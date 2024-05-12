@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Welcome!</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %} Welcome {% endblock %}
+
+{% block content %}
     <h1>Play Online Chess on UniChess!</h1>
     <p>
         This is a demo application which will support a fully working online chess application.
@@ -28,5 +26,4 @@
     <p>
        <a href="{% url 'games' %}"> GAMES </a>
     </p>
-</body>
-</html>
+{% endblock %}

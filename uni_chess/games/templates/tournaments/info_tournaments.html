@@ -1,18 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{tournament.name}}</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %} {{tournament.name}} {% endblock %}
+
+{% block content %}
     <p>Date: <b>{{tournament.date}} </b></p>
     <p>Start time: <b>{{tournament.start_time}}</b></p>
-    <p>Prize: <b>{{tournament.prize}}</b></p>
+    <p>Prize: <b>{{tournament.prize}} $</b></p>
     <p>
        <a href="{% url 'tournaments' %}"> HOME </a>
     </p>
     <p>
        <a href="{% url 'tournaments' %}"> TOURNAMENTS </a>
     </p>
-</body>
-</html>
+
+{% endblock %}

@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Tournaments</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %} Tournaments {% endblock %}
+
+{% block content %}
     <h1>Tournaments</h1>
     <ul>
         {% for t in tournaments %}
@@ -22,5 +20,5 @@
     <p>
        <a href="{% url 'games' %}"> GAMES </a>
     </p>
-</body>
-</html>
+
+{% endblock %}
