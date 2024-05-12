@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %} Tournaments {% endblock %}
+
+{% block content %}
+    <h1>Tournaments</h1>
+    <ul>
+        {% for t in tournaments %}
+            <li>
+                <a href = "{% url 'tournament_info' t.id %}">
+                    {{t.name}}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <p>
+       <a href="{% url 'home' %}"> HOME </a>
+    </p>
+    <p>
+       <a href="{% url 'games' %}"> GAMES </a>
+    </p>
+
+{% endblock %}

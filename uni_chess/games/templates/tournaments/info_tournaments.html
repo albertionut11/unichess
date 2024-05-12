@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %} {{tournament.name}} {% endblock %}
+
+{% block content %}
+    <p>Date: <b>{{tournament.date}} </b></p>
+    <p>Start time: <b>{{tournament.start_time}}</b></p>
+    <p>Prize: <b>{{tournament.prize}} $</b></p>
+    <p>
+       <a href="{% url 'tournaments' %}"> HOME </a>
+    </p>
+    <p>
+       <a href="{% url 'tournaments' %}"> TOURNAMENTS </a>
+    </p>
+
+{% endblock %}

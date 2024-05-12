@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %} Welcome {% endblock %}
+
+{% block content %}
+    <h1>Play Online Chess on UniChess!</h1>
+    <p>
+        This is a demo application which will support a fully working online chess application.
+    </p>
+    <p>
+        {{message}}
+    </p>
+    <h2>Games</h2>
+    <ul>
+        {% for game in games %}
+            <li>
+                <a href = "{% url 'game_info' game.id %}">
+                    {{game.title}}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+    <p>
+       <a href="{% url 'tournaments' %}"> TOURNAMENTS </a>
+    </p>
+    <p>
+       <a href="{% url 'games' %}"> GAMES </a>
+    </p>
+{% endblock %}
