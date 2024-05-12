@@ -25,5 +25,8 @@ urlpatterns = [
     path('', wb_views.welcome, name='home'),
     path('date', wb_views.date, name='date'),
     path('about', wb_views.about, name='about'),
-    path('games/<int:id>', g_views.info)
+    path('games', g_views.get_games, name='games'),
+    path('games/<int:id>', g_views.game_info, name='game_info'),
+    path('tournaments', g_views.get_tournaments, name='tournaments'),
+    path('tournaments/<int:id>', g_views.tournament_info, name='tournament_info')
 ]

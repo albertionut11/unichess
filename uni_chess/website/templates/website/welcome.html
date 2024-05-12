@@ -12,8 +12,21 @@
     <p>
         {{message}}
     </p>
+    <h2>Games</h2>
+    <ul>
+        {% for game in games %}
+            <li>
+                <a href = "{% url 'game_info' game.id %}">
+                    {{game.title}}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
     <p>
-        Total number of games played: {{gamesCount}}.
+       <a href="{% url 'tournaments' %}"> TOURNAMENTS </a>
+    </p>
+    <p>
+       <a href="{% url 'games' %}"> GAMES </a>
     </p>
 </body>
 </html>

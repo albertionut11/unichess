@@ -9,7 +9,7 @@ from games.models import Game
 def welcome(request):
     return render(request, "website/welcome.html",
                   {"message": "Chess is a beautiful sport.",
-                           "gamesCount": Game.objects.count()})
+                           "games": Game.objects.all})
 
 
 def date(request):

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tournaments</title>
+</head>
+<body>
+    <h1>Tournaments</h1>
+    <ul>
+        {% for t in tournaments %}
+            <li>
+                <a href = "{% url 'tournament_info' t.id %}">
+                    {{t.name}}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <p>
+       <a href="{% url 'home' %}"> HOME </a>
+    </p>
+    <p>
+       <a href="{% url 'games' %}"> GAMES </a>
+    </p>
+</body>
+</html>
