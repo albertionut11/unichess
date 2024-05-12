@@ -3,9 +3,13 @@ from datetime import datetime
 from django.shortcuts import render
 from django.http import HttpResponse
 
+from games.models import Game
+
 
 def welcome(request):
-    return HttpResponse("Welcome to the UniChess page")
+    return render(request, "website/welcome.html",
+                  {"message": "Chess is a beautiful sport.",
+                           "gamesCount": Game.objects.count()})
 
 
 def date(request):

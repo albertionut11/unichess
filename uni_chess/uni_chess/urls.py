@@ -17,11 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-import website.views as views
+import website.views as wb_views
+import games.views as g_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.welcome, name='home'),
-    path('date', views.date, name='date'),
-    path('about', views.about, name='about')
+    path('', wb_views.welcome, name='home'),
+    path('date', wb_views.date, name='date'),
+    path('about', wb_views.about, name='about'),
+    path('games/<int:id>', g_views.info)
 ]
