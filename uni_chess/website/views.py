@@ -7,9 +7,11 @@ from games.models import Game
 
 
 def welcome(request):
-    return render(request, "website/welcome.html",
-                  {"message": "Chess is a beautiful sport.",
-                           "games": Game.objects.all})
+    if request.user.is_authenticated:
+        context = {"games": Game.objects.all()}
+    else:
+        context = {}
+    return render(request, "website/welcome.html", context)
 
 
 def date(request):
