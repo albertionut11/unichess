@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %} {{game.title}} {% endblock %}
+
+{% block content %}
+    <h1>Tournament: <b>{{game.tournament.name}} with prize: <b>{{game.tournament.prize}}</b></b></h1>
+    <p>White: <b>{{game.white}}</b></p>
+    <p>Black: <b>{{game.black}}</b></p>
+    <p>Result: <b>{{game.result}} wins!</b></p>
+    <p>Duration: <b>{{game.duration}}</b></p>
+
+    <h2>Participants</h2>
+    <ul>
+    {% for p in game.participants.all %}
+        <li>{{ p.username }}</li>
+    {% endfor %}
+    </ul>
+
+    <br>
+
+    <p>
+       <a href="{% url 'game_create' %}"> New </a>
+    </p>
+    <p>
+       <a href="{% url 'game_update' game.id %}"> Update </a>
+    </p>
+    <p>
+       <a href="{% url 'game_delete' game.id %}"> Delete </a>
+    </p>
+    <p>
+       <a href="{% url 'home' %}"> HOME </a>
+    </p>
+    <p>
+       <a href="{% url 'games' %}"> GAMES </a>
+    </p>
+
+{% endblock %}
