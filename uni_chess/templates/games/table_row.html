@@ -1,0 +1,11 @@
+<tr>
+    <td>{{ line_key }}</td>
+    {% include 'games/table_square.html' with cell=line.a l_key=line_key c_key='a' bgcolor=even %}
+    {% include 'games/table_square.html' with cell=line.b l_key=line_key c_key='b' bgcolor=odd %}
+    {% include 'games/table_square.html' with cell=line.c l_key=line_key c_key='c' bgcolor=even %}
+    {% include 'games/table_square.html' with cell=line.d l_key=line_key c_key='d' bgcolor=odd %}
+    {% include 'games/table_square.html' with cell=line.e l_key=line_key c_key='e' bgcolor=even %}
+    {% include 'games/table_square.html' with cell=line.f l_key=line_key c_key='f' bgcolor=odd %}
+    {% include 'games/table_square.html' with cell=line.g l_key=line_key c_key='g' bgcolor=even %}
+    {% include 'games/table_square.html' with cell=line.h l_key=line_key c_key='h' bgcolor=odd %}
+</tr>

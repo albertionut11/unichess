@@ -1,9 +1,26 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, get_object_or_404, redirect
-from django.forms import modelform_factory
+from django.views.generic import View, TemplateView, FormView
 
+from games.game_logic.Board import Board
+from games.game_logic.Chess import Chess
 from .models import Game, Tournament
 from .forms import GameForm
+
+
+class PlayView(LoginRequiredMixin, TemplateView):
+    template_name = 'games/play.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(PlayView, self).get_context_data(**kwargs)
+
+        context['msg'] = 'Chess is beautiful'
+        play = Chess()
+        html_table = play.board.render(context)
+        context['html_table'] = html_table
+        return {'context': context}
+
 
 
 @login_required
@@ -64,7 +81,3 @@ def delete(request, id):
     else:
         return render(request, "games/delete.html", {"game": game})
 
-
-@login_required
-def play(request):
-    return render(request, "games/play.html")

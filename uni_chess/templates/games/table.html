@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% with even_color=board.light_color %}
+{% with odd_color=board.dark_color %}
+<table border="1" class="chess-board">
+                    {% include 'games/table_row.html' with line=board.table.8 line_key=8 even=even_color odd=odd_color %}
+                    {% include 'games/table_row.html' with line=board.table.7 line_key=7 even=odd_color odd=even_color %}
+                    {% include 'games/table_row.html' with line=board.table.6 line_key=6 even=even_color odd=odd_color %}
+                    {% include 'games/table_row.html' with line=board.table.5 line_key=5 even=odd_color odd=even_color %}
+                    {% include 'games/table_row.html' with line=board.table.4 line_key=4 even=even_color odd=odd_color %}
+                    {% include 'games/table_row.html' with line=board.table.3 line_key=3 even=odd_color odd=even_color %}
+                    {% include 'games/table_row.html' with line=board.table.2 line_key=2 even=even_color odd=odd_color %}
+                    {% include 'games/table_row.html' with line=board.table.1 line_key=1 even=odd_color odd=even_color %}
+                    <tr align="center" class="chess_board_bottom_line">
+                        <td></td><td>a</td><td>b</td><td>c</td><td>d</td><td>e</td><td>f</td><td>g</td><td>h</td>
+                    </tr>
+</table>
+{% endwith %}
+{% endwith %}
