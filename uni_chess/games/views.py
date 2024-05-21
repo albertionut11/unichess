@@ -64,3 +64,7 @@ def delete(request, id):
     else:
         return render(request, "games/delete.html", {"game": game})
 
+
+@login_required
+def play(request):
+    return render(request, "games/play.html")
