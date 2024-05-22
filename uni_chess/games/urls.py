@@ -8,5 +8,6 @@ urlpatterns = [
     path('games/create', views.create, name='game_create'),
     path('games/update/<int:id>', views.update, name='game_update'),
     path('games/delete/<int:id>', views.delete, name='game_delete'),
+    path('games/play', views.PlayView.as_view(), name='game_play'),
     path('tournaments', views.get_tournaments, name='tournaments'),
     path('tournaments/<int:id>', views.tournament_info, name='tournament_info')]

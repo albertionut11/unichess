@@ -1,0 +1,17 @@
+{% with light_color=board.light_color %}
+{% with dark_color=board.dark_color %}
+<table border="1" class="chess-board" style="margin: auto">
+                    {% include 'games/table_row.html' with row=board.table.8 row_ind=8 even=light_color odd=dark_color %}
+                    {% include 'games/table_row.html' with row=board.table.7 row_ind=7 even=dark_color odd=light_color %}
+                    {% include 'games/table_row.html' with row=board.table.6 row_ind=6 even=light_color odd=dark_color %}
+                    {% include 'games/table_row.html' with row=board.table.5 row_ind=5 even=dark_color odd=light_color %}
+                    {% include 'games/table_row.html' with row=board.table.4 row_ind=4 even=light_color odd=dark_color %}
+                    {% include 'games/table_row.html' with row=board.table.3 row_ind=3 even=dark_color odd=light_color %}
+                    {% include 'games/table_row.html' with row=board.table.2 row_ind=2 even=light_color odd=dark_color %}
+                    {% include 'games/table_row.html' with row=board.table.1 row_ind=1 even=dark_color odd=light_color %}
+                    <tr align="center" class="chess_board_bottom_line">
+                        <td></td><td>a</td><td>b</td><td>c</td><td>d</td><td>e</td><td>f</td><td>g</td><td>h</td>
+                    </tr>
+</table>
+{% endwith %}
+{% endwith %}
