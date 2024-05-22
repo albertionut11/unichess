@@ -1,5 +1,10 @@
 body {
     font-family: sans-serif;
-    color: black;
-    background-color: white;
+    color: #543310;
+    background-color: #F8F4E1;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
 }
