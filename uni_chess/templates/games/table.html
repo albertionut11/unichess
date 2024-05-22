@@ -1,8 +1,6 @@
-{% extends "base.html" %}
-
 {% with even_color=board.light_color %}
 {% with odd_color=board.dark_color %}
-<table border="1" class="chess-board">
+<table border="1" class="chess-board" style="margin: auto">
                     {% include 'games/table_row.html' with line=board.table.8 line_key=8 even=even_color odd=odd_color %}
                     {% include 'games/table_row.html' with line=board.table.7 line_key=7 even=odd_color odd=even_color %}
                     {% include 'games/table_row.html' with line=board.table.6 line_key=6 even=even_color odd=odd_color %}

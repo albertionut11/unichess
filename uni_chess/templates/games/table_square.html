@@ -1,9 +1,7 @@
 <td bgColor="#{{ bgcolor }}" >
-{% with folder ="static/chess/pieces/" %}
+{% with folder="/static/chess/pieces/" %}
 {% if cell == '.' %}
-    <a id="{{ l_key }}_{{ c_key }}" href="{% url 'piece-action' pk=game.id action='move' line=l_key column=c_key %}">
-        <img src="{{ folder }}/empty_cell.png" />
-    </a>
+        <img src="{{ folder }}empty_cell.png" />
 {% endif %}
 {% endwith %}
 </td>

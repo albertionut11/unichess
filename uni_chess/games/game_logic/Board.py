@@ -16,8 +16,8 @@ class Board:
         self.players['white'] = Player('white')
         self.players['black'] = Player('black')
         self.template_name = 'games/table.html'
-        self.light_color = 'cccccc'
-        self.dark_color = '999999'
+        self.light_color = 'F5DEB3'
+        self.dark_color = 'a1764b'
 
     def load_table(self):
         self.new_table()
@@ -42,5 +42,7 @@ class Board:
     def render(self, context):
         template = loader.get_template(self.template_name)
         context['board'] = self
+        print('Board context:', context)
+        print('Template:', template, self.template_name)
         html_table = template.render(context)
         return html_table
