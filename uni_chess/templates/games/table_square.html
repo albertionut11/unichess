@@ -1,7 +1,7 @@
 <td bgColor="#{{ bgcolor }}" >
 {% with folder="/static/chess/pieces/" %}
-{% if cell == '.' %}
-        <img src="{{ folder }}empty_cell.png" />
+{% if square == '.' %}
+        <img src="{{ folder }}square.png" />
 {% endif %}
 {% endwith %}
 </td>

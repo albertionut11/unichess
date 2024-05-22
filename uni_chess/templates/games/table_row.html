@@ -1,11 +1,11 @@
 <tr>
-    <td>{{ line_key }}</td>
-    {% include 'games/table_square.html' with cell=line.a l_key=line_key c_key='a' bgcolor=even %}
-    {% include 'games/table_square.html' with cell=line.b l_key=line_key c_key='b' bgcolor=odd %}
-    {% include 'games/table_square.html' with cell=line.c l_key=line_key c_key='c' bgcolor=even %}
-    {% include 'games/table_square.html' with cell=line.d l_key=line_key c_key='d' bgcolor=odd %}
-    {% include 'games/table_square.html' with cell=line.e l_key=line_key c_key='e' bgcolor=even %}
-    {% include 'games/table_square.html' with cell=line.f l_key=line_key c_key='f' bgcolor=odd %}
-    {% include 'games/table_square.html' with cell=line.g l_key=line_key c_key='g' bgcolor=even %}
-    {% include 'games/table_square.html' with cell=line.h l_key=line_key c_key='h' bgcolor=odd %}
+    <td>{{ row_ind }}</td>
+    {% include 'games/table_square.html' with square=row.a r_ind=row_ind s_ind='a' bgcolor=even %}
+    {% include 'games/table_square.html' with square=row.b r_ind=row_ind s_ind='b' bgcolor=odd %}
+    {% include 'games/table_square.html' with square=row.c r_ind=row_ind s_ind='c' bgcolor=even %}
+    {% include 'games/table_square.html' with square=row.d r_ind=row_ind s_ind='d' bgcolor=odd %}
+    {% include 'games/table_square.html' with square=row.e r_ind=row_ind s_ind='e' bgcolor=even %}
+    {% include 'games/table_square.html' with square=row.f r_ind=row_ind s_ind='f' bgcolor=odd %}
+    {% include 'games/table_square.html' with square=row.g r_ind=row_ind s_ind='g' bgcolor=even %}
+    {% include 'games/table_square.html' with square=row.h r_ind=row_ind s_ind='h' bgcolor=odd %}
 </tr>
