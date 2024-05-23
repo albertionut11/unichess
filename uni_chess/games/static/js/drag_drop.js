@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", function() {
     const pieces = document.querySelectorAll("img[draggable='true']");
     const squares = document.querySelectorAll("td[data-position]");
+    const playId = document.getElementById("play_id").value;
 
     pieces.forEach(piece => {
         piece.addEventListener("dragstart", dragStart);
@@ -24,7 +25,6 @@ document.addEventListener("DOMContentLoaded", function() {
         const id = e.dataTransfer.getData("text/plain");
         const piece = document.getElementById(id);
 
-        // Ensure we get the correct td element
         let targetSquare = e.target;
         while (targetSquare && !targetSquare.hasAttribute("data-position")) {
             targetSquare = targetSquare.parentNode;
@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function() {
             targetSquare.removeChild(targetSquare.firstChild);
         }
 
-        fetch("/move_piece/", {
+        fetch(`/move_piece/${playId}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

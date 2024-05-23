@@ -19,8 +19,8 @@ class Board:
         self.light_color = 'F5DEB3'
         self.dark_color = 'a1764b'
 
-    def load_table(self):
-        self.new_table()
+    def load_table(self, state):
+        self.table = state
 
     def new_table(self):
         whites = Player('white')
