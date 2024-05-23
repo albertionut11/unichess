@@ -1,13 +1,16 @@
-from .Board import Board
+from django.shortcuts import get_object_or_404
 
+from .Board import Board
+from ..models import Game
 
 class Play:
-    def __init__(self, state):
-        if state is None:
-            self.board = Board()
+    def __init__(self, data):
+        self.board = Board()
+        self.data = data
+
+        if self.data == '':
             self.board.new_table()
         else:
-            self.board = Board()
-            self.board.load_table(state)
+            self.board.load_table(self.data)
 
 

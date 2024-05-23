@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function() {
     const pieces = document.querySelectorAll("img[draggable='true']");
     const squares = document.querySelectorAll("td[data-position]");
-    const playId = document.getElementById("play_id").value;
+    const gameId = document.getElementById("game_id").value;
 
     pieces.forEach(piece => {
         piece.addEventListener("dragstart", dragStart);
@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", function() {
             targetSquare.removeChild(targetSquare.firstChild);
         }
 
-        fetch(`/move_piece/${playId}`, {
+        fetch(`/move_piece/${gameId}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

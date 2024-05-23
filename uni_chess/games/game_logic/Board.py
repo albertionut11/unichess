@@ -19,8 +19,17 @@ class Board:
         self.light_color = 'F5DEB3'
         self.dark_color = 'a1764b'
 
-    def load_table(self, state):
-        self.table = state
+    def load_table(self, data):
+        self.new_table()
+        moves = data.split(' ')[:-1]
+
+        for move in moves:
+            from_pos = move[0] + move[1]
+            to_pos = move[2] + move[3]
+
+            self.table[to_pos[0]][to_pos[1]] = self.table[from_pos[0]][from_pos[1]]
+            self.table[from_pos[0]][from_pos[1]] = '.'
+
 
     def new_table(self):
         whites = Player('white')

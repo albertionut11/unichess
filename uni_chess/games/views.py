@@ -4,7 +4,6 @@ import uuid
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.cache import cache
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -23,35 +22,33 @@ class PlayView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(PlayView, self).get_context_data(**kwargs)
 
-        context['msg'] = 'Chess is beautiful'
+        game_id = self.kwargs.get('game_id')
 
-        play_id = self.kwargs.get('play_id')
-
-        cache_key = f'game_{play_id}'
-        state = cache.get(cache_key)
-        play = Play(state)
+        game = get_object_or_404(Game, pk=game_id)
+        play = Play(game.data)
 
         html_table = play.board.render(context)
         context['html_table'] = html_table
-        context['play_id'] = play_id
+        context['game_id'] = game_id
         return {'context': context}
 
 
 @login_required
-def create_play(request):
-    play = Play(None)
-
-    play_id = base64.urlsafe_b64encode(uuid.uuid4().bytes).rstrip(b'=').decode('ascii')
-
-    cache_key = f'game_{play_id}'
-    cache.set(cache_key, play.board.table)
-    return redirect('game_play', play_id=play_id)
+def create(request):
+    if request.method == "POST":
+        form = GameForm(request.POST)
+        if form.is_valid():
+            game = form.save()
+            print('Here')
+            print(game.id)
+            return redirect("game_play", game_id=game.id)
+    else:
+        form = GameForm()
+    return render(request, 'games/create.html', {"form": form})
 
 
 @csrf_exempt
-def move_piece(request, play_id):
-
-    cache_key = f'game_{play_id}'
+def move_piece(request, game_id):
 
     if request.method == "POST":
         data = json.loads(request.body)
@@ -61,18 +58,17 @@ def move_piece(request, play_id):
         print(from_pos)
         print(to_pos)
 
-        state = cache.get(cache_key)
-        from_row, from_col = from_pos[0], from_pos[1]
-        to_row, to_col = to_pos[0], to_pos[1]
+        game = get_object_or_404(Game, pk=game_id)
 
-        # Move piece
-        state[to_row][to_col] = state[from_row][from_col]
-        state[from_row][from_col] = '.'
+        data = game.data
+        data += from_pos + to_pos + ' '
+        game.data = data
 
-        cache.set(cache_key, state)
+        game.save()
 
         return JsonResponse({"status": "ok"})
     return JsonResponse({"status": "fail"})
+
 
 @login_required
 def get_games(request):
@@ -96,18 +92,6 @@ def get_tournaments(request):
 def tournament_info(request, id):
     tournament = get_object_or_404(Tournament, pk=id)
     return render(request, 'tournaments/info_tournaments.html', {'tournament': tournament})
-
-
-@login_required
-def create(request):
-    if request.method == "POST":
-        form = GameForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("games")
-    else:
-        form = GameForm()
-    return render(request, 'games/create.html', {"form": form})
 
 
 @login_required

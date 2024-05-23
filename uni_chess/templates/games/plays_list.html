@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %} Active Games {% endblock %}
+
+{% block content %}
+    <h1>Active Games</h1>
+    <ul>
+        {% for guid in guids %}
+            <li>
+                <a href = "{% url 'game_play' guid %}">
+                   Game with id: {{guid}}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <p>
+       <a href="{% url 'create_play' %}"> NEW GAME </a>
+    </p>
+    <p>
+       <a href="{% url 'home' %}"> HOME </a>
+    </p>
+    <p>
+       <a href="{% url 'tournaments' %}"> GAMES </a>
+    </p>
+{% endblock %}
