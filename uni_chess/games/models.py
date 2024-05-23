@@ -14,16 +14,18 @@ class Tournament(models.Model):
     def __str__(self):
         return f"Tournament {self.name} with prize of {self.prize}$ at {self.start_time} on {self.date}"
 
+
 class Game(models.Model):
-    title = models.CharField(max_length=200)
-    white = models.CharField(max_length=200)
-    black = models.CharField(max_length=200)
+    white = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='white')
+    black = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='black')
     result = models.IntegerField()
     date = models.DateField()
     start_time = models.TimeField(default=time(9))
-    duration = models.IntegerField(default=0)
-    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
-    participants = models.ManyToManyField(get_user_model())
+    duration = models.IntegerField(default=5)
+    increment = models.IntegerField(default=0)
+    data = models.CharField(max_length=1000, default='')
+    isActive = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.title} between White: {self.white} and Black: {self.black} at {self.start_time} on {self.date}"
+        return f"Game between White: {self.white} and Black: {self.black} at {self.start_time} on {self.date}"
+

@@ -1,7 +1,57 @@
-<td bgColor="#{{ bgcolor }}" >
+<style>
+td {
+    width: 64px;
+    height: 64px;
+    position: relative;
+}
+img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+</style>
+
+<td bgColor="#{{ bgcolor }}" data-position="{{ r_ind }}{{ s_ind }}" >
 {% with folder="/static/chess/pieces/" %}
 {% if square == '.' %}
-        <img src="{{ folder }}square.png" />
+        <img src="{{ folder }}square.png" draggable="true" />
 {% endif %}
+{% if square == 'bP' %}
+        <img src="{{ folder }}bP.svg" id="{{ r_ind }}{{ s_ind }}" draggable="true"/>
+{% endif %}
+{% if square == 'bR' %}
+        <img src="{{ folder }}bR.svg" id="{{ r_ind }}{{ s_ind }}" draggable="true"/>
+{% endif %}
+{% if square == 'bN' %}
+        <img src="{{ folder }}bN.svg"  id="{{ r_ind }}{{ s_ind }}" draggable="true"/>
+{% endif %}
+{% if square == 'bB' %}
+        <img src="{{ folder }}bB.svg" id="{{ r_ind }}{{ s_ind }}" draggable="true" />
+{% endif %}
+{% if square == 'bQ' %}
+        <img src="{{ folder }}bQ.svg" id="{{ r_ind }}{{ s_ind }}" draggable="true" />
+{% endif %}
+{% if square == 'bK' %}
+        <img src="{{ folder }}bK.svg" id="{{ r_ind }}{{ s_ind }}" draggable="true" />
+{% endif %}
+{% if square == 'wP' %}
+        <img src="{{ folder }}wP.svg" id="{{ r_ind }}{{ s_ind }}" draggable="true" />
+{% endif %}
+{% if square == 'wR' %}
+        <img src="{{ folder }}wR.svg" id="{{ r_ind }}{{ s_ind }}" draggable="true" />
+{% endif %}
+{% if square == 'wN' %}
+        <img src="{{ folder }}wN.svg" id="{{ r_ind }}{{ s_ind }}" draggable="true" />
+{% endif %}
+{% if square == 'wB' %}
+        <img src="{{ folder }}wB.svg" id="{{ r_ind }}{{ s_ind }}" draggable="true"/>
+{% endif %}
+{% if square == 'wK' %}
+        <img src="{{ folder }}wk.svg" id="{{ r_ind }}{{ s_ind }}" draggable="true" />
+{% endif %}
+{% if square == 'wQ' %}
+        <img src="{{ folder }}wq.svg" id="{{ r_ind }}{{ s_ind }}" draggable="true" />
+{% endif %}
+
 {% endwith %}
 </td>

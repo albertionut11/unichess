@@ -1,13 +1,14 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block title %} Play Game {% endblock %}
 
 {% block content %}
-
     <p>
-        {{context.msg}}
+       <a href="{% url 'games' %}"> GAMES </a>
     </p>
-
+<div id="chess-table">
 {{ context.html_table|safe }}
-
+</div>
+<input type="hidden" id="game_id" value="{{ context.game_id }}">
+<script src="{% static 'js/drag_drop.js' %}"></script>
 {% endblock %}

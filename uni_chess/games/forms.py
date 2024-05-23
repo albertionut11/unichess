@@ -9,7 +9,7 @@ from .models import Game
 class GameForm(ModelForm):
     class Meta:
         model = Game
-        fields = '__all__'
+        fields = [field.name for field in Game._meta.fields if field.name != 'data']
         widgets = {
             'date': DateInput(attrs={"type": "date"}),
             'start': TimeInput(attrs={"type": "time"}),
@@ -19,5 +19,5 @@ class GameForm(ModelForm):
     def clean_date(self):
         d = self.cleaned_data.get("date")
         if d < date.today():
-            raise ValidationError("Meetings cannot be in the past")
+            raise ValidationError("Games cannot be in the past")
         return d

@@ -11,19 +11,21 @@
     <ul>
         {% for game in games %}
             <li>
-                <a href = "{% url 'game_info' game.id %}">
-                    {{game.title}}
+                <a href = "{% url 'game_play' game.id %}">
+                    {{game}}
                 </a>
             </li>
         {% endfor %}
     </ul>
     <p>
-       <a href="{% url 'tournaments' %}"> TOURNAMENTS </a>
+       <a href="{% url 'game_create' %}"> NEW GAME </a>
     </p>
     <p>
        <a href="{% url 'games' %}"> GAMES </a>
     </p>
     <p>
-       <a href="{% url 'game_play' %}"> Play </a>
+       <a href="{% url 'tournaments' %}"> TOURNAMENTS </a>
     </p>
+
+
 {% endblock %}

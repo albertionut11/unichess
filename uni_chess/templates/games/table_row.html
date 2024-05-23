@@ -1,5 +1,5 @@
 <tr>
-    <td>{{ row_ind }}</td>
+    <td align="center" >{{ row_ind }}</td>
     {% include 'games/table_square.html' with square=row.a r_ind=row_ind s_ind='a' bgcolor=even %}
     {% include 'games/table_square.html' with square=row.b r_ind=row_ind s_ind='b' bgcolor=odd %}
     {% include 'games/table_square.html' with square=row.c r_ind=row_ind s_ind='c' bgcolor=even %}
