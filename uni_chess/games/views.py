@@ -30,7 +30,16 @@ class PlayView(LoginRequiredMixin, TemplateView):
         html_table = play.board.render(context)
         context['html_table'] = html_table
         context['game_id'] = game_id
+        context['user_role'] = self.get_user_role(game)
         return {'context': context}
+
+    def get_user_role(self, game):
+        user = self.request.user
+        if user.username == game.white.username:
+            return 'white'
+        elif user.username == game.black.username:
+            return 'black'
+        return 'spectator'
 
 
 @login_required
@@ -48,7 +57,12 @@ def create(request):
 
 
 @csrf_exempt
+@login_required
 def move_piece(request, game_id):
+    game = get_object_or_404(Game, pk=game_id)
+
+    if request.user.username != game.white.username and request.user.username != game.black.username:
+        return JsonResponse({"status": "fail"})
 
     if request.method == "POST":
         data = json.loads(request.body)
@@ -57,8 +71,6 @@ def move_piece(request, game_id):
 
         print(from_pos)
         print(to_pos)
-
-        game = get_object_or_404(Game, pk=game_id)
 
         data = game.data
         data += from_pos + to_pos + ' '

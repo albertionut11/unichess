@@ -2,15 +2,18 @@ document.addEventListener("DOMContentLoaded", function() {
     const pieces = document.querySelectorAll("img[draggable='true']");
     const squares = document.querySelectorAll("td[data-position]");
     const gameId = document.getElementById("game_id").value;
+    const userRole = document.getElementById("user_role").value;
 
-    pieces.forEach(piece => {
-        piece.addEventListener("dragstart", dragStart);
-    });
+    if (userRole === "white" || userRole === "black"){
+        pieces.forEach(piece => {
+            piece.addEventListener("dragstart", dragStart);
+        });
 
-    squares.forEach(square => {
-        square.addEventListener("dragover", dragOver);
-        square.addEventListener("drop", drop);
-    });
+        squares.forEach(square => {
+            square.addEventListener("dragover", dragOver);
+            square.addEventListener("drop", drop);
+        });
+    }
 
     function dragStart(e) {
         e.dataTransfer.setData("text/plain", e.target.id);

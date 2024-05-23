@@ -10,5 +10,6 @@
 {{ context.html_table|safe }}
 </div>
 <input type="hidden" id="game_id" value="{{ context.game_id }}">
+<input type="hidden" id="user_role" value="{{ context.user_role }}">
 <script src="{% static 'js/drag_drop.js' %}"></script>
 {% endblock %}
