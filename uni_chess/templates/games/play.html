@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block title %} Play Game {% endblock %}
 
 {% block content %}
@@ -7,7 +7,8 @@
     <p>
         {{context.msg}}
     </p>
-
+<div id="chess-table">
 {{ context.html_table|safe }}
-
+</div>
+<script src="{% static 'js/drag_drop.js' %}"></script>
 {% endblock %}

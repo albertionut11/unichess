@@ -1,6 +1,11 @@
+import json
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from django.views.generic import View, TemplateView, FormView
 
 from games.game_logic.Board import Board
@@ -21,7 +26,26 @@ class PlayView(LoginRequiredMixin, TemplateView):
         context['html_table'] = html_table
         return {'context': context}
 
+@csrf_exempt
+def move_piece(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        from_pos = data.get("from")
+        to_pos = data.get("to")
 
+        print(from_pos)
+        print(to_pos)
+
+        # Implement your move logic here
+        # For now, assume all moves are valid
+
+        # Update the board state here
+        # play = Chess()
+        # play.board.table[to_pos[0]][to_pos[1]] = play.board.table[from_pos[0]][from_pos[1]]
+        # play.board.table[from_pos[0]][from_pos[1]] = '.'
+
+        return JsonResponse({"status": "ok"})
+    return JsonResponse({"status": "fail"})
 
 @login_required
 def get_games(request):
