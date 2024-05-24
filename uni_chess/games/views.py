@@ -30,10 +30,10 @@ class PlayView(LoginRequiredMixin, TemplateView):
         game = get_object_or_404(Game, pk=game_id)
         play = Play(game.data)
 
+        context['user_role'] = self.get_user_role(game)
         html_table = play.board.render(context)
         context['html_table'] = html_table
         context['game_id'] = game_id
-        context['user_role'] = self.get_user_role(game)
         context['turn'] = game.turn
         return {'context': context}
 

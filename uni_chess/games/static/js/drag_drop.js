@@ -5,16 +5,15 @@ document.addEventListener("DOMContentLoaded", function() {
     const userRole = document.getElementById("user_role").value;
     let turn = document.getElementById("turn").value;
 
-    // Ensure WebSocket URL is correct
-    const socket = new WebSocket(`ws://${window.location.host}/ws/games/play/${gameId}/`);
+    const socket = new WebSocket(`ws://${window.location.host}/ws/game/${gameId}/`);
 
     socket.onmessage = function(e) {
         const data = JSON.parse(e.data);
         const from = data.from;
         const to = data.to;
         turn = data.turn;
-        document.getElementById("turn").value = turn;
-        document.getElementById("turn-display").innerText = turn;
+        document.getElementById("turn").value = turn; // Update the hidden input value
+        document.getElementById("turn-display").innerText = turn; // Update the displayed turn
 
         const piece = document.querySelector(`td[data-position="${from}"] img`);
         const targetSquare = document.querySelector(`td[data-position="${to}"]`);
@@ -28,9 +27,18 @@ document.addEventListener("DOMContentLoaded", function() {
     };
 
     function updateDraggable() {
+        pieces.forEach(piece => {
+            piece.removeEventListener("dragstart", dragStart);
+            piece.setAttribute("draggable", false);
+        });
+
         if ((userRole === "white" && turn === "white") || (userRole === "black" && turn === "black")) {
             pieces.forEach(piece => {
-                piece.addEventListener("dragstart", dragStart);
+                const pieceColor = piece.getAttribute("data-color");
+                if (pieceColor === userRole) {
+                    piece.addEventListener("dragstart", dragStart);
+                    piece.setAttribute("draggable", true);
+                }
             });
 
             squares.forEach(square => {
@@ -38,10 +46,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 square.addEventListener("drop", drop);
             });
         } else {
-            pieces.forEach(piece => {
-                piece.removeEventListener("dragstart", dragStart);
-            });
-
             squares.forEach(square => {
                 square.removeEventListener("dragover", dragOver);
                 square.removeEventListener("drop", drop);
@@ -52,7 +56,12 @@ document.addEventListener("DOMContentLoaded", function() {
     updateDraggable();
 
     function dragStart(e) {
-        e.dataTransfer.setData("text/plain", e.target.id);
+        const pieceColor = e.target.getAttribute("data-color");
+        if (pieceColor !== userRole) {
+            e.preventDefault(); // Prevent dragging if piece color doesn't match user role
+        } else {
+            e.dataTransfer.setData("text/plain", e.target.id);
+        }
     }
 
     function dragOver(e) {

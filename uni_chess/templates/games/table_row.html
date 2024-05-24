@@ -1,11 +1,22 @@
 <tr>
-    <td align="center" >{{ row_ind }}</td>
-    {% include 'games/table_square.html' with square=row.a r_ind=row_ind s_ind='a' bgcolor=even %}
-    {% include 'games/table_square.html' with square=row.b r_ind=row_ind s_ind='b' bgcolor=odd %}
-    {% include 'games/table_square.html' with square=row.c r_ind=row_ind s_ind='c' bgcolor=even %}
-    {% include 'games/table_square.html' with square=row.d r_ind=row_ind s_ind='d' bgcolor=odd %}
-    {% include 'games/table_square.html' with square=row.e r_ind=row_ind s_ind='e' bgcolor=even %}
-    {% include 'games/table_square.html' with square=row.f r_ind=row_ind s_ind='f' bgcolor=odd %}
-    {% include 'games/table_square.html' with square=row.g r_ind=row_ind s_ind='g' bgcolor=even %}
-    {% include 'games/table_square.html' with square=row.h r_ind=row_ind s_ind='h' bgcolor=odd %}
+    <td align="center">{{ row_ind }}</td>
+    {% if user_role == "black" %}
+        {% include 'games/table_square.html' with square=row.h r_ind=row_ind s_ind='h' bgcolor=odd %}
+        {% include 'games/table_square.html' with square=row.g r_ind=row_ind s_ind='g' bgcolor=even %}
+        {% include 'games/table_square.html' with square=row.f r_ind=row_ind s_ind='f' bgcolor=odd %}
+        {% include 'games/table_square.html' with square=row.e r_ind=row_ind s_ind='e' bgcolor=even %}
+        {% include 'games/table_square.html' with square=row.d r_ind=row_ind s_ind='d' bgcolor=odd %}
+        {% include 'games/table_square.html' with square=row.c r_ind=row_ind s_ind='c' bgcolor=even %}
+        {% include 'games/table_square.html' with square=row.b r_ind=row_ind s_ind='b' bgcolor=odd %}
+        {% include 'games/table_square.html' with square=row.a r_ind=row_ind s_ind='a' bgcolor=even %}
+    {% else %}
+        {% include 'games/table_square.html' with square=row.a r_ind=row_ind s_ind='a' bgcolor=even %}
+        {% include 'games/table_square.html' with square=row.b r_ind=row_ind s_ind='b' bgcolor=odd %}
+        {% include 'games/table_square.html' with square=row.c r_ind=row_ind s_ind='c' bgcolor=even %}
+        {% include 'games/table_square.html' with square=row.d r_ind=row_ind s_ind='d' bgcolor=odd %}
+        {% include 'games/table_square.html' with square=row.e r_ind=row_ind s_ind='e' bgcolor=even %}
+        {% include 'games/table_square.html' with square=row.f r_ind=row_ind s_ind='f' bgcolor=odd %}
+        {% include 'games/table_square.html' with square=row.g r_ind=row_ind s_ind='g' bgcolor=even %}
+        {% include 'games/table_square.html' with square=row.h r_ind=row_ind s_ind='h' bgcolor=odd %}
+    {% endif %}
 </tr>
