@@ -8,3 +8,20 @@ html, body {
     margin: 0;
     padding: 0;
 }
+
+.move-dot {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: green;
+    opacity: 0.7;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+}
+
+.highlight-red {
+    background-color: rgba(255, 0, 0, 0.2);
+}
