@@ -154,19 +154,19 @@ document.addEventListener("DOMContentLoaded", function() {
             if (targetPiece) {
                 const targetPieceColor = targetPiece.getAttribute("data-color");
 
-                if (targetPieceColor !== userRole) {
+                if ((targetPieceColor === "black" && userRole === "white") || (targetPieceColor === "white" && userRole === "black")) {
                     const red = document.createElement("div");
                     red.classList.add("highlight-red");
                     square.appendChild(red);
                     square.addEventListener("click", movePiece);
                     highlightedMoves.push(square);
+                } else if (targetPieceColor !== userRole) {
+                    const dot = document.createElement("div");
+                    dot.classList.add("move-dot");
+                    square.appendChild(dot);
+                    square.addEventListener("click", movePiece);
+                    highlightedMoves.push(square);
                 }
-            } else {
-                const dot = document.createElement("div");
-                dot.classList.add("move-dot");
-                square.appendChild(dot);
-                square.addEventListener("click", movePiece);
-                highlightedMoves.push(square);
             }
         });
     }
@@ -216,9 +216,9 @@ document.addEventListener("DOMContentLoaded", function() {
         let cookieValue = null;
         if (document.cookie && document.cookie !== "") {
             const cookies = document.cookie.split(";");
-            for (let i = 0; cookies[i]; i++) {
+            for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
-                if (cookie.startsWith(name + "=")) {
+                if (cookie.substring(0, name.length + 1) === (name + "=")) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
                 }

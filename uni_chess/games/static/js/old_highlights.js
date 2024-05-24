@@ -1,4 +1,4 @@
-// highlights.js
+// old_highlights.js
 
 document.addEventListener("DOMContentLoaded", function() {
     const pieces = document.querySelectorAll("img[draggable='true']");
