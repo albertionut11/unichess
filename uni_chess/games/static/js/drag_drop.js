@@ -81,6 +81,11 @@ document.addEventListener("DOMContentLoaded", function() {
         const fromPosition = piece.parentNode.getAttribute("data-position");
         const toPosition = targetSquare.getAttribute("data-position");
 
+        if (fromPosition === toPosition) {
+            console.log("Invalid move: Cannot move piece to the same position.");
+            return;
+        }
+
         while (targetSquare.firstChild) {
             targetSquare.removeChild(targetSquare.firstChild);
         }
