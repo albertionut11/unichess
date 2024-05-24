@@ -9,7 +9,7 @@ from .models import Game
 class GameForm(ModelForm):
     class Meta:
         model = Game
-        fields = [field.name for field in Game._meta.fields if field.name != 'data']
+        fields = [field.name for field in Game._meta.fields if field.name != 'data' and field.name != 'turn']
         widgets = {
             'date': DateInput(attrs={"type": "date"}),
             'start': TimeInput(attrs={"type": "time"}),

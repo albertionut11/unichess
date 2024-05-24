@@ -1,27 +1,21 @@
 from django.template import loader
 
 
-class Player:
-    def __init__(self, name):
-        self.name = name
-        self.pieces = list()
-
-
 class Board:
     def __init__(self):
         print('Board.__init__')
         self.table = dict()
         self.data = None
-        self.players = dict()
-        self.players['white'] = Player('white')
-        self.players['black'] = Player('black')
         self.template_name = 'games/table.html'
         self.light_color = 'F5DEB3'
         self.dark_color = 'a1764b'
+        self.turn = 'white'
 
     def load_table(self, data):
         self.new_table()
         moves = data.split(' ')[:-1]
+
+        self.turn = 'white' if len(moves) % 2 == 0 else 'black'
 
         for move in moves:
             from_pos = move[0] + move[1]
@@ -32,10 +26,7 @@ class Board:
 
 
     def new_table(self):
-        whites = Player('white')
-        self.players['white'] = whites
-        blacks = Player('black')
-        self.players['black'] = blacks
+        self.turn = 'white'
 
         self.table = {
             '8': {'a': 'bR', 'b': 'bN', 'c': 'bB', 'd': 'bQ', 'e': 'bK', 'f': 'bB', 'g': 'bN', 'h': 'bR'},

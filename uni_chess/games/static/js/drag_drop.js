@@ -3,17 +3,53 @@ document.addEventListener("DOMContentLoaded", function() {
     const squares = document.querySelectorAll("td[data-position]");
     const gameId = document.getElementById("game_id").value;
     const userRole = document.getElementById("user_role").value;
+    let turn = document.getElementById("turn").value;
 
-    if (userRole === "white" || userRole === "black"){
-        pieces.forEach(piece => {
-            piece.addEventListener("dragstart", dragStart);
-        });
+    // Ensure WebSocket URL is correct
+    const socket = new WebSocket(`ws://${window.location.host}/ws/games/play/${gameId}/`);
 
-        squares.forEach(square => {
-            square.addEventListener("dragover", dragOver);
-            square.addEventListener("drop", drop);
-        });
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const from = data.from;
+        const to = data.to;
+        turn = data.turn;
+        document.getElementById("turn").value = turn;
+        document.getElementById("turn-display").innerText = turn;
+
+        const piece = document.querySelector(`td[data-position="${from}"] img`);
+        const targetSquare = document.querySelector(`td[data-position="${to}"]`);
+
+        while (targetSquare.firstChild) {
+            targetSquare.removeChild(targetSquare.firstChild);
+        }
+
+        targetSquare.appendChild(piece);
+        updateDraggable();
+    };
+
+    function updateDraggable() {
+        if ((userRole === "white" && turn === "white") || (userRole === "black" && turn === "black")) {
+            pieces.forEach(piece => {
+                piece.addEventListener("dragstart", dragStart);
+            });
+
+            squares.forEach(square => {
+                square.addEventListener("dragover", dragOver);
+                square.addEventListener("drop", drop);
+            });
+        } else {
+            pieces.forEach(piece => {
+                piece.removeEventListener("dragstart", dragStart);
+            });
+
+            squares.forEach(square => {
+                square.removeEventListener("dragover", dragOver);
+                square.removeEventListener("drop", drop);
+            });
+        }
     }
+
+    updateDraggable();
 
     function dragStart(e) {
         e.dataTransfer.setData("text/plain", e.target.id);
@@ -36,7 +72,6 @@ document.addEventListener("DOMContentLoaded", function() {
         const fromPosition = piece.parentNode.getAttribute("data-position");
         const toPosition = targetSquare.getAttribute("data-position");
 
-        // Ensure only one piece per square
         while (targetSquare.firstChild) {
             targetSquare.removeChild(targetSquare.firstChild);
         }
@@ -47,12 +82,15 @@ document.addEventListener("DOMContentLoaded", function() {
                 "Content-Type": "application/json",
                 "X-CSRFToken": getCookie("csrftoken"),
             },
-            body: JSON.stringify({ from: fromPosition, to: toPosition }),
+            body: JSON.stringify({ from: fromPosition, to: toPosition, turn: turn }),
         })
         .then(response => response.json())
         .then(data => {
             if (data.status === "ok") {
                 targetSquare.appendChild(piece);
+                turn = data.new_turn;
+                document.getElementById("turn").value = turn;
+                updateDraggable();
             } else {
                 console.error("Invalid move");
             }
