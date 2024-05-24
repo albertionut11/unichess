@@ -25,6 +25,7 @@ class Game(models.Model):
     increment = models.IntegerField(default=0)
     data = models.CharField(max_length=1000, default='')
     isActive = models.BooleanField(default=True)
+    turn = models.CharField(max_length=10, default='white')
 
     def __str__(self):
         return f"Game between White: {self.white} and Black: {self.black} at {self.start_time} on {self.date}"

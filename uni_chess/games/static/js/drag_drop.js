@@ -2,18 +2,66 @@ document.addEventListener("DOMContentLoaded", function() {
     const pieces = document.querySelectorAll("img[draggable='true']");
     const squares = document.querySelectorAll("td[data-position]");
     const gameId = document.getElementById("game_id").value;
+    const userRole = document.getElementById("user_role").value;
+    let turn = document.getElementById("turn").value;
 
-    pieces.forEach(piece => {
-        piece.addEventListener("dragstart", dragStart);
-    });
+    const socket = new WebSocket(`ws://${window.location.host}/ws/game/${gameId}/`);
 
-    squares.forEach(square => {
-        square.addEventListener("dragover", dragOver);
-        square.addEventListener("drop", drop);
-    });
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const from = data.from;
+        const to = data.to;
+        turn = data.turn;
+        document.getElementById("turn").value = turn; // Update the hidden input value
+        document.getElementById("turn-display").innerText = turn; // Update the displayed turn
+
+        const piece = document.querySelector(`td[data-position="${from}"] img`);
+        const targetSquare = document.querySelector(`td[data-position="${to}"]`);
+
+        while (targetSquare.firstChild) {
+            targetSquare.removeChild(targetSquare.firstChild);
+        }
+
+        targetSquare.appendChild(piece);
+        updateDraggable();
+    };
+
+    function updateDraggable() {
+        pieces.forEach(piece => {
+            piece.removeEventListener("dragstart", dragStart);
+            piece.setAttribute("draggable", false);
+        });
+
+        if ((userRole === "white" && turn === "white") || (userRole === "black" && turn === "black")) {
+            pieces.forEach(piece => {
+                const pieceColor = piece.getAttribute("data-color");
+                if (pieceColor === userRole) {
+                    piece.addEventListener("dragstart", dragStart);
+                    piece.setAttribute("draggable", true);
+                }
+            });
+
+            squares.forEach(square => {
+                square.addEventListener("dragover", dragOver);
+                square.addEventListener("drop", drop);
+            });
+        } else {
+            squares.forEach(square => {
+                square.removeEventListener("dragover", dragOver);
+                square.removeEventListener("drop", drop);
+            });
+        }
+    }
+
+    updateDraggable();
 
     function dragStart(e) {
-        e.dataTransfer.setData("text/plain", e.target.id);
+        const pieceColor = e.target.getAttribute("data-color");
+        if (pieceColor !== userRole) {
+            e.preventDefault(); // Prevent dragging if piece color doesn't match user role
+        } else {
+            e.dataTransfer.setData("text/plain", e.target.id);
+        }
     }
 
     function dragOver(e) {
@@ -33,7 +81,11 @@ document.addEventListener("DOMContentLoaded", function() {
         const fromPosition = piece.parentNode.getAttribute("data-position");
         const toPosition = targetSquare.getAttribute("data-position");
 
-        // Ensure only one piece per square
+        if (fromPosition === toPosition) {
+            console.log("Invalid move: Cannot move piece to the same position.");
+            return;
+        }
+
         while (targetSquare.firstChild) {
             targetSquare.removeChild(targetSquare.firstChild);
         }
@@ -44,12 +96,15 @@ document.addEventListener("DOMContentLoaded", function() {
                 "Content-Type": "application/json",
                 "X-CSRFToken": getCookie("csrftoken"),
             },
-            body: JSON.stringify({ from: fromPosition, to: toPosition }),
+            body: JSON.stringify({ from: fromPosition, to: toPosition, turn: turn }),
         })
         .then(response => response.json())
         .then(data => {
             if (data.status === "ok") {
                 targetSquare.appendChild(piece);
+                turn = data.new_turn;
+                document.getElementById("turn").value = turn;
+                updateDraggable();
             } else {
                 console.error("Invalid move");
             }

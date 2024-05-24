@@ -2,6 +2,9 @@ import base64
 import json
 import uuid
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
@@ -27,10 +30,20 @@ class PlayView(LoginRequiredMixin, TemplateView):
         game = get_object_or_404(Game, pk=game_id)
         play = Play(game.data)
 
+        context['user_role'] = self.get_user_role(game)
         html_table = play.board.render(context)
         context['html_table'] = html_table
         context['game_id'] = game_id
+        context['turn'] = game.turn
         return {'context': context}
+
+    def get_user_role(self, game):
+        user = self.request.user
+        if user.username == game.white.username:
+            return 'white'
+        elif user.username == game.black.username:
+            return 'black'
+        return 'spectator'
 
 
 @login_required
@@ -39,8 +52,6 @@ def create(request):
         form = GameForm(request.POST)
         if form.is_valid():
             game = form.save()
-            print('Here')
-            print(game.id)
             return redirect("game_play", game_id=game.id)
     else:
         form = GameForm()
@@ -48,25 +59,44 @@ def create(request):
 
 
 @csrf_exempt
+@login_required
 def move_piece(request, game_id):
+    game = get_object_or_404(Game, pk=game_id)
+
+    if request.user.username != game.white.username and request.user.username != game.black.username:
+        return JsonResponse({"status": "fail"})
 
     if request.method == "POST":
         data = json.loads(request.body)
         from_pos = data.get("from")
         to_pos = data.get("to")
+        turn = data.get("turn")
 
-        print(from_pos)
-        print(to_pos)
+        if (request.user.username == game.white.username and turn != 'white') or \
+                (request.user.username == game.black.username and turn != 'black'):
+            return JsonResponse({"status": "fail"})
 
-        game = get_object_or_404(Game, pk=game_id)
+        game_data = game.data
+        game_data += from_pos + to_pos + ' '
+        game.data = game_data
 
-        data = game.data
-        data += from_pos + to_pos + ' '
-        game.data = data
-
+        new_turn = 'black' if turn == 'white' else 'white'
+        game.turn = new_turn
         game.save()
 
-        return JsonResponse({"status": "ok"})
+        # Send move to WebSocket group
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f'game_{game_id}',
+            {
+                'type': 'game_move',
+                'from': from_pos,
+                'to': to_pos,
+                'turn': new_turn,
+            }
+        )
+
+        return JsonResponse({"status": "ok", "new_turn": new_turn})
     return JsonResponse({"status": "fail"})
 
 
@@ -115,4 +145,3 @@ def delete(request, id):
         return redirect("games")
     else:
         return render(request, "games/delete.html", {"game": game})
-
