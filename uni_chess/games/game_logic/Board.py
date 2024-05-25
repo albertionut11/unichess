@@ -1,5 +1,5 @@
 from django.template import loader
-
+from .Piece import King, Queen, Bishop, Knight, Rook, Pawn
 
 class Board:
     def __init__(self):
@@ -22,27 +22,32 @@ class Board:
             to_pos = move[2] + move[3]
 
             self.table[to_pos[0]][to_pos[1]] = self.table[from_pos[0]][from_pos[1]]
-            self.table[from_pos[0]][from_pos[1]] = '.'
+            self.table[from_pos[0]][from_pos[1]] = None
 
 
     def new_table(self):
         self.turn = 'white'
 
         self.table = {
-            '8': {'a': 'bR', 'b': 'bN', 'c': 'bB', 'd': 'bQ', 'e': 'bK', 'f': 'bB', 'g': 'bN', 'h': 'bR'},
-            '7': {'a': 'bP', 'b': 'bP', 'c': 'bP', 'd': 'bP', 'e': 'bP', 'f': 'bP', 'g': 'bP', 'h': 'bP'},
-            '6': {'a': '.', 'b': '.', 'c': '.', 'd': '.', 'e': '.', 'f': '.', 'g': '.', 'h': '.'},
-            '5': {'a': '.', 'b': '.', 'c': '.', 'd': '.', 'e': '.', 'f': '.', 'g': '.', 'h': '.'},
-            '4': {'a': '.', 'b': '.', 'c': '.', 'd': '.', 'e': '.', 'f': '.', 'g': '.', 'h': '.'},
-            '3': {'a': '.', 'b': '.', 'c': '.', 'd': '.', 'e': '.', 'f': '.', 'g': '.', 'h': '.'},
-            '2': {'a': 'wP', 'b': 'wP', 'c': 'wP', 'd': 'wP', 'e': 'wP', 'f': 'wP', 'g': 'wP', 'h': 'wP'},
-            '1': {'a': 'wR', 'b': 'wN', 'c': 'wB', 'd': 'wQ', 'e': 'wK', 'f': 'wB', 'g': 'wN', 'h': 'wR'},
+            '8': {'a': Rook('black'), 'b': Knight('black'), 'c': Bishop('black'), 'd': Queen('black'), 'e': King('black'), 'f': Bishop('black'), 'g': Knight('black'), 'h': Rook('black')},
+            '7': {'a': Pawn('black'), 'b': Pawn('black'), 'c': Pawn('black'), 'd': Pawn('black'), 'e': Pawn('black'), 'f': Pawn('black'), 'g': Pawn('black'), 'h': Pawn('black')},
+            '6': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '5': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '4': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '3': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '2': {'a': Pawn('white'), 'b': Pawn('white'), 'c': Pawn('white'), 'd': Pawn('white'), 'e': Pawn('white'), 'f': Pawn('white'), 'g': Pawn('white'), 'h': Pawn('white')},
+            '1': {'a': Rook('white'), 'b': Knight('white'), 'c': Bishop('white'), 'd': Queen('white'), 'e': King('white'), 'f': Bishop('white'), 'g': Knight('white'), 'h': Rook('white')},
         }
 
     def render(self, context):
         template = loader.get_template(self.template_name)
         context['board'] = self
-        print('Board context:', context)
-        print('Template:', template, self.template_name)
         html_table = template.render(context)
         return html_table
+
+    def get_piece(self, row, col):
+        return self.table[row][col]
+
+    def __str__(self):
+        return self.table
+

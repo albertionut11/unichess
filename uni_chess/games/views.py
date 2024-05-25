@@ -76,6 +76,8 @@ def move_piece(request, game_id):
                 (request.user.username == game.black.username and turn != 'black'):
             return JsonResponse({"status": "fail"})
 
+        # validate move here
+
         game_data = game.data
         game_data += from_pos + to_pos + ' '
         game.data = game_data
@@ -116,7 +118,7 @@ def get_moves(request, game_id):
             return JsonResponse({"status": "fail"})
 
         play = Play(game.data)
-        moves = play.getAvailableMoves(from_row, from_col)
+        moves = play.getAllMoves(from_row, from_col)
         return JsonResponse({"status": "ok", "moves": moves})
 
 
