@@ -1,7 +1,5 @@
-from django.shortcuts import get_object_or_404
-
 from .Board import Board
-from ..models import Game
+
 
 class Play:
     def __init__(self, data):
@@ -13,4 +11,12 @@ class Play:
         else:
             self.board.load_table(self.data)
 
+    def getAvailableMoves(self, from_row, from_col):
+        moves = []
+        for row in self.board.table.keys():
+            for col in self.board.table[row].keys():
+                pos = row + col
+                moves.append(pos)
 
+        print(moves)
+        return moves

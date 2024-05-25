@@ -19,6 +19,18 @@ from .models import Game, Tournament
 from .forms import GameForm
 
 
+@login_required
+def create(request):
+    if request.method == "POST":
+        form = GameForm(request.POST)
+        if form.is_valid():
+            game = form.save()
+            return redirect("game_play", game_id=game.id)
+    else:
+        form = GameForm()
+    return render(request, 'games/create.html', {"form": form})
+
+
 class PlayView(LoginRequiredMixin, TemplateView):
     template_name = 'games/play.html'
 
@@ -44,18 +56,6 @@ class PlayView(LoginRequiredMixin, TemplateView):
         elif user.username == game.black.username:
             return 'black'
         return 'spectator'
-
-
-@login_required
-def create(request):
-    if request.method == "POST":
-        form = GameForm(request.POST)
-        if form.is_valid():
-            game = form.save()
-            return redirect("game_play", game_id=game.id)
-    else:
-        form = GameForm()
-    return render(request, 'games/create.html', {"form": form})
 
 
 @csrf_exempt
@@ -84,7 +84,6 @@ def move_piece(request, game_id):
         game.turn = new_turn
         game.save()
 
-        # Send move to WebSocket group
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             f'game_{game_id}',
@@ -98,6 +97,27 @@ def move_piece(request, game_id):
 
         return JsonResponse({"status": "ok", "new_turn": new_turn})
     return JsonResponse({"status": "fail"})
+
+@login_required
+@csrf_exempt
+def get_moves(request, game_id):
+    game = get_object_or_404(Game, pk=game_id)
+
+    if request.user.username != game.white.username and request.user.username != game.black.username:
+        return JsonResponse({"status": "fail"})
+
+    if request.method == "GET":
+        turn = request.GET.get("turn")
+        pos = request.GET.get("from")
+        from_row, from_col = pos[0], pos[1]
+
+        if (request.user.username == game.white.username and turn != 'white') or \
+                (request.user.username == game.black.username and turn != 'black'):
+            return JsonResponse({"status": "fail"})
+
+        play = Play(game.data)
+        moves = play.getAvailableMoves(from_row, from_col)
+        return JsonResponse({"status": "ok", "moves": moves})
 
 
 @login_required
