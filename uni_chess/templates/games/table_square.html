@@ -13,9 +13,6 @@ img {
 
 <td bgColor="#{{ bgcolor }}" data-position="{{ r_ind }}{{ s_ind }}" >
 {% with folder="/static/chess/pieces/" %}
-{% if square == '.' %}
-        <img src="{{ folder }}square.png" draggable="true" />
-{% endif %}
 {% if square == 'bP' %}
         <img src="{{ folder }}bP.svg" id="{{ r_ind }}{{ s_ind }}" draggable="true" data-color="black"/>
 {% endif %}

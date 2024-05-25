@@ -20,10 +20,8 @@ document.addEventListener("DOMContentLoaded", function() {
         const piece = document.querySelector(`td[data-position="${from}"] img`);
         const targetSquare = document.querySelector(`td[data-position="${to}"]`);
 
-        while (targetSquare.firstChild) {
-            targetSquare.removeChild(targetSquare.firstChild);
-        }
-
+        resetSquare(from);
+        resetSquare(to);
         targetSquare.appendChild(piece);
         updateDraggable();
     };
@@ -90,10 +88,6 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        while (targetSquare.firstChild) {
-            targetSquare.removeChild(targetSquare.firstChild);
-        }
-
         fetch(`/move_piece/${gameId}`, {
             method: "POST",
             headers: {
@@ -105,9 +99,12 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(data => {
             if (data.status === "ok") {
+                resetSquare(fromPosition);
+                resetSquare(toPosition);
                 targetSquare.appendChild(piece);
                 turn = data.new_turn;
                 document.getElementById("turn").value = turn;
+                clearHighlights();
                 updateDraggable();
             } else {
                 console.error("Invalid move");
@@ -137,33 +134,34 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(data => {
             if (data.status === "ok") {
-                highlightMoves(data.moves);
+                highlightMoves(data.moves, fromPosition);
             } else {
                 console.error("Failed to get moves");
             }
         });
     }
 
-    function highlightMoves(moves) {
+    function highlightMoves(moves, fromPosition) {
         clearHighlights();
 
         moves.forEach(position => {
+            if (position === fromPosition) return;
             const square = document.querySelector(`td[data-position="${position}"]`);
             const targetPiece = square.querySelector("img");
 
-            if (targetPiece) {
+            if (!targetPiece) {
+                const dot = document.createElement("div");
+                dot.classList.add("move-dot");
+                square.appendChild(dot);
+                square.addEventListener("click", movePiece);
+                highlightedMoves.push(square);
+            } else {
                 const targetPieceColor = targetPiece.getAttribute("data-color");
 
                 if ((targetPieceColor === "black" && userRole === "white") || (targetPieceColor === "white" && userRole === "black")) {
                     const red = document.createElement("div");
                     red.classList.add("highlight-red");
                     square.appendChild(red);
-                    square.addEventListener("click", movePiece);
-                    highlightedMoves.push(square);
-                } else if (targetPieceColor !== userRole) {
-                    const dot = document.createElement("div");
-                    dot.classList.add("move-dot");
-                    square.appendChild(dot);
                     square.addEventListener("click", movePiece);
                     highlightedMoves.push(square);
                 }
@@ -198,9 +196,8 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(data => {
             if (data.status === "ok") {
-                while (targetSquare.firstChild) {
-                    targetSquare.removeChild(targetSquare.firstChild);
-                }
+                resetSquare(fromPosition);
+                resetSquare(toPosition);
                 targetSquare.appendChild(selectedPiece);
                 turn = data.new_turn;
                 document.getElementById("turn").value = turn;
@@ -212,10 +209,18 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
+    function resetSquare(position) {
+        const square = document.querySelector(`td[data-position="${position}"]`);
+        while (square.firstChild) {
+            square.removeChild(square.firstChild);
+        }
+    }
+
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== "") {
             const cookies = document.cookie.split(";");
+
             for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
                 if (cookie.substring(0, name.length + 1) === (name + "=")) {
