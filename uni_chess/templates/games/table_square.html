@@ -1,21 +1,29 @@
 <style>
+table.chess-board {
+    border-collapse: collapse;
+}
 td {
-    width: 64px;
-    height: 64px;
+    width: 68px;
+    height: 68px;
     position: relative;
+    padding: 0;
+    box-sizing: border-box;
+    text-align: center;
+    vertical-align: middle;
 }
 img {
     width: 100%;
     height: 100%;
     object-fit: contain;
+    display: block; /* Ensure no extra space below the image */
 }
 </style>
 
-<td bgColor="#{{ bgcolor }}" data-position="{{ r_ind }}{{ s_ind }}" >
-{% with folder="/static/chess/pieces/" %}
-{% if square %}
-    <img src="{{ folder }}{{ square }}.svg" id="{{ r_ind }}{{ s_ind }}" draggable="true" data-color="{{ square.get_color }}"/>
-{% endif %}
-{% endwith %}
+<td bgColor="#{{ bgcolor }}" data-position="{{ r_ind }}{{ s_ind }}" class="chess-square">
+    {% with folder="/static/chess/pieces/" %}
+    {% if square %}
+        <img src="{{ folder }}{{ square }}.svg" id="{{ r_ind }}{{ s_ind }}" draggable="true" data-color="{{ square.get_color }}"/>
+    {% endif %}
+    {% endwith %}
 </td>
 
