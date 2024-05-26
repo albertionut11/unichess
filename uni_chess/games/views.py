@@ -118,7 +118,7 @@ def get_moves(request, game_id):
             return JsonResponse({"status": "fail"})
 
         play = Play(game.data)
-        moves = play.getAllMoves(from_row, from_col)
+        moves = play.getAvailableMoves(from_row, from_col)
         return JsonResponse({"status": "ok", "moves": moves})
 
 

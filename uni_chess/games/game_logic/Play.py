@@ -14,7 +14,11 @@ class Play:
     def getAvailableMoves(self, from_row, from_col):
         piece = self.board.get_piece(from_row, from_col)
         if piece:
-            return piece.getAvailableMoves(self.board, from_row, from_col)
+            if piece.__str__()[-1] == 'P':
+                return piece.getAvailableMoves(self.board, from_row, from_col)
+            else:
+                return self.getAllMoves(from_row, from_col)
+
         return []
 
     def getAllMoves(self, from_row, from_col):
