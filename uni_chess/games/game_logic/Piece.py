@@ -11,6 +11,21 @@ class Piece:
     def get_color(self):
         return self.color
 
+    @staticmethod
+    def outOfBounds(row, col):
+        if row < '1' or '8' < row:
+            return True
+
+        # out of bounds col
+        if col < 'a' or 'h' < col:
+            return True
+
+        return False
+
+    @staticmethod
+    def getPiece(board, row, col):
+        piece = board.get_piece(row, col)
+        return piece
 
 class King(Piece):
     def getAvailableMoves(self, board, from_row, from_col):
@@ -30,15 +45,6 @@ class Queen(Piece):
         return f'{self.color[0]}Q'
 
 
-class Bishop(Piece):
-    def getAvailableMoves(self, board, from_row, from_col):
-        # Implement the logic to get available moves for the Bishop
-        pass
-
-    def __str__(self):
-        return f'{self.color[0]}B'
-
-
 class Knight(Piece):
     def getAvailableMoves(self, board, from_row, from_col):
         # Implement the logic to get available moves for the Knight
@@ -56,6 +62,75 @@ class Rook(Piece):
     def __str__(self):
         return f'{self.color[0]}R'
 
+
+class Bishop(Piece):
+    def getAvailableMoves(self, board, from_row, from_col):
+        moves = []
+        # breakpoint()
+        # down left
+        row = str(int(from_row) - 1)
+        col = chr(ord(from_col) - 1)
+
+        while row >= '1' and col >= 'a':
+            piece = self.getPiece(board, row, col)
+            if piece:
+                if piece.get_color() != self.color:
+                    moves.append(row + col)
+                break
+            else:
+                moves.append(row + col)
+                row = str(int(row) - 1)
+                col = chr(ord(col) - 1)
+
+        # up left
+        row = str(int(from_row) + 1)
+        col = chr(ord(from_col) - 1)
+
+        while row <= '8' and col >= 'a':
+            piece = self.getPiece(board, row, col)
+            if piece:
+                if piece.get_color() != self.color:
+                    moves.append(row + col)
+                break
+            else:
+                moves.append(row + col)
+                row = str(int(row) + 1)
+                col = chr(ord(col) - 1)
+
+        # down right
+        row = str(int(from_row) - 1)
+        col = chr(ord(from_col) + 1)
+
+        while row >= '1' and col <= 'h':
+            piece = self.getPiece(board, row, col)
+            if piece:
+                if piece.get_color() != self.color:
+                    moves.append(row + col)
+                break
+            else:
+                moves.append(row + col)
+                row = str(int(row) - 1)
+                col = chr(ord(col) + 1)
+
+        # up right
+        row = str(int(from_row) + 1)
+        col = chr(ord(from_col) + 1)
+
+        while row <= '8' and col <= 'h':
+            piece = self.getPiece(board, row, col)
+            if piece:
+                if piece.get_color() != self.color:
+                    moves.append(row + col)
+                break
+            else:
+                moves.append(row + col)
+                row = str(int(row) + 1)
+                col = chr(ord(col) + 1)
+
+        return moves, None
+
+    def __str__(self):
+        return f'{self.color[0]}B'
 
 class Pawn(Piece):
 
@@ -94,16 +169,10 @@ class Pawn(Piece):
 
         return moves, enPassantPos
 
-
-    @staticmethod
-    def isValidMove(board, from_row, from_col, forwardMove=False):
+    def isValidMove(self, board, from_row, from_col, forwardMove=False):
         # breakpoint()
-        # out of bounds row
-        if from_row < '1' or '8' < from_row:
-            return False
-
-        # out of bounds col
-        if from_col < 'a' or 'h' < from_col:
+        # out of bounds check
+        if self.outOfBounds(from_row, from_col):
             return False
 
         # check for piece in following square, if we have piece but forward move -> False, if now forward move -> True
@@ -111,9 +180,6 @@ class Pawn(Piece):
         if forwardMove:
             if piece:
                 return False
-        else:
-            if piece:
-                return True
 
         return True
 
