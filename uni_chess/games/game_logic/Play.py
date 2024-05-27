@@ -17,7 +17,6 @@ class Play:
             return piece.getSafeMoves(self.board, from_row, from_col)
         else:
             print("We should never be here")
-
         return []
 
     def is_checkmate(self, color):

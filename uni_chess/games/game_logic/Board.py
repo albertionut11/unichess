@@ -1,6 +1,7 @@
 from django.template import loader
 from .Piece import King, Queen, Bishop, Knight, Rook, Pawn
 
+
 class Board:
     def __init__(self):
         print('Board.__init__')
@@ -35,7 +36,6 @@ class Board:
                 self.table[from_pos[0]][from_pos[1]] = None
                 self.table[from_pos[0]][to_pos[1]] = None  # remove the capture pawn in En Passant move
 
-
     def new_table(self):
         self.turn = 'white'
 
@@ -60,7 +60,7 @@ class Board:
         return self.table[row][col]
 
     def __str__(self):
-        return self.table
+        return str(self.table)
 
     def is_king_in_check(self, king_color):
         king_position = self.find_king(king_color)
@@ -70,8 +70,8 @@ class Board:
             for col in self.table[row]:
                 piece = self.get_piece(row, col)
                 if piece and piece.get_color() == opponent_color:
-                    moves, _ = piece.getSafeMoves(self, row, col)
-                    if king_position in moves:
+                    available_moves, _ = piece.getAvailableMoves(self, row, col) # dont forget this
+                    if king_position in available_moves:
                         return True
         return False
 
@@ -84,18 +84,20 @@ class Board:
         print('We should never reach this')
         return None
 
-    def is_valid_move(self, from_row, from_col, to_row, to_col):
-        # temporary move
+    def make_move(self, from_row, from_col, to_row, to_col):
         piece = self.table[from_row][from_col]
         captured_piece = self.table[to_row][to_col]
         self.table[to_row][to_col] = piece
         self.table[from_row][from_col] = None
+        return piece, captured_piece
 
-        king_in_check = self.is_king_in_check(piece.get_color())
-
-        # revert the move
+    def undo_move(self, from_row, from_col, to_row, to_col, captured_piece):
+        piece = self.table[to_row][to_col]
         self.table[from_row][from_col] = piece
         self.table[to_row][to_col] = captured_piece
 
+    def is_valid_move(self, from_row, from_col, to_row, to_col):
+        piece, captured_piece = self.make_move(from_row, from_col, to_row, to_col)
+        king_in_check = self.is_king_in_check(piece.get_color())
+        self.undo_move(from_row, from_col, to_row, to_col, captured_piece)
         return not king_in_check
-
