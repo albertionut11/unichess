@@ -63,21 +63,21 @@ class Pawn(Piece):
         return f'{self.color[0]}P'
 
     def getAvailableMoves(self, board, from_row, from_col):
-
+        # breakpoint()
         moves = []
         side = self.get_color()
         direction = 1 if side == 'white' else -1
 
         # starting moves -> pawn can move two squares at the beginning of the game
         next_row_1 = str(int(from_row) + direction * 1)
-        if self.isValidMove(board, next_row_1, from_col):
+        if self.isValidMove(board, next_row_1, from_col, True):
             move_1 = next_row_1 + from_col
             moves.append(move_1)
 
             # second square
-            if (side == 'white' and from_row == '2') or (side == 'black' and from_col == '7'):
+            if (side == 'white' and from_row == '2') or (side == 'black' and from_row == '7'):
                 next_row_2 = str(int(from_row) + direction * 2)
-                if self.isValidMove(board, next_row_2, from_col):
+                if self.isValidMove(board, next_row_2, from_col, True):
                     move_2 = next_row_2 + from_col
                     moves.append(move_2)
 
@@ -92,23 +92,28 @@ class Pawn(Piece):
         if enPassantPos:
             moves.append(enPassantPos)
 
-        return moves
+        return moves, enPassantPos
 
 
     @staticmethod
-    def isValidMove(board, from_row, from_col):
-        # piece ahead of us
-        piece = board.get_piece(from_row, from_col)
-        if piece:
-            return False
-
+    def isValidMove(board, from_row, from_col, forwardMove=False):
+        # breakpoint()
         # out of bounds row
-        if '1' > from_row > '8':
+        if from_row < '1' or '8' < from_row:
             return False
 
         # out of bounds col
-        if 'a' > from_col > 'h':
+        if from_col < 'a' or 'h' < from_col:
             return False
+
+        # check for piece in following square, if we have piece but forward move -> False, if now forward move -> True
+        piece = board.get_piece(from_row, from_col)
+        if forwardMove:
+            if piece:
+                return False
+        else:
+            if piece:
+                return True
 
         return True
 
@@ -116,7 +121,7 @@ class Pawn(Piece):
         direction = 1 if side == 'white' else -1
         diagRow_1, diagCol_1 = str(int(from_row) + direction * 1), chr(ord(from_col) + 1)
         diagRow_2, diagCol_2 = str(int(from_row) + direction * 1), chr(ord(from_col) - 1)
-
+        # breakpoint()
         positions = []
 
         if self.isValidMove(board, diagRow_1, diagCol_1):

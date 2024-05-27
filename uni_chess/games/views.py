@@ -76,10 +76,24 @@ def move_piece(request, game_id):
                 (request.user.username == game.black.username and turn != 'black'):
             return JsonResponse({"status": "fail"})
 
-        # validate move here
+        # validate move
+        play = Play(game.data)
+        moves, enPassantPos = play.getAvailableMoves(from_pos[0], from_pos[1])
+
+        ok, EP = False, False
+        if to_pos == enPassantPos:
+            ok = True
+            EP = True
+        # else:
+        #     for move in moves:
+        #         if move == to_pos:
+        #             ok = True
+        # if not ok:
+        #     return JsonResponse({"status": "fail"})
+
 
         game_data = game.data
-        game_data += from_pos + to_pos + ' '
+        game_data += from_pos + to_pos + ' ' if not EP else 'E' + from_pos + to_pos + ' '
         game.data = game_data
 
         new_turn = 'black' if turn == 'white' else 'white'
@@ -97,7 +111,7 @@ def move_piece(request, game_id):
             }
         )
 
-        return JsonResponse({"status": "ok", "new_turn": new_turn})
+        return JsonResponse({"status": "ok", "new_turn": new_turn, "enPassant": EP})
     return JsonResponse({"status": "fail"})
 
 @login_required
@@ -118,7 +132,7 @@ def get_moves(request, game_id):
             return JsonResponse({"status": "fail"})
 
         play = Play(game.data)
-        moves = play.getAvailableMoves(from_row, from_col)
+        moves, EP = play.getAvailableMoves(from_row, from_col)
         return JsonResponse({"status": "ok", "moves": moves})
 
 

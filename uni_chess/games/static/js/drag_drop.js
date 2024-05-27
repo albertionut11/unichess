@@ -99,6 +99,17 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(data => {
             if (data.status === "ok") {
+                if (data.enPassant) {
+                    // Calculate the position of the captured pawn
+                    const fromRow = parseInt(fromPosition[1]);
+                    const toRow = parseInt(toPosition[1]);
+                    const capturedRow = fromRow < toRow ? toRow - 1 : toRow + 1;  // Adjust based on move direction
+                    const capturedPosition = toPosition[0] + capturedRow;
+
+                    // Remove the captured pawn
+                    resetSquare(capturedPosition);
+                }
+
                 resetSquare(fromPosition);
                 resetSquare(toPosition);
                 targetSquare.appendChild(piece);
@@ -196,6 +207,15 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(data => {
             if (data.status === "ok") {
+                if (data.enPassant) {
+                    // Calculate the position of the captured pawn
+                    const fromRow = fromPosition[0];
+                    const capturedPosition = fromRow + toPosition[1];
+
+                    // Remove the captured pawn
+                    resetSquare(capturedPosition);
+                }
+
                 resetSquare(fromPosition);
                 resetSquare(toPosition);
                 targetSquare.appendChild(selectedPiece);

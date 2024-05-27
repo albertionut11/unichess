@@ -13,16 +13,27 @@ class Board:
 
     def load_table(self, data):
         self.new_table()
+        self.data = data
         moves = data.split(' ')[:-1]
 
         self.turn = 'white' if len(moves) % 2 == 0 else 'black'
 
         for move in moves:
-            from_pos = move[0] + move[1]
-            to_pos = move[2] + move[3]
+            # if not En Passant move
+            if move[0] != 'E':
+                from_pos = move[0] + move[1]
+                to_pos = move[2] + move[3]
 
-            self.table[to_pos[0]][to_pos[1]] = self.table[from_pos[0]][from_pos[1]]
-            self.table[from_pos[0]][from_pos[1]] = None
+                self.table[to_pos[0]][to_pos[1]] = self.table[from_pos[0]][from_pos[1]]
+                self.table[from_pos[0]][from_pos[1]] = None
+            else:
+                # En passant move
+                from_pos = move[1] + move[2]
+                to_pos = move[3] + move[4]
+
+                self.table[to_pos[0]][to_pos[1]] = self.table[from_pos[0]][from_pos[1]]
+                self.table[from_pos[0]][from_pos[1]] = None
+                self.table[from_pos[0]][to_pos[1]] = None  # remove the capture pawn in En Passant move
 
 
     def new_table(self):

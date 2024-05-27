@@ -29,4 +29,4 @@ class Play:
                 moves.append(pos)
 
         print(moves)
-        return moves
+        return moves, None
