@@ -14,11 +14,21 @@ document.addEventListener("DOMContentLoaded", function() {
         const from = data.from;
         const to = data.to;
         turn = data.turn;
+        const enPassant = data.enPassant || false;
+
         document.getElementById("turn").value = turn;
         document.getElementById("turn-display").innerText = turn;
 
         const piece = document.querySelector(`td[data-position="${from}"] img`);
         const targetSquare = document.querySelector(`td[data-position="${to}"]`);
+
+        if (enPassant) {
+            // calculate the position of the captured pawn
+            const fromRow = from[0];
+            const capturedPosition = fromRow + to[1];
+
+            resetSquare(capturedPosition);
+        }
 
         resetSquare(from);
         resetSquare(to);
@@ -99,6 +109,14 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(data => {
             if (data.status === "ok") {
+                if (data.enPassant) {
+                    // calculate the position of the captured pawn
+                    const fromRow = fromPosition[0];
+                    const capturedPosition = fromRow + toPosition[1];
+
+                    resetSquare(capturedPosition);
+                }
+
                 resetSquare(fromPosition);
                 resetSquare(toPosition);
                 targetSquare.appendChild(piece);
@@ -196,6 +214,14 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(data => {
             if (data.status === "ok") {
+                if (data.enPassant) {
+                    // calculate the position of the captured pawn
+                    const fromRow = fromPosition[0];
+                    const capturedPosition = fromRow + toPosition[1];
+
+                    resetSquare(capturedPosition);
+                }
+
                 resetSquare(fromPosition);
                 resetSquare(toPosition);
                 targetSquare.appendChild(selectedPiece);

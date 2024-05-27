@@ -25,6 +25,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         from_pos = data['from']
         to_pos = data['to']
         turn = data['turn']
+        enPassant = data.get('enPassant', False)
 
         await self.channel_layer.group_send(
             self.game_group_name,
@@ -33,6 +34,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                 'from': from_pos,
                 'to': to_pos,
                 'turn': turn,
+                'EnPassant': enPassant
             }
         )
 
@@ -40,9 +42,11 @@ class GameConsumer(AsyncWebsocketConsumer):
         from_pos = event['from']
         to_pos = event['to']
         turn = event['turn']
+        enPassant = event.get('enPassant', False)
 
         await self.send(text_data=json.dumps({
             'from': from_pos,
             'to': to_pos,
             'turn': turn,
+            'enPassant': enPassant
         }))
