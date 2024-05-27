@@ -108,6 +108,7 @@ def move_piece(request, game_id):
                 'from': from_pos,
                 'to': to_pos,
                 'turn': new_turn,
+                'enPassant': EP,
             }
         )
 

@@ -14,11 +14,21 @@ document.addEventListener("DOMContentLoaded", function() {
         const from = data.from;
         const to = data.to;
         turn = data.turn;
+        const enPassant = data.enPassant || false;
+
         document.getElementById("turn").value = turn;
         document.getElementById("turn-display").innerText = turn;
 
         const piece = document.querySelector(`td[data-position="${from}"] img`);
         const targetSquare = document.querySelector(`td[data-position="${to}"]`);
+
+        if (enPassant) {
+            // calculate the position of the captured pawn
+            const fromRow = from[0];
+            const capturedPosition = fromRow + to[1];
+
+            resetSquare(capturedPosition);
+        }
 
         resetSquare(from);
         resetSquare(to);
@@ -100,13 +110,10 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(data => {
             if (data.status === "ok") {
                 if (data.enPassant) {
-                    // Calculate the position of the captured pawn
-                    const fromRow = parseInt(fromPosition[1]);
-                    const toRow = parseInt(toPosition[1]);
-                    const capturedRow = fromRow < toRow ? toRow - 1 : toRow + 1;  // Adjust based on move direction
-                    const capturedPosition = toPosition[0] + capturedRow;
+                    // calculate the position of the captured pawn
+                    const fromRow = fromPosition[0];
+                    const capturedPosition = fromRow + toPosition[1];
 
-                    // Remove the captured pawn
                     resetSquare(capturedPosition);
                 }
 
@@ -208,11 +215,10 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(data => {
             if (data.status === "ok") {
                 if (data.enPassant) {
-                    // Calculate the position of the captured pawn
+                    // calculate the position of the captured pawn
                     const fromRow = fromPosition[0];
                     const capturedPosition = fromRow + toPosition[1];
 
-                    // Remove the captured pawn
                     resetSquare(capturedPosition);
                 }
 
