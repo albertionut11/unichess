@@ -23,10 +23,8 @@ document.addEventListener("DOMContentLoaded", function() {
         const targetSquare = document.querySelector(`td[data-position="${to}"]`);
 
         if (enPassant) {
-            // calculate the position of the captured pawn
             const fromRow = from[0];
             const capturedPosition = fromRow + to[1];
-
             resetSquare(capturedPosition);
         }
 
@@ -34,6 +32,10 @@ document.addEventListener("DOMContentLoaded", function() {
         resetSquare(to);
         targetSquare.appendChild(piece);
         updateDraggable();
+
+        if (data.status === "checkmate") {
+            displayCheckmateMessage();
+        }
     };
 
     function updateDraggable() {
@@ -110,10 +112,8 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(data => {
             if (data.status === "ok") {
                 if (data.enPassant) {
-                    // calculate the position of the captured pawn
                     const fromRow = fromPosition[0];
                     const capturedPosition = fromRow + toPosition[1];
-
                     resetSquare(capturedPosition);
                 }
 
@@ -124,6 +124,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 document.getElementById("turn").value = turn;
                 clearHighlights();
                 updateDraggable();
+            } else if (data.status === "checkmate") {
+                displayCheckmateMessage();
             } else {
                 console.error("Invalid move");
             }
@@ -215,10 +217,8 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(data => {
             if (data.status === "ok") {
                 if (data.enPassant) {
-                    // calculate the position of the captured pawn
                     const fromRow = fromPosition[0];
                     const capturedPosition = fromRow + toPosition[1];
-
                     resetSquare(capturedPosition);
                 }
 
@@ -229,6 +229,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 document.getElementById("turn").value = turn;
                 clearHighlights();
                 updateDraggable();
+            } else if (data.status === "checkmate") {
+                displayCheckmateMessage();
             } else {
                 console.error("Invalid move");
             }
@@ -240,6 +242,13 @@ document.addEventListener("DOMContentLoaded", function() {
         while (square.firstChild) {
             square.removeChild(square.firstChild);
         }
+    }
+
+    function displayCheckmateMessage() {
+        const messageDiv = document.createElement("div");
+        messageDiv.innerText = "Checkmate";
+        messageDiv.classList.add("checkmate-message");
+        document.getElementById("chess-table").after(messageDiv);
     }
 
     function getCookie(name) {

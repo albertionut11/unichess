@@ -62,3 +62,40 @@ class Board:
     def __str__(self):
         return self.table
 
+    def is_king_in_check(self, king_color):
+        king_position = self.find_king(king_color)
+        opponent_color = 'white' if king_color == 'black' else 'black'
+
+        for row in self.table:
+            for col in self.table[row]:
+                piece = self.get_piece(row, col)
+                if piece and piece.get_color() == opponent_color:
+                    moves, _ = piece.getSafeMoves(self, row, col)
+                    if king_position in moves:
+                        return True
+        return False
+
+    def find_king(self, color):
+        for row in self.table:
+            for col in self.table[row]:
+                piece = self.get_piece(row, col)
+                if piece and piece.__str__() == f'{color[0]}K':
+                    return row + col
+        print('We should never reach this')
+        return None
+
+    def is_valid_move(self, from_row, from_col, to_row, to_col):
+        # temporary move
+        piece = self.table[from_row][from_col]
+        captured_piece = self.table[to_row][to_col]
+        self.table[to_row][to_col] = piece
+        self.table[from_row][from_col] = None
+
+        king_in_check = self.is_king_in_check(piece.get_color())
+
+        # revert the move
+        self.table[from_row][from_col] = piece
+        self.table[to_row][to_col] = captured_piece
+
+        return not king_in_check
+

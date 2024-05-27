@@ -28,11 +28,31 @@ class Piece:
         piece = board.get_piece(row, col)
         return piece
 
+    def getSafeMoves(self, board, from_row, from_col):
+        all_moves, enPassantPos = self.getAvailableMoves(board, from_row, from_col)
+        safe_moves = []
+        for move in all_moves:
+            to_row, to_col = move[0], move[1]
+            if board.is_valid_move(from_row, from_col, to_row, to_col):
+                safe_moves.append(move)
+        return safe_moves, enPassantPos
+
 
 class King(Piece):
     def getAvailableMoves(self, board, from_row, from_col):
-        # Implement the logic to get available moves for the King
-        pass
+        directions = [
+            (1, 0), (-1, 0), (0, 1), (0, -1),
+            (1, 1), (1, -1), (-1, 1), (-1, -1)
+        ]
+        moves = []
+        for direction in directions:
+            to_row = str(int(from_row) + direction[0])
+            to_col = chr(ord(from_col) + direction[1])
+            if not self.outOfBounds(to_row, to_col):
+                piece = board.get_piece(to_row, to_col)
+                if not piece or piece.get_color() != self.color:
+                    moves.append(to_row + to_col)
+        return moves, None
 
     def __str__(self):
         return f'{self.color[0]}K'
