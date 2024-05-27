@@ -18,6 +18,8 @@ class Play:
                 return piece.getAvailableMoves(self.board, from_row, from_col)
             elif piece.__str__()[-1] == 'B':
                 return piece.getAvailableMoves(self.board, from_row, from_col)
+            elif piece.__str__()[-1] == 'N':
+                return piece.getAvailableMoves(self.board, from_row, from_col)
             else:
                 return self.getAllMoves(from_row, from_col)
 

@@ -13,7 +13,8 @@ class Piece:
 
     @staticmethod
     def outOfBounds(row, col):
-        if row < '1' or '8' < row:
+        row = int(row)
+        if row < 1 or 8 < row:
             return True
 
         # out of bounds col
@@ -26,6 +27,7 @@ class Piece:
     def getPiece(board, row, col):
         piece = board.get_piece(row, col)
         return piece
+
 
 class King(Piece):
     def getAvailableMoves(self, board, from_row, from_col):
@@ -44,16 +46,6 @@ class Queen(Piece):
     def __str__(self):
         return f'{self.color[0]}Q'
 
-
-class Knight(Piece):
-    def getAvailableMoves(self, board, from_row, from_col):
-        # Implement the logic to get available moves for the Knight
-        pass
-
-    def __str__(self):
-        return f'{self.color[0]}N'
-
-
 class Rook(Piece):
     def getAvailableMoves(self, board, from_row, from_col):
         # Implement the logic to get available moves for the Rook
@@ -63,7 +55,69 @@ class Rook(Piece):
         return f'{self.color[0]}R'
 
 
+class Knight(Piece):
+
+    def __str__(self):
+        return f'{self.color[0]}N'
+
+    def getAvailableMoves(self, board, from_row, from_col):
+        moves = []
+        # breakpoint()
+        # 2 up 1 left-right
+        up_row = str(int(from_row) + 2)
+        left_col = chr(ord(from_col) - 1)
+        right_col = chr(ord(from_col) + 1)
+
+        if not self.outOfBounds(up_row, left_col) and self.isValidKnightMove(board, up_row, left_col):
+            moves.append(up_row + left_col)
+
+        if not self.outOfBounds(up_row, right_col) and self.isValidKnightMove(board, up_row, right_col):
+            moves.append(up_row + right_col)
+
+        # 2 down 1 left-right
+        down_row = str(int(from_row) - 2)
+
+        if not self.outOfBounds(down_row, left_col) and self.isValidKnightMove(board, down_row, left_col):
+            moves.append(down_row + left_col)
+
+        if not self.outOfBounds(down_row, right_col) and self.isValidKnightMove(board, down_row, right_col):
+            moves.append(down_row + right_col)
+
+        # 2 left 1 up-down
+        left_col = chr(ord(from_col) - 2)
+        up_row = str(int(from_row) + 1)
+        down_row = str(int(from_row) - 1)
+
+        if not self.outOfBounds(up_row, left_col) and self.isValidKnightMove(board, up_row, left_col):
+            moves.append(up_row + left_col)
+
+        if not self.outOfBounds(down_row, left_col) and self.isValidKnightMove(board, down_row, left_col):
+            moves.append(down_row + left_col)
+
+        # 2 right 1 up-down
+        right_col = chr(ord(from_col) + 2)
+
+        if not self.outOfBounds(up_row, right_col) and self.isValidKnightMove(board, up_row, right_col):
+            moves.append(up_row + right_col)
+
+        if not self.outOfBounds(down_row, right_col) and self.isValidKnightMove(board, down_row, right_col):
+            moves.append(down_row + right_col)
+
+        return moves, None
+
+    def isValidKnightMove(self, board, row, col):
+        piece = self.getPiece(board, row, col)
+        if piece:
+            if piece.get_color() == self.color:
+                return False
+
+        return True
+
 class Bishop(Piece):
+
+    def __str__(self):
+        return f'{self.color[0]}B'
+
     def getAvailableMoves(self, board, from_row, from_col):
         moves = []
         # breakpoint()
@@ -129,8 +183,6 @@ class Bishop(Piece):
 
         return moves, None
 
-    def __str__(self):
-        return f'{self.color[0]}B'
 
 class Pawn(Piece):
 
