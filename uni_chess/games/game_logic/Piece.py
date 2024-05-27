@@ -47,12 +47,62 @@ class Queen(Piece):
         return f'{self.color[0]}Q'
 
 class Rook(Piece):
-    def getAvailableMoves(self, board, from_row, from_col):
-        # Implement the logic to get available moves for the Rook
-        pass
 
     def __str__(self):
         return f'{self.color[0]}R'
+
+    def getAvailableMoves(self, board, from_row, from_col):
+        moves = []
+
+        # up
+        up_row = str(int(from_row) + 1)
+        while up_row <= '8':
+            piece = self.getPiece(board, up_row, from_col)
+            if piece:
+                if piece.get_color() != self.color:
+                    moves.append(up_row + from_col)
+                break
+            else:
+                moves.append(up_row + from_col)
+                up_row = str(int(up_row) + 1)
+
+        # down
+        down_row = str(int(from_row) - 1)
+        while down_row >= '1':
+            piece = self.getPiece(board, down_row, from_col)
+            if piece:
+                if piece.get_color() != self.color:
+                    moves.append(down_row + from_col)
+                break
+            else:
+                moves.append(down_row + from_col)
+                down_row = str(int(down_row) - 1)
+
+        # left
+        left_col = chr(ord(from_col) - 1)
+        while left_col >= 'a':
+            piece = self.getPiece(board, from_row, left_col)
+            if piece:
+                if piece.get_color() != self.color:
+                    moves.append(from_row + left_col)
+                break
+            else:
+                moves.append(from_row + left_col)
+                left_col = chr(ord(left_col) - 1)
+
+        # right
+        right_col = chr(ord(from_col) + 1)
+        while right_col <= 'h':
+            piece = self.getPiece(board, from_row, right_col)
+            if piece:
+                if piece.get_color() != self.color:
+                    moves.append(from_row + right_col)
+                break
+            else:
+                moves.append(from_row + right_col)
+                right_col = chr(ord(right_col) + 1)
+
+        return moves, None
 
 
 class Knight(Piece):
