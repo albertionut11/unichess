@@ -61,8 +61,8 @@ class King(Piece):
 class Queen(Piece):
     def getAvailableMoves(self, board, from_row, from_col):
         moves = []
-        rook = Rook(Piece)
-        bishop = Bishop(Piece)
+        rook = Rook(self.color)
+        bishop = Bishop(self.color)
         RookMoves = rook.getAvailableMoves(board, from_row, from_col)
         BishopMoves = bishop.getAvailableMoves(board, from_row, from_col)
 
@@ -343,19 +343,21 @@ class Pawn(Piece):
         if (side == 'white' and from_row == '5') or (side == 'black' and from_row == '4'):
             vecinCol_1 = chr(ord(from_col) + 1) if chr(ord(from_col) + 1) <= 'h' else None
             vecinCol_2 = chr(ord(from_col) - 1) if chr(ord(from_col) - 1) >= 'a' else None
-            lastMove = board.data.split(' ')[-2]
+            if board.data:
+                print(board.data)
+                lastMove = board.data.split(' ')[-2]
 
-            if vecinCol_1:
-                piece = board.get_piece(from_row, vecinCol_1)
-                if side == 'white' and piece.__str__() == 'bP':
-                    expMove = f'7{vecinCol_1}5{vecinCol_1}'
-                    if lastMove == expMove:
-                        return str(int(from_row) + 1) + vecinCol_1
+                if vecinCol_1:
+                    piece = board.get_piece(from_row, vecinCol_1)
+                    if side == 'white' and piece.__str__() == 'bP':
+                        expMove = f'7{vecinCol_1}5{vecinCol_1}'
+                        if lastMove == expMove:
+                            return str(int(from_row) + 1) + vecinCol_1
 
-                elif side == 'black' and piece.__str__() == 'wP':
-                    expMove = f'2{vecinCol_1}4{vecinCol_1}'
-                    if lastMove == expMove:
-                        return str(int(from_row) - 1) + vecinCol_1
+                    elif side == 'black' and piece.__str__() == 'wP':
+                        expMove = f'2{vecinCol_1}4{vecinCol_1}'
+                        if lastMove == expMove:
+                            return str(int(from_row) - 1) + vecinCol_1
 
             if vecinCol_2:
                 piece = board.get_piece(from_row, vecinCol_2)

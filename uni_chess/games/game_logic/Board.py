@@ -1,5 +1,5 @@
 from django.template import loader
-from .Piece import King, Queen, Bishop, Knight, Rook, Pawn
+from .Piece import King, Queen, Bishop, Knight, Rook, Pawn, Piece
 
 
 class Board:
@@ -64,15 +64,67 @@ class Board:
 
     def is_king_in_check(self, king_color):
         king_position = self.find_king(king_color)
+        if not king_position:
+            return False
+
+        king_row, king_col = king_position[0], king_position[1]
         opponent_color = 'white' if king_color == 'black' else 'black'
 
-        for row in self.table:
-            for col in self.table[row]:
-                piece = self.get_piece(row, col)
-                if piece and piece.get_color() == opponent_color:
-                    available_moves, _ = piece.getAvailableMoves(self, row, col) # dont forget this
-                    if king_position in available_moves:
+        directions = [
+            (1, 0), (-1, 0), (0, 1), (0, -1),  # rook-like moves
+            (1, 1), (1, -1), (-1, 1), (-1, -1)  # bishop-like moves
+        ]
+
+        # check for attacks from Rook, Bishop, and Queen
+        for direction in directions:
+            row_offset, col_offset = direction
+            row, col = int(king_row), king_col
+
+            while True:
+                row += row_offset
+                col = chr(ord(col) + col_offset)
+
+                if Piece.outOfBounds(str(row), col):
+                    break
+
+                piece = self.get_piece(str(row), col)
+
+                if piece:
+                    if piece.get_color() == opponent_color and (
+                            (abs(row_offset) == abs(col_offset) and isinstance(piece, (Bishop, Queen))) or
+                            ((row_offset == 0 or col_offset == 0) and isinstance(piece, (Rook, Queen)))
+                    ):
                         return True
+                    break
+
+        # check for attacks from Knight
+        knight_moves = [
+            (2, 1), (2, -1), (-2, 1), (-2, -1),
+            (1, 2), (1, -2), (-1, 2), (-1, -2)
+        ]
+
+        for move in knight_moves:
+            row = str(int(king_row) + move[0])
+            col = chr(ord(king_col) + move[1])
+
+            if Piece.outOfBounds(str(row), col):
+                break
+
+            piece = self.get_piece(row, col)
+            if piece and piece.get_color() == opponent_color and isinstance(piece, Knight):
+                return True
+
+        # check for attacks from Pawn
+        pawn_direction = -1 if king_color == 'black' else +1 # changed here consider this in case of bugs
+        for col_offset in [-1, 1]:
+            row = str(int(king_row) + pawn_direction)
+            col = chr(ord(king_col) + col_offset)
+
+            if not Piece.outOfBounds(row, col):
+                piece = self.get_piece(row, col)
+                if piece and piece.get_color() == opponent_color and isinstance(piece, Pawn):
+                    return True
+
         return False
 
     def find_king(self, color):
@@ -81,7 +133,7 @@ class Board:
                 piece = self.get_piece(row, col)
                 if piece and piece.__str__() == f'{color[0]}K':
                     return row + col
-        print('We should never reach this')
+
         return None
 
     def make_move(self, from_row, from_col, to_row, to_col):

@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", function() {
         updateDraggable();
 
         if (data.status === "checkmate") {
+            console.log('onMessage here');
             displayCheckmateMessage();
         }
     };
@@ -45,6 +46,7 @@ document.addEventListener("DOMContentLoaded", function() {
             piece.setAttribute("draggable", false);
         });
 
+        console.log("For sure I need to see this message");
         if ((userRole === "white" && turn === "white") || (userRole === "black" && turn === "black")) {
             pieces.forEach(piece => {
                 const pieceColor = piece.getAttribute("data-color");
@@ -125,6 +127,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 clearHighlights();
                 updateDraggable();
             } else if (data.status === "checkmate") {
+                console.log("drop here");
                 displayCheckmateMessage();
             } else {
                 console.error("Invalid move");
@@ -230,6 +233,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 clearHighlights();
                 updateDraggable();
             } else if (data.status === "checkmate") {
+                console.log('movePiece here');
                 displayCheckmateMessage();
             } else {
                 console.error("Invalid move");
@@ -248,7 +252,8 @@ document.addEventListener("DOMContentLoaded", function() {
         const messageDiv = document.createElement("div");
         messageDiv.innerText = "Checkmate";
         messageDiv.classList.add("checkmate-message");
-        document.getElementById("chess-table").after(messageDiv);
+        const chessTable = document.getElementById("chess-table");
+        chessTable.parentNode.insertBefore(messageDiv, chessTable);
     }
 
     function getCookie(name) {

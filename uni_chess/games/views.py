@@ -99,9 +99,15 @@ def move_piece(request, game_id):
         game.turn = new_turn
         game.save()
 
+        # perform move on the table to be able to correctly check for checkmate
+        play.board.make_move(from_pos[0], from_pos[1], to_pos[0], to_pos[1])
+        checkmate = False
+        breakpoint()
         if play.board.is_king_in_check(new_turn):
             if play.is_checkmate(new_turn):
-                return JsonResponse({"status": "checkmate", "winner": turn})
+                checkmate = True
+
+        print(checkmate)
 
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
@@ -112,8 +118,12 @@ def move_piece(request, game_id):
                 'to': to_pos,
                 'turn': new_turn,
                 'enPassant': EP,
+                'checkmate': checkmate,
             }
         )
+
+        if checkmate:
+            return JsonResponse({"status": "checkmate", "winner": turn})
 
         return JsonResponse({"status": "ok", "new_turn": new_turn, "enPassant": EP})
     return JsonResponse({"status": "fail"})

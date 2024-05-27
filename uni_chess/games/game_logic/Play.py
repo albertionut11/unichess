@@ -24,8 +24,9 @@ class Play:
             for col in self.board.table[row]:
                 piece = self.board.get_piece(row, col)
                 if piece and piece.get_color() == color:
-                    moves, _ = piece.getAvailableMoves(self.board, row, col)
+                    moves, _ = piece.getSafeMoves(self.board, row, col)
                     if moves:
+                        print(piece.__str__, row, col, moves)
                         return False
         return True if self.board.is_king_in_check(color) else False
 

@@ -9,11 +9,14 @@
     <p>
         Turn: <span id="turn-display">{{ context.turn }}</span>
     </p>
-<div id="chess-table">
-{{ context.html_table|safe }}
+<div id="chess-container">
+    <div id="chess-table">
+        {{ context.html_table|safe }}
+    </div>
 </div>
 <input type="hidden" id="game_id" value="{{ context.game_id }}">
 <input type="hidden" id="user_role" value="{{ context.user_role }}">
 <input type="hidden" id="turn" value="{{ context.turn }}">
 <script src="{% static 'js/drag_drop.js' %}"></script>
 {% endblock %}
+
