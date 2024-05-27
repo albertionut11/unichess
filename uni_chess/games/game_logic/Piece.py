@@ -40,11 +40,19 @@ class King(Piece):
 
 class Queen(Piece):
     def getAvailableMoves(self, board, from_row, from_col):
-        # Implement the logic to get available moves for the Queen
-        pass
+        moves = []
+        rook = Rook(Piece)
+        bishop = Bishop(Piece)
+        RookMoves = rook.getAvailableMoves(board, from_row, from_col)
+        BishopMoves = bishop.getAvailableMoves(board, from_row, from_col)
+
+        moves = RookMoves[0] + BishopMoves[0]
+
+        return moves, None
 
     def __str__(self):
         return f'{self.color[0]}Q'
+
 
 class Rook(Piece):
 
