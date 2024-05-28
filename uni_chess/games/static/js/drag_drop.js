@@ -32,10 +32,11 @@ document.addEventListener("DOMContentLoaded", function() {
         resetSquare(to);
         targetSquare.appendChild(piece);
         updateDraggable();
+        console.log("DATA:" ,data);
 
-        if (data.status === "checkmate") {
+        if (data.checkmate) {
             console.log('onMessage here');
-            displayCheckmateMessage();
+            displayCheckmateMessage(turn);
         }
     };
 
@@ -46,7 +47,6 @@ document.addEventListener("DOMContentLoaded", function() {
             piece.setAttribute("draggable", false);
         });
 
-        console.log("For sure I need to see this message");
         if ((userRole === "white" && turn === "white") || (userRole === "black" && turn === "black")) {
             pieces.forEach(piece => {
                 const pieceColor = piece.getAttribute("data-color");
@@ -118,6 +118,9 @@ document.addEventListener("DOMContentLoaded", function() {
                     const capturedPosition = fromRow + toPosition[1];
                     resetSquare(capturedPosition);
                 }
+                if (data.winner){
+                    console.log("Winner:", data.winner)
+                }
 
                 resetSquare(fromPosition);
                 resetSquare(toPosition);
@@ -126,9 +129,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 document.getElementById("turn").value = turn;
                 clearHighlights();
                 updateDraggable();
-            } else if (data.status === "checkmate") {
-                console.log("drop here");
-                displayCheckmateMessage();
             } else {
                 console.error("Invalid move");
             }
@@ -224,6 +224,9 @@ document.addEventListener("DOMContentLoaded", function() {
                     const capturedPosition = fromRow + toPosition[1];
                     resetSquare(capturedPosition);
                 }
+                if (data.winner){
+                    console.log("Winner:", data.winner)
+                }
 
                 resetSquare(fromPosition);
                 resetSquare(toPosition);
@@ -232,9 +235,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 document.getElementById("turn").value = turn;
                 clearHighlights();
                 updateDraggable();
-            } else if (data.status === "checkmate") {
-                console.log('movePiece here');
-                displayCheckmateMessage();
             } else {
                 console.error("Invalid move");
             }
@@ -248,12 +248,11 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    function displayCheckmateMessage() {
-        const messageDiv = document.createElement("div");
-        messageDiv.innerText = "Checkmate";
+    function displayCheckmateMessage(turn) {
+        const winner = turn === "white" ? "Black" : "White";
+        const messageDiv = document.getElementById("checkmate-message");
+        messageDiv.innerText = `Checkmate: ${winner} wins!`;
         messageDiv.classList.add("checkmate-message");
-        const chessTable = document.getElementById("chess-table");
-        chessTable.parentNode.insertBefore(messageDiv, chessTable);
     }
 
     function getCookie(name) {

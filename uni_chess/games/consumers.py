@@ -22,6 +22,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
+        print('Received: ', data)
         from_pos = data['from']
         to_pos = data['to']
         turn = data['turn']
@@ -41,6 +42,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         )
 
     async def game_move(self, event):
+        print('Send: ', event)
         from_pos = event['from']
         to_pos = event['to']
         turn = event['turn']

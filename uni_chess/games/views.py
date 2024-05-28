@@ -47,6 +47,10 @@ class PlayView(LoginRequiredMixin, TemplateView):
         context['html_table'] = html_table
         context['game_id'] = game_id
         context['turn'] = game.turn
+
+        if play.checkmate:
+            context['checkmate'] = play.checkmate
+
         return {'context': context}
 
     def get_user_role(self, game):
@@ -102,7 +106,7 @@ def move_piece(request, game_id):
         # perform move on the table to be able to correctly check for checkmate
         play.board.make_move(from_pos[0], from_pos[1], to_pos[0], to_pos[1])
         checkmate = False
-        breakpoint()
+        # breakpoint()
         if play.board.is_king_in_check(new_turn):
             if play.is_checkmate(new_turn):
                 checkmate = True
@@ -123,7 +127,7 @@ def move_piece(request, game_id):
         )
 
         if checkmate:
-            return JsonResponse({"status": "checkmate", "winner": turn})
+            return JsonResponse({"status": "ok", "winner": turn})
 
         return JsonResponse({"status": "ok", "new_turn": new_turn, "enPassant": EP})
     return JsonResponse({"status": "fail"})

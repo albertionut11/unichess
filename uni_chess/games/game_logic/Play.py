@@ -5,11 +5,16 @@ class Play:
     def __init__(self, data):
         self.board = Board()
         self.data = data
+        self.checkmate = None
 
         if self.data == '':
             self.board.new_table()
         else:
             self.board.load_table(self.data)
+            if self.is_checkmate("white"):
+                self.checkmate = "Black"
+            elif self.is_checkmate("black"):
+                self.checkmate = "White"
 
     def getMoves(self, from_row, from_col):
         piece = self.board.get_piece(from_row, from_col)
