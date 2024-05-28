@@ -11,6 +11,8 @@ class Board:
         self.light_color = 'F5DEB3'
         self.dark_color = 'a1764b'
         self.turn = 'white'
+        self.kings_moved = {'white': False, 'black': False}
+        self.rooks_moved = {'1a': False, '1h': False, '8a': False, '8h': False}
 
     def load_table(self, data):
         self.new_table()
@@ -20,14 +22,7 @@ class Board:
         self.turn = 'white' if len(moves) % 2 == 0 else 'black'
 
         for move in moves:
-            # if not En Passant move
-            if move[0] != 'E':
-                from_pos = move[0] + move[1]
-                to_pos = move[2] + move[3]
-
-                self.table[to_pos[0]][to_pos[1]] = self.table[from_pos[0]][from_pos[1]]
-                self.table[from_pos[0]][from_pos[1]] = None
-            else:
+            if move[0] == 'E':
                 # En passant move
                 from_pos = move[1] + move[2]
                 to_pos = move[3] + move[4]
@@ -35,6 +30,31 @@ class Board:
                 self.table[to_pos[0]][to_pos[1]] = self.table[from_pos[0]][from_pos[1]]
                 self.table[from_pos[0]][from_pos[1]] = None
                 self.table[from_pos[0]][to_pos[1]] = None  # remove the capture pawn in En Passant move
+
+            elif move[0] == 'P':
+                # breakpoint()
+                # Pawn Promotion move
+                from_row, from_col = move[1], move[2]
+                to_row, to_col = move[3], move[4]
+                self.make_move(from_row, from_col, to_row, to_col, move[-1])
+
+            elif move[0] == 'C':
+                from_row, from_col = move[1], move[2]
+                to_row, to_col = move[3], move[4]
+                castling = None
+                if to_col == 'g':
+                    castling = 'K'
+                elif to_col == 'c':
+                    castling = 'Q'
+                self.make_move(from_row, from_col, to_row, to_col, castling=castling)
+
+            else:
+                # Regular move
+                from_pos = move[0] + move[1]
+                to_pos = move[2] + move[3]
+
+                self.table[to_pos[0]][to_pos[1]] = self.table[from_pos[0]][from_pos[1]]
+                self.table[from_pos[0]][from_pos[1]] = None
 
     def new_table(self):
         self.turn = 'white'
@@ -48,6 +68,34 @@ class Board:
             '3': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
             '2': {'a': Pawn('white'), 'b': Pawn('white'), 'c': Pawn('white'), 'd': Pawn('white'), 'e': Pawn('white'), 'f': Pawn('white'), 'g': Pawn('white'), 'h': Pawn('white')},
             '1': {'a': Rook('white'), 'b': Knight('white'), 'c': Bishop('white'), 'd': Queen('white'), 'e': King('white'), 'f': Bishop('white'), 'g': Knight('white'), 'h': Rook('white')},
+        }
+
+        self.cc_table()
+
+    def pp_table(self):
+        self.table = {
+            '8': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '7': {'a': Pawn('white'), 'b': Pawn('white'), 'c': Pawn('white'), 'd': Pawn('white'), 'e': Pawn('white'),
+                  'f': Pawn('white'), 'g': Pawn('white'), 'h': Pawn('white')},
+            '6': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '5': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '4': {'a': None, 'b': King('white'), 'c': None, 'd': None, 'e': None, 'f': King('black'), 'g': None, 'h': None},
+            '3': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '2': {'a': Pawn('black'), 'b': Pawn('black'), 'c': Pawn('black'), 'd': Pawn('black'), 'e': Pawn('black'),
+                  'f': Pawn('black'), 'g': Pawn('black'), 'h': Pawn('black')},
+            '1': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+        }
+
+    def cc_table(self):
+        self.table = {
+            '8': {'a': Rook('black'), 'b': None, 'c': None, 'd': None, 'e': King('black'), 'f': None, 'g': None, 'h': Rook('black')},
+            '7': {'a': Pawn('black'), 'b': Pawn('black'), 'c': Pawn('black'), 'd': Pawn('black'), 'e': Pawn('black'), 'f': Pawn('black'), 'g': Pawn('black'), 'h': Pawn('black')},
+            '6': {'a': Knight('black'), 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '5': {'a': Queen('black'), 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '4': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '3': {'a': Queen('white'), 'b': Knight('white'), 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '2': {'a': Pawn('white'), 'b': Pawn('white'), 'c': Pawn('white'), 'd': Pawn('white'), 'e': Pawn('white'), 'f': Pawn('white'), 'g': Pawn('white'), 'h': Pawn('white')},
+            '1': {'a': Rook('white'), 'b': None, 'c': None, 'd': None, 'e': King('white'), 'f': None, 'g': None, 'h': Rook('white')},
         }
 
     def render(self, context):
@@ -115,7 +163,7 @@ class Board:
                 return True
 
         # check for attacks from Pawn
-        pawn_direction = -1 if king_color == 'black' else +1 # changed here consider this in case of bugs
+        pawn_direction = -1 if king_color == 'black' else 1
         for col_offset in [-1, 1]:
             row = str(int(king_row) + pawn_direction)
             col = chr(ord(king_col) + col_offset)
@@ -136,20 +184,112 @@ class Board:
 
         return None
 
-    def make_move(self, from_row, from_col, to_row, to_col):
-        piece = self.table[from_row][from_col]
-        captured_piece = self.table[to_row][to_col]
-        self.table[to_row][to_col] = piece
-        self.table[from_row][from_col] = None
-        return piece, captured_piece
+    def promote_pawn(self, row, col, promotion_choice):
+        color = self.table[row][col].get_color()
+        if promotion_choice == 'Q':
+            self.table[row][col] = Queen(color)
+        elif promotion_choice == 'R':
+            self.table[row][col] = Rook(color)
+        elif promotion_choice == 'B':
+            self.table[row][col] = Bishop(color)
+        elif promotion_choice == 'N':
+            self.table[row][col] = Knight(color)
+        else:
+            raise ValueError("Invalid promotion choice")
+
+
+    def make_move(self, from_row, from_col, to_row, to_col, promotion=None, castling=None):
+        # breakpoint()
+        if not castling:
+            piece = self.table[from_row][from_col]
+            captured_piece = self.table[to_row][to_col]
+            self.table[to_row][to_col] = piece
+            self.table[from_row][from_col] = None
+
+            # handle and validate pawn promotion
+            if isinstance(piece, Pawn):
+                promotion_row = '8' if piece.get_color() == 'white' else '1'
+                if to_row == promotion_row:
+                    if promotion:
+                        self.promote_pawn(to_row, to_col, promotion)
+
+            return piece, captured_piece
+        else:
+            # breakpoint()
+            king_piece = self.table[from_row][from_col]
+            if isinstance(king_piece, King):
+                rook = None
+                if castling == 'K':
+                    rook = self.table[from_row]['h']
+                    self.table[from_row]['h'] = None
+                    self.table[from_row][from_col] = None
+                    self.table[from_row]['f'] = rook
+                    self.table[from_row]['g'] = king_piece
+                    self.kings_moved[king_piece.get_color()] = True
+                    self.rooks_moved[from_row + from_col] = True
+
+                elif castling == 'Q':
+                    rook = self.table[from_row]['a']
+                    self.table[from_row]['a'] = None
+                    self.table[from_row][from_col] = None
+                    self.table[from_row]['d'] = rook
+                    self.table[from_row]['c'] = king_piece
+                    self.kings_moved[king_piece.get_color()] = True
+                    self.rooks_moved[from_row + from_col] = True
+
+                return king_piece, rook
+            else:
+                print("You have tried to castle but not with the king")
 
     def undo_move(self, from_row, from_col, to_row, to_col, captured_piece):
         piece = self.table[to_row][to_col]
         self.table[from_row][from_col] = piece
         self.table[to_row][to_col] = captured_piece
 
-    def is_valid_move(self, from_row, from_col, to_row, to_col):
+    def is_valid_move(self, from_row, from_col, to_row, to_col, castling=None):
         piece, captured_piece = self.make_move(from_row, from_col, to_row, to_col)
         king_in_check = self.is_king_in_check(piece.get_color())
         self.undo_move(from_row, from_col, to_row, to_col, captured_piece)
         return not king_in_check
+
+    def can_castle_kingside(self, color):
+        row = '1' if color == 'white' else '8'
+        rook_pos = row + 'h'
+
+        if self.kings_moved[color] or self.rooks_moved[rook_pos] or self.table[row]['f'] or self.table[row]['g']:
+            return False
+
+        # Check if squares are under attack
+        if self.is_under_attack(row, 'e', color) or self.is_under_attack(row, 'f', color) or self.is_under_attack(row, 'g', color):
+            return False
+        return True
+
+    def can_castle_queenside(self, color):
+        row = '1' if color == 'white' else '8'
+        rook_pos = row + 'a'
+
+        if self.kings_moved[color] or self.rooks_moved[rook_pos] or self.table[row]['b'] or self.table[row]['c'] or self.table[row]['d']:
+            return False
+
+        # Check if squares are under attack
+        if self.is_under_attack(row, 'e', color) or self.is_under_attack(row, 'd', color) or self.is_under_attack(row, 'c', color):
+            return False
+        return True
+
+    def is_under_attack(self, row, col, color):
+        king_position = self.find_king(color)
+        if king_position == row + col:
+            if self.is_king_in_check(color):
+                return True
+        else:
+            # make temporary move
+            self.table[row][col] = self.table[king_position[0]][king_position[1]]
+            self.table[king_position[0]][king_position[1]] = None
+            if self.is_king_in_check(color):
+                # undo move
+                self.table[king_position[0]][king_position[1]] = self.table[row][col]
+                self.table[row][col] = None
+                return True
+            # undo move
+            self.table[king_position[0]][king_position[1]] = self.table[row][col]
+            self.table[row][col] = None

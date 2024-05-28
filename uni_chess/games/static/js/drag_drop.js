@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const userRole = document.getElementById("user_role").value;
     let turn = document.getElementById("turn").value;
     let selectedPiece = null;
+    let promotionPiece = null;
     let highlightedMoves = [];
 
     const socket = new WebSocket(`ws://${window.location.host}/ws/game/${gameId}/`);
@@ -28,17 +29,62 @@ document.addEventListener("DOMContentLoaded", function() {
             resetSquare(capturedPosition);
         }
 
-        resetSquare(from);
-        resetSquare(to);
-        targetSquare.appendChild(piece);
+        if (data.castling) {
+            performCastlingMove(data.castling, from);
+        } else {
+            resetSquare(from);
+            resetSquare(to);
+            targetSquare.appendChild(piece);
+        }
+
         updateDraggable();
         console.log("DATA:" ,data);
+
+        if (data.promotion) {
+            const promotionColor = turn === "white" ? "b" : "w"
+            console.log('Promotion to', promotionColor + data.promotion);
+            promotePawn(to, promotionColor + data.promotion);
+        }
 
         if (data.checkmate) {
             console.log('onMessage here');
             displayCheckmateMessage(turn);
         }
     };
+
+     function performCastlingMove(castling, from) {
+         // const kingColor = turn === "white" ? "b" : "w";
+
+         console.log("from", from);
+         console.log("castling", castling);
+         // kingside castle
+         let rookFrom = from[0] + "h";
+         let kingTo = from[0] + "g";
+         let rookTo = from[0] + "f";
+
+         if (castling === "Q") {
+             rookFrom = from[0] + "a";
+             kingTo = from[0] + "c";
+             rookTo = from[0] + "d";
+         }
+
+         console.log("rookFrom", rookFrom);
+         console.log("kingTo", kingTo);
+         console.log("rookTo", rookTo);
+
+        const king = document.querySelector(`td[data-position="${from}"] img`);
+        const rook = document.querySelector(`td[data-position="${rookFrom}"] img`);
+
+        const kingTargetSquare = document.querySelector(`td[data-position="${kingTo}"]`);
+        const rookTargetSquare = document.querySelector(`td[data-position="${rookTo}"]`);
+
+        resetSquare(from);
+        resetSquare(rookFrom);
+
+        kingTargetSquare.appendChild(king);
+        rookTargetSquare.appendChild(rook);
+        clearHighlights();
+    }
 
     function updateDraggable() {
         pieces.forEach(piece => {
@@ -102,13 +148,44 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
+         // Check for pawn promotion situation
+        if (isPawnPromotion(piece, toPosition)) {
+            showPromotionOptions(fromPosition, toPosition, targetSquare);
+        } else {
+            makeMove(fromPosition, toPosition, targetSquare);
+        }
+    }
+
+    function isPawnPromotion(piece, toPosition) {
+        const pieceType = piece.getAttribute("data-piece");
+        const toRow = toPosition[0];
+        return pieceType === "P" && ((userRole === "white" && toRow === "8") || (userRole === "black" && toRow === "1"));
+    }
+
+    function showPromotionOptions(fromPosition, toPosition, targetSquare) {
+        const promotionChoices = ["Q", "R", "B", "N"];
+        const promotionContainer = document.getElementById("promotion-container");
+        promotionContainer.innerHTML = "";
+        promotionChoices.forEach(choice => {
+            const btn = document.createElement("button");
+            btn.innerText = choice;
+            btn.addEventListener("click", () => {
+                promotionPiece = choice;
+                promotionContainer.innerHTML = "";
+                makeMove(fromPosition, toPosition, targetSquare, choice);
+            });
+            promotionContainer.appendChild(btn);
+        });
+    }
+
+        function makeMove(fromPosition, toPosition, targetSquare, promotion = null) {
         fetch(`/move_piece/${gameId}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRFToken": getCookie("csrftoken"),
             },
-            body: JSON.stringify({ from: fromPosition, to: toPosition, turn: turn }),
+            body: JSON.stringify({ from: fromPosition, to: toPosition, turn: turn, promotion: promotion }),
         })
         .then(response => response.json())
         .then(data => {
@@ -118,22 +195,30 @@ document.addEventListener("DOMContentLoaded", function() {
                     const capturedPosition = fromRow + toPosition[1];
                     resetSquare(capturedPosition);
                 }
-                if (data.winner){
-                    console.log("Winner:", data.winner)
-                }
 
                 resetSquare(fromPosition);
                 resetSquare(toPosition);
-                targetSquare.appendChild(piece);
+                targetSquare.appendChild(selectedPiece);
+
+                if (data.winner) {
+                    console.log("Winner:", data.winner);
+                }
+
                 turn = data.new_turn;
                 document.getElementById("turn").value = turn;
                 clearHighlights();
                 updateDraggable();
+
+                // Check if promotion occurred and handle it
+                if (promotion) {
+                    promotePawn(toPosition, userRole[0] + promotion); // e.g., "wQ" for white Queen
+                }
             } else {
                 console.error("Invalid move");
             }
         });
     }
+
 
     function handleClick(e) {
         const piece = e.target;
@@ -207,38 +292,11 @@ document.addEventListener("DOMContentLoaded", function() {
         const targetSquare = e.currentTarget;
         const toPosition = targetSquare.getAttribute("data-position");
         const fromPosition = selectedPiece.parentNode.getAttribute("data-position");
-
-        fetch(`/move_piece/${gameId}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCookie("csrftoken"),
-            },
-            body: JSON.stringify({ from: fromPosition, to: toPosition, turn: turn }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === "ok") {
-                if (data.enPassant) {
-                    const fromRow = fromPosition[0];
-                    const capturedPosition = fromRow + toPosition[1];
-                    resetSquare(capturedPosition);
-                }
-                if (data.winner){
-                    console.log("Winner:", data.winner)
-                }
-
-                resetSquare(fromPosition);
-                resetSquare(toPosition);
-                targetSquare.appendChild(selectedPiece);
-                turn = data.new_turn;
-                document.getElementById("turn").value = turn;
-                clearHighlights();
-                updateDraggable();
-            } else {
-                console.error("Invalid move");
-            }
-        });
+        if (isPawnPromotion(selectedPiece, toPosition)) {
+            showPromotionOptions(fromPosition, toPosition, targetSquare);
+        } else {
+            makeMove(fromPosition, toPosition, targetSquare);
+        }
     }
 
     function resetSquare(position) {
@@ -269,5 +327,16 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
         return cookieValue;
+    }
+
+    function promotePawn(position, promotion) {
+        const targetSquare = document.querySelector(`td[data-position="${position}"]`);
+        const promotionPiece = document.createElement("img");
+        promotionPiece.src = `/static/chess/pieces/${promotion}.svg`;
+        promotionPiece.setAttribute("data-piece", promotion.slice(1)); // Only the piece type (e.g., "Q", "R", etc.)
+        promotionPiece.setAttribute("data-color", promotion[0]); // "w" for white, "b" for black
+        resetSquare(position);
+        targetSquare.appendChild(promotionPiece);
+        updateDraggable();
     }
 });

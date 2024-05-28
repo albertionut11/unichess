@@ -29,13 +29,14 @@ class Piece:
         return piece
 
     def getSafeMoves(self, board, from_row, from_col):
-        all_moves, enPassantPos = self.getAvailableMoves(board, from_row, from_col)
+        # breakpoint()
+        all_moves, enPassantPos, castling = self.getAvailableMoves(board, from_row, from_col)
         safe_moves = []
         for move in all_moves:
             to_row, to_col = move[0], move[1]
             if board.is_valid_move(from_row, from_col, to_row, to_col):
                 safe_moves.append(move)
-        return safe_moves, enPassantPos
+        return safe_moves, enPassantPos, castling
 
 
 class King(Piece):
@@ -45,6 +46,7 @@ class King(Piece):
             (1, 1), (1, -1), (-1, 1), (-1, -1)
         ]
         moves = []
+        castling = []
         for direction in directions:
             to_row = str(int(from_row) + direction[0])
             to_col = chr(ord(from_col) + direction[1])
@@ -52,10 +54,30 @@ class King(Piece):
                 piece = board.get_piece(to_row, to_col)
                 if not piece or piece.get_color() != self.color:
                     moves.append(to_row + to_col)
-        return moves, None
+
+        # Check for castling
+        if not board.kings_moved[self.get_color()]:
+            castling += self.check_castling(board, from_row, from_col)
+
+        return moves, None, castling
+
+    def check_castling(self, board, from_row, from_col):
+        castling_moves = []
+        row = from_row
+
+        if board.can_castle_kingside(self.get_color()):
+            castling_moves.append(row + 'g')
+        if board.can_castle_queenside(self.get_color()):
+            castling_moves.append(row + 'c')
+
+        return castling_moves
 
     def __str__(self):
         return f'{self.color[0]}K'
+
+    @staticmethod
+    def get_piece_initial():
+        return 'K'
 
 
 class Queen(Piece):
@@ -68,16 +90,24 @@ class Queen(Piece):
 
         moves = RookMoves[0] + BishopMoves[0]
 
-        return moves, None
+        return moves, None, None
 
     def __str__(self):
         return f'{self.color[0]}Q'
+
+    @staticmethod
+    def get_piece_initial():
+        return 'Q'
 
 
 class Rook(Piece):
 
     def __str__(self):
         return f'{self.color[0]}R'
+
+    @staticmethod
+    def get_piece_initial():
+        return 'R'
 
     def getAvailableMoves(self, board, from_row, from_col):
         moves = []
@@ -130,13 +160,17 @@ class Rook(Piece):
                 moves.append(from_row + right_col)
                 right_col = chr(ord(right_col) + 1)
 
-        return moves, None
+        return moves, None, None
 
 
 class Knight(Piece):
 
     def __str__(self):
         return f'{self.color[0]}N'
+
+    @staticmethod
+    def get_piece_initial():
+        return 'N'
 
     def getAvailableMoves(self, board, from_row, from_col):
         moves = []
@@ -181,7 +215,7 @@ class Knight(Piece):
         if not self.outOfBounds(down_row, right_col) and self.isValidKnightMove(board, down_row, right_col):
             moves.append(down_row + right_col)
 
-        return moves, None
+        return moves, None, None
 
     def isValidKnightMove(self, board, row, col):
         piece = self.getPiece(board, row, col)
@@ -191,10 +225,15 @@ class Knight(Piece):
 
         return True
 
+
 class Bishop(Piece):
 
     def __str__(self):
         return f'{self.color[0]}B'
+
+    @staticmethod
+    def get_piece_initial():
+        return 'P'
 
     def getAvailableMoves(self, board, from_row, from_col):
         moves = []
@@ -259,13 +298,17 @@ class Bishop(Piece):
                 row = str(int(row) + 1)
                 col = chr(ord(col) + 1)
 
-        return moves, None
+        return moves, None, None
 
 
 class Pawn(Piece):
 
     def __str__(self):
         return f'{self.color[0]}P'
+
+    @staticmethod
+    def get_piece_initial():
+        return 'P'
 
     def getAvailableMoves(self, board, from_row, from_col):
         # breakpoint()
@@ -297,7 +340,7 @@ class Pawn(Piece):
         if enPassantPos:
             moves.append(enPassantPos)
 
-        return moves, enPassantPos
+        return moves, enPassantPos, None
 
     def isValidMove(self, board, from_row, from_col, forwardMove=False):
         # breakpoint()
