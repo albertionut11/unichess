@@ -29,23 +29,62 @@ document.addEventListener("DOMContentLoaded", function() {
             resetSquare(capturedPosition);
         }
 
-        resetSquare(from);
-        resetSquare(to);
-        targetSquare.appendChild(piece);
+        if (data.castling) {
+            performCastlingMove(data.castling, from);
+        } else {
+            resetSquare(from);
+            resetSquare(to);
+            targetSquare.appendChild(piece);
+        }
+
         updateDraggable();
         console.log("DATA:" ,data);
 
         if (data.promotion) {
-        const promotionColor = turn === "white" ? "b" : "w"
-        console.log('Promotion to', promotionColor + data.promotion);
-        promotePawn(to, promotionColor + data.promotion);
-    }
+            const promotionColor = turn === "white" ? "b" : "w"
+            console.log('Promotion to', promotionColor + data.promotion);
+            promotePawn(to, promotionColor + data.promotion);
+        }
 
         if (data.checkmate) {
             console.log('onMessage here');
             displayCheckmateMessage(turn);
         }
     };
+
+     function performCastlingMove(castling, from) {
+         // const kingColor = turn === "white" ? "b" : "w";
+
+         console.log("from", from);
+         console.log("castling", castling);
+         // kingside castle
+         let rookFrom = from[0] + "h";
+         let kingTo = from[0] + "g";
+         let rookTo = from[0] + "f";
+
+         if (castling === "Q") {
+             rookFrom = from[0] + "a";
+             kingTo = from[0] + "c";
+             rookTo = from[0] + "d";
+         }
+
+         console.log("rookFrom", rookFrom);
+         console.log("kingTo", kingTo);
+         console.log("rookTo", rookTo);
+
+        const king = document.querySelector(`td[data-position="${from}"] img`);
+        const rook = document.querySelector(`td[data-position="${rookFrom}"] img`);
+
+        const kingTargetSquare = document.querySelector(`td[data-position="${kingTo}"]`);
+        const rookTargetSquare = document.querySelector(`td[data-position="${rookTo}"]`);
+
+        resetSquare(from);
+        resetSquare(rookFrom);
+
+        kingTargetSquare.appendChild(king);
+        rookTargetSquare.appendChild(rook);
+        clearHighlights();
+    }
 
     function updateDraggable() {
         pieces.forEach(piece => {
@@ -109,10 +148,6 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        // check if we are in a pawn promotion situation and add an additional parameter to the Post request called promotion which should be the letter of the chosen piece
-        // if we are in a pawn promotion situation add a cool pop-up from which the player should choose his piece to promote to
-        // call the function to replace the pawn with the chosen piece
-
          // Check for pawn promotion situation
         if (isPawnPromotion(piece, toPosition)) {
             showPromotionOptions(fromPosition, toPosition, targetSquare);
@@ -143,7 +178,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-     function makeMove(fromPosition, toPosition, targetSquare, promotion = null) {
+        function makeMove(fromPosition, toPosition, targetSquare, promotion = null) {
         fetch(`/move_piece/${gameId}`, {
             method: "POST",
             headers: {
@@ -160,13 +195,15 @@ document.addEventListener("DOMContentLoaded", function() {
                     const capturedPosition = fromRow + toPosition[1];
                     resetSquare(capturedPosition);
                 }
-                if (data.winner){
-                    console.log("Winner:", data.winner);
-                }
 
                 resetSquare(fromPosition);
                 resetSquare(toPosition);
                 targetSquare.appendChild(selectedPiece);
+
+                if (data.winner) {
+                    console.log("Winner:", data.winner);
+                }
+
                 turn = data.new_turn;
                 document.getElementById("turn").value = turn;
                 clearHighlights();
@@ -255,9 +292,6 @@ document.addEventListener("DOMContentLoaded", function() {
         const targetSquare = e.currentTarget;
         const toPosition = targetSquare.getAttribute("data-position");
         const fromPosition = selectedPiece.parentNode.getAttribute("data-position");
-        console.log("TargetSquare:", targetSquare);
-        console.log("toPosition:", toPosition);
-        console.log("fromPosition:", fromPosition);
         if (isPawnPromotion(selectedPiece, toPosition)) {
             showPromotionOptions(fromPosition, toPosition, targetSquare);
         } else {

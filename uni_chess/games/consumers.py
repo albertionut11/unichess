@@ -29,6 +29,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         enPassant = data.get('enPassant', False)
         checkmate = data['checkmate']
         promotion = data.get('promotion', False)
+        castling = data.get('castling', False)
 
         await self.channel_layer.group_send(
             self.game_group_name,
@@ -40,6 +41,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                 'EnPassant': enPassant,
                 'checkmate': checkmate,
                 'promotion': promotion,
+                'castling': castling
             }
         )
 
@@ -51,6 +53,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         enPassant = event.get('enPassant', False)
         checkmate = event.get('checkmate', False)
         promotion = event.get('promotion', False)
+        castling = event.get('castling', False)
 
         await self.send(text_data=json.dumps({
             'from': from_pos,
@@ -59,4 +62,5 @@ class GameConsumer(AsyncWebsocketConsumer):
             'enPassant': enPassant,
             'checkmate': checkmate,
             'promotion': promotion,
+            'castling': castling,
         }))
