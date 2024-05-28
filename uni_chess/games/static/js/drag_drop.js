@@ -36,13 +36,10 @@ document.addEventListener("DOMContentLoaded", function() {
         console.log("DATA:" ,data);
 
         if (data.promotion) {
-            console.log('Promotion to', data.promotion);
-            // function to replace the pawn in "to" position to the chosen promoted piece
-            const side = turn === "white" ? "b" : "w";
-            const promotion = side + data.promotion;
-            console.log('Promotion to', promotion);
-            promotePawn(to, promotion);
-        }
+        const promotionColor = turn === "white" ? "b" : "w"
+        console.log('Promotion to', promotionColor + data.promotion);
+        promotePawn(to, promotionColor + data.promotion);
+    }
 
         if (data.checkmate) {
             console.log('onMessage here');
@@ -146,7 +143,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    function makeMove(fromPosition, toPosition, targetSquare, promotion = null) {
+     function makeMove(fromPosition, toPosition, targetSquare, promotion = null) {
         fetch(`/move_piece/${gameId}`, {
             method: "POST",
             headers: {
@@ -164,7 +161,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     resetSquare(capturedPosition);
                 }
                 if (data.winner){
-                    console.log("Winner:", data.winner)
+                    console.log("Winner:", data.winner);
                 }
 
                 resetSquare(fromPosition);
@@ -174,11 +171,17 @@ document.addEventListener("DOMContentLoaded", function() {
                 document.getElementById("turn").value = turn;
                 clearHighlights();
                 updateDraggable();
+
+                // Check if promotion occurred and handle it
+                if (promotion) {
+                    promotePawn(toPosition, userRole[0] + promotion); // e.g., "wQ" for white Queen
+                }
             } else {
                 console.error("Invalid move");
             }
         });
     }
+
 
     function handleClick(e) {
         const piece = e.target;
@@ -296,8 +299,8 @@ document.addEventListener("DOMContentLoaded", function() {
         const targetSquare = document.querySelector(`td[data-position="${position}"]`);
         const promotionPiece = document.createElement("img");
         promotionPiece.src = `/static/chess/pieces/${promotion}.svg`;
-        promotionPiece.setAttribute("data-piece", promotion);
-        promotionPiece.setAttribute("data-color", promotion[0]);
+        promotionPiece.setAttribute("data-piece", promotion.slice(1)); // Only the piece type (e.g., "Q", "R", etc.)
+        promotionPiece.setAttribute("data-color", promotion[0]); // "w" for white, "b" for black
         resetSquare(position);
         targetSquare.appendChild(promotionPiece);
         updateDraggable();
