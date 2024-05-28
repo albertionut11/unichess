@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const userRole = document.getElementById("user_role").value;
     let turn = document.getElementById("turn").value;
     let selectedPiece = null;
+    let promotionPiece = null;
     let highlightedMoves = [];
 
     const socket = new WebSocket(`ws://${window.location.host}/ws/game/${gameId}/`);
@@ -33,6 +34,15 @@ document.addEventListener("DOMContentLoaded", function() {
         targetSquare.appendChild(piece);
         updateDraggable();
         console.log("DATA:" ,data);
+
+        if (data.promotion) {
+            console.log('Promotion to', data.promotion);
+            // function to replace the pawn in "to" position to the chosen promoted piece
+            const side = turn === "white" ? "b" : "w";
+            const promotion = side + data.promotion;
+            console.log('Promotion to', promotion);
+            promotePawn(to, promotion);
+        }
 
         if (data.checkmate) {
             console.log('onMessage here');
@@ -102,13 +112,48 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
+        // check if we are in a pawn promotion situation and add an additional parameter to the Post request called promotion which should be the letter of the chosen piece
+        // if we are in a pawn promotion situation add a cool pop-up from which the player should choose his piece to promote to
+        // call the function to replace the pawn with the chosen piece
+
+         // Check for pawn promotion situation
+        if (isPawnPromotion(piece, toPosition)) {
+            showPromotionOptions(fromPosition, toPosition, targetSquare);
+        } else {
+            makeMove(fromPosition, toPosition, targetSquare);
+        }
+    }
+
+    function isPawnPromotion(piece, toPosition) {
+        const pieceType = piece.getAttribute("data-piece");
+        const toRow = toPosition[0];
+        return pieceType === "P" && ((userRole === "white" && toRow === "8") || (userRole === "black" && toRow === "1"));
+    }
+
+    function showPromotionOptions(fromPosition, toPosition, targetSquare) {
+        const promotionChoices = ["Q", "R", "B", "N"];
+        const promotionContainer = document.getElementById("promotion-container");
+        promotionContainer.innerHTML = "";
+        promotionChoices.forEach(choice => {
+            const btn = document.createElement("button");
+            btn.innerText = choice;
+            btn.addEventListener("click", () => {
+                promotionPiece = choice;
+                promotionContainer.innerHTML = "";
+                makeMove(fromPosition, toPosition, targetSquare, choice);
+            });
+            promotionContainer.appendChild(btn);
+        });
+    }
+
+    function makeMove(fromPosition, toPosition, targetSquare, promotion = null) {
         fetch(`/move_piece/${gameId}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "X-CSRFToken": getCookie("csrftoken"),
             },
-            body: JSON.stringify({ from: fromPosition, to: toPosition, turn: turn }),
+            body: JSON.stringify({ from: fromPosition, to: toPosition, turn: turn, promotion: promotion }),
         })
         .then(response => response.json())
         .then(data => {
@@ -124,7 +169,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 resetSquare(fromPosition);
                 resetSquare(toPosition);
-                targetSquare.appendChild(piece);
+                targetSquare.appendChild(selectedPiece);
                 turn = data.new_turn;
                 document.getElementById("turn").value = turn;
                 clearHighlights();
@@ -207,38 +252,14 @@ document.addEventListener("DOMContentLoaded", function() {
         const targetSquare = e.currentTarget;
         const toPosition = targetSquare.getAttribute("data-position");
         const fromPosition = selectedPiece.parentNode.getAttribute("data-position");
-
-        fetch(`/move_piece/${gameId}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCookie("csrftoken"),
-            },
-            body: JSON.stringify({ from: fromPosition, to: toPosition, turn: turn }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === "ok") {
-                if (data.enPassant) {
-                    const fromRow = fromPosition[0];
-                    const capturedPosition = fromRow + toPosition[1];
-                    resetSquare(capturedPosition);
-                }
-                if (data.winner){
-                    console.log("Winner:", data.winner)
-                }
-
-                resetSquare(fromPosition);
-                resetSquare(toPosition);
-                targetSquare.appendChild(selectedPiece);
-                turn = data.new_turn;
-                document.getElementById("turn").value = turn;
-                clearHighlights();
-                updateDraggable();
-            } else {
-                console.error("Invalid move");
-            }
-        });
+        console.log("TargetSquare:", targetSquare);
+        console.log("toPosition:", toPosition);
+        console.log("fromPosition:", fromPosition);
+        if (isPawnPromotion(selectedPiece, toPosition)) {
+            showPromotionOptions(fromPosition, toPosition, targetSquare);
+        } else {
+            makeMove(fromPosition, toPosition, targetSquare);
+        }
     }
 
     function resetSquare(position) {
@@ -269,5 +290,16 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
         return cookieValue;
+    }
+
+    function promotePawn(position, promotion) {
+        const targetSquare = document.querySelector(`td[data-position="${position}"]`);
+        const promotionPiece = document.createElement("img");
+        promotionPiece.src = `/static/chess/pieces/${promotion}.svg`;
+        promotionPiece.setAttribute("data-piece", promotion);
+        promotionPiece.setAttribute("data-color", promotion[0]);
+        resetSquare(position);
+        targetSquare.appendChild(promotionPiece);
+        updateDraggable();
     }
 });

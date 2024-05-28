@@ -57,6 +57,10 @@ class King(Piece):
     def __str__(self):
         return f'{self.color[0]}K'
 
+    @staticmethod
+    def get_piece_initial():
+        return 'K'
+
 
 class Queen(Piece):
     def getAvailableMoves(self, board, from_row, from_col):
@@ -73,11 +77,19 @@ class Queen(Piece):
     def __str__(self):
         return f'{self.color[0]}Q'
 
+    @staticmethod
+    def get_piece_initial():
+        return 'Q'
+
 
 class Rook(Piece):
 
     def __str__(self):
         return f'{self.color[0]}R'
+
+    @staticmethod
+    def get_piece_initial():
+        return 'R'
 
     def getAvailableMoves(self, board, from_row, from_col):
         moves = []
@@ -138,6 +150,10 @@ class Knight(Piece):
     def __str__(self):
         return f'{self.color[0]}N'
 
+    @staticmethod
+    def get_piece_initial():
+        return 'N'
+
     def getAvailableMoves(self, board, from_row, from_col):
         moves = []
         # breakpoint()
@@ -191,10 +207,15 @@ class Knight(Piece):
 
         return True
 
+
 class Bishop(Piece):
 
     def __str__(self):
         return f'{self.color[0]}B'
+
+    @staticmethod
+    def get_piece_initial():
+        return 'P'
 
     def getAvailableMoves(self, board, from_row, from_col):
         moves = []
@@ -266,6 +287,10 @@ class Pawn(Piece):
 
     def __str__(self):
         return f'{self.color[0]}P'
+
+    @staticmethod
+    def get_piece_initial():
+        return 'P'
 
     def getAvailableMoves(self, board, from_row, from_col):
         # breakpoint()

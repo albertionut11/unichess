@@ -20,14 +20,7 @@ class Board:
         self.turn = 'white' if len(moves) % 2 == 0 else 'black'
 
         for move in moves:
-            # if not En Passant move
-            if move[0] != 'E':
-                from_pos = move[0] + move[1]
-                to_pos = move[2] + move[3]
-
-                self.table[to_pos[0]][to_pos[1]] = self.table[from_pos[0]][from_pos[1]]
-                self.table[from_pos[0]][from_pos[1]] = None
-            else:
+            if move[0] == 'E':
                 # En passant move
                 from_pos = move[1] + move[2]
                 to_pos = move[3] + move[4]
@@ -35,6 +28,21 @@ class Board:
                 self.table[to_pos[0]][to_pos[1]] = self.table[from_pos[0]][from_pos[1]]
                 self.table[from_pos[0]][from_pos[1]] = None
                 self.table[from_pos[0]][to_pos[1]] = None  # remove the capture pawn in En Passant move
+
+            elif move[0] == 'P':
+                # breakpoint()
+                # Pawn Promotion move
+                from_row, from_col = move[1], move[2]
+                to_row, to_col = move[3], move[4]
+                self.make_move(from_row, from_col, to_row, to_col, move[-1])
+
+            else:
+                # Regular move
+                from_pos = move[0] + move[1]
+                to_pos = move[2] + move[3]
+
+                self.table[to_pos[0]][to_pos[1]] = self.table[from_pos[0]][from_pos[1]]
+                self.table[from_pos[0]][from_pos[1]] = None
 
     def new_table(self):
         self.turn = 'white'
@@ -48,6 +56,22 @@ class Board:
             '3': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
             '2': {'a': Pawn('white'), 'b': Pawn('white'), 'c': Pawn('white'), 'd': Pawn('white'), 'e': Pawn('white'), 'f': Pawn('white'), 'g': Pawn('white'), 'h': Pawn('white')},
             '1': {'a': Rook('white'), 'b': Knight('white'), 'c': Bishop('white'), 'd': Queen('white'), 'e': King('white'), 'f': Bishop('white'), 'g': Knight('white'), 'h': Rook('white')},
+        }
+
+        self.pp_table()
+
+    def pp_table(self):
+        self.table = {
+            '8': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '7': {'a': Pawn('white'), 'b': Pawn('white'), 'c': Pawn('white'), 'd': Pawn('white'), 'e': Pawn('white'),
+                  'f': Pawn('white'), 'g': Pawn('white'), 'h': Pawn('white')},
+            '6': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '5': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '4': {'a': None, 'b': King('white'), 'c': None, 'd': None, 'e': None, 'f': King('black'), 'g': None, 'h': None},
+            '3': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '2': {'a': Pawn('black'), 'b': Pawn('black'), 'c': Pawn('black'), 'd': Pawn('black'), 'e': Pawn('black'),
+                  'f': Pawn('black'), 'g': Pawn('black'), 'h': Pawn('black')},
+            '1': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
         }
 
     def render(self, context):
@@ -136,11 +160,33 @@ class Board:
 
         return None
 
-    def make_move(self, from_row, from_col, to_row, to_col):
+    def promote_pawn(self, row, col, promotion_choice):
+        color = self.table[row][col].get_color()
+        if promotion_choice == 'Q':
+            self.table[row][col] = Queen(color)
+        elif promotion_choice == 'R':
+            self.table[row][col] = Rook(color)
+        elif promotion_choice == 'B':
+            self.table[row][col] = Bishop(color)
+        elif promotion_choice == 'N':
+            self.table[row][col] = Knight(color)
+        else:
+            raise ValueError("Invalid promotion choice")
+
+
+    def make_move(self, from_row, from_col, to_row, to_col, promotion=None):
         piece = self.table[from_row][from_col]
         captured_piece = self.table[to_row][to_col]
         self.table[to_row][to_col] = piece
         self.table[from_row][from_col] = None
+
+        # handle and validate pawn promotion
+        if isinstance(piece, Pawn):
+            promotion_row = '8' if piece.get_color() == 'white' else '1'
+            if to_row == promotion_row:
+                if promotion:
+                    self.promote_pawn(to_row, to_col, promotion)
+
         return piece, captured_piece
 
     def undo_move(self, from_row, from_col, to_row, to_col, captured_piece):

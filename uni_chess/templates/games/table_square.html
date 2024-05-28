@@ -22,7 +22,7 @@ img {
 <td bgColor="#{{ bgcolor }}" data-position="{{ r_ind }}{{ s_ind }}" class="chess-square">
     {% with folder="/static/chess/pieces/" %}
     {% if square %}
-        <img src="{{ folder }}{{ square }}.svg" id="{{ r_ind }}{{ s_ind }}" draggable="true" data-color="{{ square.get_color }}"/>
+        <img src="{{ folder }}{{ square }}.svg" id="{{ r_ind }}{{ s_ind }}" draggable="true" data-color="{{ square.get_color }}" data-piece="{{ square.get_piece_initial }}"/>
     {% endif %}
     {% endwith %}
 </td>

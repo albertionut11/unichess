@@ -75,7 +75,8 @@ def move_piece(request, game_id):
         from_pos = data.get("from")
         to_pos = data.get("to")
         turn = data.get("turn")
-
+        promotion = data.get("promotion")
+        # breakpoint()
         if (request.user.username == game.white.username and turn != 'white') or \
                 (request.user.username == game.black.username and turn != 'black'):
             return JsonResponse({"status": "fail"})
@@ -88,15 +89,21 @@ def move_piece(request, game_id):
         if to_pos == enPassantPos:
             ok = True
             EP = True
-        else:
-            for move in moves:
-                if move == to_pos:
-                    ok = True
+        elif to_pos in moves:
+            ok = True
         if not ok:
             return JsonResponse({"status": "fail"})
 
         game_data = game.data
-        game_data += from_pos + to_pos + ' ' if not EP else 'E' + from_pos + to_pos + ' '
+        if not EP and not promotion:
+            game_data += from_pos + to_pos + ' '
+        elif EP:
+            game_data += 'E' + from_pos + to_pos + ' '
+        elif promotion:
+            game_data += 'P' + from_pos + to_pos + promotion + ' '
+        else:
+            print("We should never be here in game_data stuff in move_piece")
+
         game.data = game_data
 
         new_turn = 'black' if turn == 'white' else 'white'
@@ -104,7 +111,7 @@ def move_piece(request, game_id):
         game.save()
 
         # perform move on the table to be able to correctly check for checkmate
-        play.board.make_move(from_pos[0], from_pos[1], to_pos[0], to_pos[1])
+        play.board.make_move(from_pos[0], from_pos[1], to_pos[0], to_pos[1], promotion)
         checkmate = False
         # breakpoint()
         if play.board.is_king_in_check(new_turn):
@@ -123,6 +130,7 @@ def move_piece(request, game_id):
                 'turn': new_turn,
                 'enPassant': EP,
                 'checkmate': checkmate,
+                'promotion': promotion,
             }
         )
 
