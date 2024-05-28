@@ -47,6 +47,10 @@ class PlayView(LoginRequiredMixin, TemplateView):
         context['html_table'] = html_table
         context['game_id'] = game_id
         context['turn'] = game.turn
+
+        if play.checkmate:
+            context['checkmate'] = play.checkmate
+
         return {'context': context}
 
     def get_user_role(self, game):
@@ -78,19 +82,18 @@ def move_piece(request, game_id):
 
         # validate move
         play = Play(game.data)
-        moves, enPassantPos = play.getAvailableMoves(from_pos[0], from_pos[1])
+        moves, enPassantPos = play.getMoves(from_pos[0], from_pos[1])
 
         ok, EP = False, False
         if to_pos == enPassantPos:
             ok = True
             EP = True
-        # else:
-        #     for move in moves:
-        #         if move == to_pos:
-        #             ok = True
-        # if not ok:
-        #     return JsonResponse({"status": "fail"})
-
+        else:
+            for move in moves:
+                if move == to_pos:
+                    ok = True
+        if not ok:
+            return JsonResponse({"status": "fail"})
 
         game_data = game.data
         game_data += from_pos + to_pos + ' ' if not EP else 'E' + from_pos + to_pos + ' '
@@ -99,6 +102,16 @@ def move_piece(request, game_id):
         new_turn = 'black' if turn == 'white' else 'white'
         game.turn = new_turn
         game.save()
+
+        # perform move on the table to be able to correctly check for checkmate
+        play.board.make_move(from_pos[0], from_pos[1], to_pos[0], to_pos[1])
+        checkmate = False
+        # breakpoint()
+        if play.board.is_king_in_check(new_turn):
+            if play.is_checkmate(new_turn):
+                checkmate = True
+
+        print(checkmate)
 
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
@@ -109,8 +122,12 @@ def move_piece(request, game_id):
                 'to': to_pos,
                 'turn': new_turn,
                 'enPassant': EP,
+                'checkmate': checkmate,
             }
         )
+
+        if checkmate:
+            return JsonResponse({"status": "ok", "winner": turn})
 
         return JsonResponse({"status": "ok", "new_turn": new_turn, "enPassant": EP})
     return JsonResponse({"status": "fail"})
@@ -133,7 +150,7 @@ def get_moves(request, game_id):
             return JsonResponse({"status": "fail"})
 
         play = Play(game.data)
-        moves, EP = play.getAvailableMoves(from_row, from_col)
+        moves, EP = play.getMoves(from_row, from_col)
         return JsonResponse({"status": "ok", "moves": moves})
 
 

@@ -23,10 +23,8 @@ document.addEventListener("DOMContentLoaded", function() {
         const targetSquare = document.querySelector(`td[data-position="${to}"]`);
 
         if (enPassant) {
-            // calculate the position of the captured pawn
             const fromRow = from[0];
             const capturedPosition = fromRow + to[1];
-
             resetSquare(capturedPosition);
         }
 
@@ -34,6 +32,12 @@ document.addEventListener("DOMContentLoaded", function() {
         resetSquare(to);
         targetSquare.appendChild(piece);
         updateDraggable();
+        console.log("DATA:" ,data);
+
+        if (data.checkmate) {
+            console.log('onMessage here');
+            displayCheckmateMessage(turn);
+        }
     };
 
     function updateDraggable() {
@@ -110,11 +114,12 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(data => {
             if (data.status === "ok") {
                 if (data.enPassant) {
-                    // calculate the position of the captured pawn
                     const fromRow = fromPosition[0];
                     const capturedPosition = fromRow + toPosition[1];
-
                     resetSquare(capturedPosition);
+                }
+                if (data.winner){
+                    console.log("Winner:", data.winner)
                 }
 
                 resetSquare(fromPosition);
@@ -215,11 +220,12 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(data => {
             if (data.status === "ok") {
                 if (data.enPassant) {
-                    // calculate the position of the captured pawn
                     const fromRow = fromPosition[0];
                     const capturedPosition = fromRow + toPosition[1];
-
                     resetSquare(capturedPosition);
+                }
+                if (data.winner){
+                    console.log("Winner:", data.winner)
                 }
 
                 resetSquare(fromPosition);
@@ -240,6 +246,13 @@ document.addEventListener("DOMContentLoaded", function() {
         while (square.firstChild) {
             square.removeChild(square.firstChild);
         }
+    }
+
+    function displayCheckmateMessage(turn) {
+        const winner = turn === "white" ? "Black" : "White";
+        const messageDiv = document.getElementById("checkmate-message");
+        messageDiv.innerText = `Checkmate: ${winner} wins!`;
+        messageDiv.classList.add("checkmate-message");
     }
 
     function getCookie(name) {
