@@ -1,5 +1,7 @@
+let pieces;
+
 document.addEventListener("DOMContentLoaded", function() {
-    const pieces = document.querySelectorAll("img[draggable='true']");
+    pieces = document.querySelectorAll("img[draggable='true']");
     const squares = document.querySelectorAll("td[data-position]");
     const gameId = document.getElementById("game_id").value;
     const userRole = document.getElementById("user_role").value;
@@ -122,6 +124,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (pieceColor !== userRole) {
             e.preventDefault();
         } else {
+            selectedPiece = e.target;
             e.dataTransfer.setData("text/plain", e.target.id);
         }
     }
@@ -138,6 +141,11 @@ document.addEventListener("DOMContentLoaded", function() {
         let targetSquare = e.target;
         while (targetSquare && !targetSquare.hasAttribute("data-position")) {
             targetSquare = targetSquare.parentNode;
+        }
+
+        if (!targetSquare || !targetSquare.hasAttribute("data-position")) {
+            console.error("Invalid target square");
+            return;
         }
 
         const fromPosition = piece.parentNode.getAttribute("data-position");
@@ -157,6 +165,9 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function isPawnPromotion(piece, toPosition) {
+        // const pieceSrc = piece.getAttribute("src"); // cheap workaround around wrong data-piece data for bishop promotion
+        // const pieceTypeSrc = pieceSrc.slice(-5)[0];
+        // console.log(pieceTypeSrc);
         const pieceType = piece.getAttribute("data-piece");
         const toRow = toPosition[0];
         return pieceType === "P" && ((userRole === "white" && toRow === "8") || (userRole === "black" && toRow === "1"));
@@ -198,7 +209,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 resetSquare(fromPosition);
                 resetSquare(toPosition);
-                targetSquare.appendChild(selectedPiece);
+
+                if (targetSquare) {
+                    targetSquare.appendChild(selectedPiece);
+                }
 
                 if (data.winner) {
                     console.log("Winner:", data.winner);
@@ -253,9 +267,12 @@ document.addEventListener("DOMContentLoaded", function() {
         clearHighlights();
 
         moves.forEach(position => {
+            console.log("Position", position, fromPosition);
             if (position === fromPosition) return;
             const square = document.querySelector(`td[data-position="${position}"]`);
             const targetPiece = square.querySelector("img");
+
+            console.log(square, targetPiece);
 
             if (!targetPiece) {
                 const dot = document.createElement("div");
@@ -335,8 +352,12 @@ document.addEventListener("DOMContentLoaded", function() {
         promotionPiece.src = `/static/chess/pieces/${promotion}.svg`;
         promotionPiece.setAttribute("data-piece", promotion.slice(1)); // Only the piece type (e.g., "Q", "R", etc.)
         promotionPiece.setAttribute("data-color", promotion[0]); // "w" for white, "b" for black
+        promotionPiece.setAttribute("draggable", true); // Make it draggable
         resetSquare(position);
         targetSquare.appendChild(promotionPiece);
-        updateDraggable();
+
+        // Add event listeners to the new promoted piece
+        promotionPiece.addEventListener("dragstart", dragStart);
+        promotionPiece.addEventListener("click", handleClick);
     }
 });

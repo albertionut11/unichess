@@ -70,7 +70,7 @@ class Board:
             '1': {'a': Rook('white'), 'b': Knight('white'), 'c': Bishop('white'), 'd': Queen('white'), 'e': King('white'), 'f': Bishop('white'), 'g': Knight('white'), 'h': Rook('white')},
         }
 
-        self.cc_table()
+        self.pp_table()
 
     def pp_table(self):
         self.table = {
@@ -155,12 +155,10 @@ class Board:
             row = str(int(king_row) + move[0])
             col = chr(ord(king_col) + move[1])
 
-            if Piece.outOfBounds(str(row), col):
-                break
-
-            piece = self.get_piece(row, col)
-            if piece and piece.get_color() == opponent_color and isinstance(piece, Knight):
-                return True
+            if not Piece.outOfBounds(str(row), col):
+                piece = self.get_piece(row, col)
+                if piece and piece.get_color() == opponent_color and isinstance(piece, Knight):
+                    return True
 
         # check for attacks from Pawn
         pawn_direction = -1 if king_color == 'black' else 1
@@ -246,7 +244,7 @@ class Board:
         self.table[from_row][from_col] = piece
         self.table[to_row][to_col] = captured_piece
 
-    def is_valid_move(self, from_row, from_col, to_row, to_col, castling=None):
+    def is_valid_move(self, from_row, from_col, to_row, to_col):
         piece, captured_piece = self.make_move(from_row, from_col, to_row, to_col)
         king_in_check = self.is_king_in_check(piece.get_color())
         self.undo_move(from_row, from_col, to_row, to_col, captured_piece)

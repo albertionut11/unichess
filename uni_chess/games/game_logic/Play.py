@@ -17,6 +17,7 @@ class Play:
                 self.checkmate = "White"
 
     def getMoves(self, from_row, from_col):
+        # breakpoint()
         piece = self.board.get_piece(from_row, from_col)
         if piece:
             return piece.getSafeMoves(self.board, from_row, from_col)

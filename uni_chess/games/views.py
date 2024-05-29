@@ -152,7 +152,6 @@ def get_moves(request, game_id):
 
     if request.user.username != game.white.username and request.user.username != game.black.username:
         return JsonResponse({"status": "fail"})
-    # breakpoint()
     if request.method == "GET":
         turn = request.GET.get("turn")
         pos = request.GET.get("from")
@@ -163,6 +162,7 @@ def get_moves(request, game_id):
             return JsonResponse({"status": "fail"})
 
         play = Play(game.data)
+        # breakpoint()
         moves, EP, castling = play.getMoves(from_row, from_col)
         if castling:
             moves += castling
