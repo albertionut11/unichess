@@ -20,6 +20,7 @@ html, body {
     transform: translate(-50%, -50%);
     z-index: 1;
 }
+
 .highlight-red {
     width: 100%;
     height: 100%;
@@ -39,28 +40,19 @@ html, body {
 
 .game-container {
     display: grid;
-    grid-template-columns: 10% 80% 10%;
+    grid-template-columns: 1fr 3fr 1fr;
     gap: 10px;
     height: 100vh;
+    background-color: #F8F4E1;
 }
 
-.chat-container {
-    background-color: #f0f0f0;
+.chat-container, .board-container, .timer-container {
+    background-color: #F8F4E1;
     padding: 10px;
     overflow-y: auto;
 }
 
 .board-container {
-    background-color: #ffffff;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.timer-container {
-    background-color: #f0f0f0;
-    padding: 10px;
     display: flex;
     flex-direction: column;
     align-items: center;

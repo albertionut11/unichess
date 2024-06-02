@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const gameId = document.getElementById("game_id").value;
     const userRole = document.getElementById("user_role").value;
     let turn = document.getElementById("turn").value;
+    const increment = parseInt(document.getElementById("time_increment").value);
     let selectedPiece = null;
     let promotionPiece = null;
     let highlightedMoves = [];
@@ -236,8 +237,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 to: toPosition,
                 turn: turn,
                 promotion: promotion,
-                white_time_remaining: whiteTime,
-                black_time_remaining: blackTime
+                white_time_remaining: turn === 'white' ? whiteTime + increment : whiteTime,
+                black_time_remaining: turn === 'black' ? blackTime + increment : blackTime
             }),
         })
         .then(response => response.json())
@@ -264,7 +265,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 document.getElementById("turn").value = turn;
                 clearHighlights();
                 updateDraggable();
-
                 // Check if promotion occurred and handle it
                 if (promotion) {
                     promotePawn(toPosition, userRole[0] + promotion); // e.g., "wQ" for white Queen
@@ -366,4 +366,22 @@ document.addEventListener("DOMContentLoaded", function() {
         promotionPiece.addEventListener("dragstart", dragStart);
         promotionPiece.addEventListener("click", handleClick);
     }
+
+    // Ensure the formatTime and startTimer functions are accessible here
+    window.formatTime = function(time) {
+        const minutes = Math.floor(time / 60);
+        const seconds = time % 60;
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    };
+
+    window.startTimer = function(turn) {
+        clearInterval(whiteInterval);
+        clearInterval(blackInterval);
+
+        if (turn === 'white') {
+            whiteInterval = setInterval(() => updateTimer('white'), 1000);
+        } else {
+            blackInterval = setInterval(() => updateTimer('black'), 1000);
+        }
+    };
 });

@@ -1,13 +1,13 @@
 let whiteTime;
 let blackTime;
+let whiteInterval, blackInterval;
+let gameOver = false;
 
 document.addEventListener("DOMContentLoaded", function() {
     const gameId = document.getElementById("game_id").value;
     const increment = parseInt(document.getElementById("time_increment").value);
     const whiteTimerElement = document.getElementById("white-timer");
     const blackTimerElement = document.getElementById("black-timer");
-    let whiteInterval, blackInterval;
-    let gameOver = false;
     const COUNTER_KEY_WHITE = `white-counter-${gameId}`;
     const COUNTER_KEY_BLACK = `black-counter-${gameId}`;
 
@@ -81,13 +81,24 @@ document.addEventListener("DOMContentLoaded", function() {
 
     socket.onmessage = function(e) {
         const data = JSON.parse(e.data);
-        turn = data.turn;
+        let turn = data.turn;
 
         whiteTime = data.white_time_remaining;
         blackTime = data.black_time_remaining;
+
+        if (turn === 'white') {
+            blackTime += increment;
+        }
+        else {
+            whiteTime += increment;
+        }
 
         whiteTimerElement.textContent = formatTime(whiteTime);
         blackTimerElement.textContent = formatTime(blackTime);
         startTimer(data.turn);
     };
+
+    window.startTimer = startTimer;
+    window.updateTimer = updateTimer;
+    window.formatTime = formatTime;
 });

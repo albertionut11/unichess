@@ -122,8 +122,10 @@ def move_piece(request, game_id):
         # Update the time for the player who just made the move
         if turn == 'white':
             game.white_time_remaining = data.get("white_time_remaining")
+            game.black_time_remaining += game.increment  # Add increment to the other player's time
         else:
             game.black_time_remaining = data.get("black_time_remaining")
+            game.white_time_remaining += game.increment  # Add increment to the other player's time
 
         game.save()
 
