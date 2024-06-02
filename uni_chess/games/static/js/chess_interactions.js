@@ -1,4 +1,6 @@
 let pieces;
+let whiteTimerElement;
+let blackTimerElement;
 
 document.addEventListener("DOMContentLoaded", function() {
     pieces = document.querySelectorAll("img[draggable='true']");
@@ -11,6 +13,9 @@ document.addEventListener("DOMContentLoaded", function() {
     let highlightedMoves = [];
 
     const socket = new WebSocket(`ws://${window.location.host}/ws/game/${gameId}/`);
+
+    whiteTimerElement = document.getElementById("white-timer");
+    blackTimerElement = document.getElementById("black-timer");
 
     socket.onmessage = function(e) {
         const data = JSON.parse(e.data);
@@ -219,7 +224,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-     function makeMove(fromPosition, toPosition, targetSquare, promotion = null) {
+    function makeMove(fromPosition, toPosition, targetSquare, promotion = null) {
         fetch(`/move_piece/${gameId}`, {
             method: "POST",
             headers: {
