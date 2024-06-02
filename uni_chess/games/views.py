@@ -1,10 +1,8 @@
 import base64
 import json
 import uuid
-
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
@@ -12,9 +10,9 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.views.generic import View, TemplateView, FormView
+from django.utils import timezone
 
-from games.game_logic.Board import Board
-from games.game_logic.Play import Play
+from .game_logic.Play import Play
 from .models import Game, Tournament
 from .forms import GameForm
 
@@ -24,7 +22,10 @@ def create(request):
     if request.method == "POST":
         form = GameForm(request.POST)
         if form.is_valid():
-            game = form.save()
+            game = form.save(commit=False)
+            game.white_time_remaining = game.duration * 60  # Initialize time in seconds
+            game.black_time_remaining = game.duration * 60  # Initialize time in seconds
+            game.save()
             return redirect("game_play", game_id=game.id)
     else:
         form = GameForm()
@@ -38,7 +39,6 @@ class PlayView(LoginRequiredMixin, TemplateView):
         context = super(PlayView, self).get_context_data(**kwargs)
 
         game_id = self.kwargs.get('game_id')
-
         game = get_object_or_404(Game, pk=game_id)
         play = Play(game.data)
 
@@ -47,6 +47,12 @@ class PlayView(LoginRequiredMixin, TemplateView):
         context['html_table'] = html_table
         context['game_id'] = game_id
         context['turn'] = game.turn
+        context['duration'] = game.duration
+        context['increment'] = game.increment
+        context['white_time_remaining'] = game.white_time_remaining
+        context['black_time_remaining'] = game.black_time_remaining
+        context['white_username'] = game.white
+        context['black_username'] = game.black
 
         if play.checkmate:
             context['checkmate'] = play.checkmate
@@ -76,7 +82,7 @@ def move_piece(request, game_id):
         to_pos = data.get("to")
         turn = data.get("turn")
         promotion = data.get("promotion")
-        # breakpoint()
+
         if (request.user.username == game.white.username and turn != 'white') or \
                 (request.user.username == game.black.username and turn != 'black'):
             return JsonResponse({"status": "fail"})
@@ -114,12 +120,18 @@ def move_piece(request, game_id):
 
         new_turn = 'black' if turn == 'white' else 'white'
         game.turn = new_turn
+
+        # Update the time for the player who just made the move
+        if turn == 'white':
+            game.white_time_remaining = data.get("white_time_remaining")
+        else:
+            game.black_time_remaining = data.get("black_time_remaining")
+
         game.save()
 
         # perform move on the table to be able to correctly check for checkmate
         play.board.make_move(from_pos[0], from_pos[1], to_pos[0], to_pos[1], promotion, C)
         checkmate = False
-        # breakpoint()
         if play.board.is_king_in_check(new_turn):
             if play.is_checkmate(new_turn):
                 checkmate = True
@@ -135,7 +147,9 @@ def move_piece(request, game_id):
                 'enPassant': EP,
                 'checkmate': checkmate,
                 'promotion': promotion,
-                'castling': C
+                'castling': C,
+                'white_time_remaining': game.white_time_remaining,
+                'black_time_remaining': game.black_time_remaining
             }
         )
 
@@ -144,6 +158,7 @@ def move_piece(request, game_id):
 
         return JsonResponse({"status": "ok", "new_turn": new_turn, "enPassant": EP, "castling": C})
     return JsonResponse({"status": "fail"})
+
 
 @login_required
 @csrf_exempt
@@ -169,6 +184,31 @@ def get_moves(request, game_id):
         if castling:
             moves += castling
         return JsonResponse({"status": "ok", "moves": moves})
+
+@login_required
+@csrf_exempt
+def save_time(request, game_id):
+    game = get_object_or_404(Game, pk=game_id)
+
+    if request.user.username != game.white.username and request.user.username != game.black.username:
+        return JsonResponse({"status": "fail"})
+
+    if request.method == "POST":
+        data = json.loads(request.body)
+        game.white_time_remaining = data.get('white_time_remaining', game.white_time_remaining)
+        game.black_time_remaining = data.get('black_time_remaining', game.black_time_remaining)
+        game.save()
+
+        return JsonResponse({"status": "ok"})
+    return JsonResponse({"status": "fail"})
+
+@login_required
+def get_timer_state(request, game_id):
+    game = get_object_or_404(Game, pk=game_id)
+    return JsonResponse({
+        'white_time_remaining': game.white_time_remaining,
+        'black_time_remaining': game.black_time_remaining
+    })
 
 
 @login_required

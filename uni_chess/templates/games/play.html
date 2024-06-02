@@ -3,28 +3,43 @@
 {% block title %} Play Game {% endblock %}
 
 {% block content %}
-    <p>
-       <a href="{% url 'games' %}"> GAMES </a>
-    </p>
-    <p>
-        Turn: <span id="turn-display">{{ context.turn }}</span>
-    </p>
-    <div id="checkmate-message" class="checkmate-message">
-        {% if context.checkmate %}
-            Checkmate: {{ context.checkmate }} wins!
-        {% endif %}
+<div class="game-container">
+    <div class="chat-container box">
+        <p><a href="{% url 'games' %}"> GAMES </a></p>
+        <div id="chat-box" class="chat-container box">Game Chat</div>
     </div>
-    <div id="chess-container">
-        <div id="chess-table">
-            {{ context.html_table|safe }}
+    <div class="board-container box">
+        <p class="info-box">Turn: <span id="turn-display">{{ context.turn }}</span></p>
+        <div id="checkmate-message" class="checkmate-message">
+            {% if context.checkmate %}
+                Checkmate: {{ context.checkmate }} wins!
+            {% endif %}
+        </div>
+        <div id="chess-container">
+            <div id="chess-table">
+                {{ context.html_table|safe }}
+            </div>
+        </div>
+        <div id="promotion-container"></div>
+    </div>
+    <div class="timer-container box">
+        <div id="timers">
+            <div class="time-format-box">Time Format: {{context.duration}}+{{context.increment}}</div>
+            <div class="username-box">White: {{ context.white_username }}</div>
+            <div id="white-timer" class="timer white-timer">{{context.duration}}</div>
+            <div id="black-timer" class="timer black-timer">{{context.duration}}</div>
+            <div class="username-box">Black: {{ context.black_username }}</div>
         </div>
     </div>
-    <div id="promotion-container">
+</div>
 
-    </div>
 <input type="hidden" id="game_id" value="{{ context.game_id }}">
 <input type="hidden" id="user_role" value="{{ context.user_role }}">
 <input type="hidden" id="turn" value="{{ context.turn }}">
-<script src="{% static 'js/chess_interactions.js' %}"></script>
-{% endblock %}
+<input type="hidden" id="initial_white_time" value="{{ context.duration }}">
+<input type="hidden" id="initial_black_time" value="{{ context.duration }}">
+<input type="hidden" id="time_increment" value="{{ context.increment }}">
 
+<script src="{% static 'js/chess_interactions.js' %}"></script>
+<script src="{% static 'js/timer.js' %}"></script>
+{% endblock %}

@@ -1,19 +1,16 @@
 from datetime import date
-
-from django.forms import ModelForm, DateInput, TimeInput, TextInput
+from django.forms import ModelForm, DateInput, TimeInput, TextInput, HiddenInput
 from django.core.exceptions import ValidationError
-
 from .models import Game
 
 
 class GameForm(ModelForm):
     class Meta:
         model = Game
-        fields = [field.name for field in Game._meta.fields if field.name != 'data' and field.name != 'turn']
+        fields = ['white', 'black', 'duration', 'increment']
         widgets = {
-            'date': DateInput(attrs={"type": "date"}),
-            'start': TimeInput(attrs={"type": "time"}),
-            'result': TextInput(attrs={"type": "number", "min": "0", "max": "2"}),
+            'duration': TextInput(attrs={"type": "number", "min": "1"}),
+            'increment': TextInput(attrs={"type": "number", "min": "0"}),
         }
 
     def clean_date(self):

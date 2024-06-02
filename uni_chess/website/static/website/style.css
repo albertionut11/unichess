@@ -20,6 +20,7 @@ html, body {
     transform: translate(-50%, -50%);
     z-index: 1;
 }
+
 .highlight-red {
     width: 100%;
     height: 100%;
@@ -35,4 +36,88 @@ html, body {
     color: red;
     text-align: center;
     margin-bottom: 10px;
+}
+
+.game-container {
+    display: grid;
+    grid-template-columns: 1fr 3fr 1fr;
+    gap: 10px;
+    height: 100vh;
+    background-color: #F8F4E1;
+    overflow: hidden;
+}
+
+.box {
+    background-color: #F8F4E1;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.info-box {
+    background-color: #FFFFFF;
+    padding: 5px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.chat-container, .board-container, .timer-container {
+    overflow-y: auto;
+}
+
+.board-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.timer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.time-format-box {
+    background-color: #543310;
+    color: #ffffff;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    text-align: center;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    font-weight: bold;
+}
+
+.username-box {
+    background-color: #d1d1d1;
+    padding: 5px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    font-weight: bold;
+    color: #333;
+}
+
+.timer {
+    font-size: 2em;
+    margin: 10px 0;
+    padding: 10px;
+    width: 100%;
+    text-align: center;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.white-timer {
+    background-color: rgba(255, 255, 255, 0.8);
+    color: black;
+}
+
+.black-timer {
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
 }

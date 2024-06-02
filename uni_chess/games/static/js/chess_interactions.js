@@ -1,4 +1,6 @@
 let pieces;
+let whiteTimerElement;
+let blackTimerElement;
 
 document.addEventListener("DOMContentLoaded", function() {
     pieces = document.querySelectorAll("img[draggable='true']");
@@ -6,11 +8,15 @@ document.addEventListener("DOMContentLoaded", function() {
     const gameId = document.getElementById("game_id").value;
     const userRole = document.getElementById("user_role").value;
     let turn = document.getElementById("turn").value;
+    const increment = parseInt(document.getElementById("time_increment").value);
     let selectedPiece = null;
     let promotionPiece = null;
     let highlightedMoves = [];
 
     const socket = new WebSocket(`ws://${window.location.host}/ws/game/${gameId}/`);
+
+    whiteTimerElement = document.getElementById("white-timer");
+    blackTimerElement = document.getElementById("black-timer");
 
     socket.onmessage = function(e) {
         const data = JSON.parse(e.data);
@@ -40,10 +46,10 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         updateDraggable();
-        console.log("DATA:" ,data);
+        console.log("DATA:", data);
 
         if (data.promotion) {
-            const promotionColor = turn === "white" ? "b" : "w"
+            const promotionColor = turn === "white" ? "b" : "w";
             console.log('Promotion to', promotionColor + data.promotion);
             promotePawn(to, promotionColor + data.promotion);
         }
@@ -52,6 +58,13 @@ document.addEventListener("DOMContentLoaded", function() {
             console.log('onMessage here');
             displayCheckmateMessage(turn);
         }
+
+        // Update timers
+        whiteTime = data.white_time_remaining;
+        blackTime = data.black_time_remaining;
+        whiteTimerElement.textContent = formatTime(whiteTime);
+        blackTimerElement.textContent = formatTime(blackTime);
+        startTimer(data.turn);
     };
 
     function updateDraggable() {
@@ -122,7 +135,7 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-         // Check for pawn promotion situation
+        // Check for pawn promotion situation
         if (isPawnPromotion(piece, toPosition)) {
             showPromotionOptions(fromPosition, toPosition, targetSquare);
         } else {
@@ -130,7 +143,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-     function handleClick(e) {
+    function handleClick(e) {
         const piece = e.target;
         const fromPosition = piece.parentNode.getAttribute("data-position");
 
@@ -212,7 +225,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-
     function makeMove(fromPosition, toPosition, targetSquare, promotion = null) {
         fetch(`/move_piece/${gameId}`, {
             method: "POST",
@@ -220,7 +232,14 @@ document.addEventListener("DOMContentLoaded", function() {
                 "Content-Type": "application/json",
                 "X-CSRFToken": getCookie("csrftoken"),
             },
-            body: JSON.stringify({ from: fromPosition, to: toPosition, turn: turn, promotion: promotion }),
+            body: JSON.stringify({
+                from: fromPosition,
+                to: toPosition,
+                turn: turn,
+                promotion: promotion,
+                white_time_remaining: turn === 'white' ? whiteTime + increment : whiteTime,
+                black_time_remaining: turn === 'black' ? blackTime + increment : blackTime
+            }),
         })
         .then(response => response.json())
         .then(data => {
@@ -246,7 +265,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 document.getElementById("turn").value = turn;
                 clearHighlights();
                 updateDraggable();
-
                 // Check if promotion occurred and handle it
                 if (promotion) {
                     promotePawn(toPosition, userRole[0] + promotion); // e.g., "wQ" for white Queen
@@ -258,9 +276,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function isPawnPromotion(piece, toPosition) {
-        // const pieceSrc = piece.getAttribute("src"); // cheap workaround around wrong data-piece data for bishop promotion
-        // const pieceTypeSrc = pieceSrc.slice(-5)[0];
-        // console.log(pieceTypeSrc);
         const pieceType = piece.getAttribute("data-piece");
         const toRow = toPosition[0];
         return pieceType === "P" && ((userRole === "white" && toRow === "8") || (userRole === "black" && toRow === "1"));
@@ -282,25 +297,16 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-     function performCastlingMove(castling, from) {
-         // const kingColor = turn === "white" ? "b" : "w";
+    function performCastlingMove(castling, from) {
+        let rookFrom = from[0] + "h";
+        let kingTo = from[0] + "g";
+        let rookTo = from[0] + "f";
 
-         console.log("from", from);
-         console.log("castling", castling);
-         // kingside castle
-         let rookFrom = from[0] + "h";
-         let kingTo = from[0] + "g";
-         let rookTo = from[0] + "f";
-
-         if (castling === "Q") {
-             rookFrom = from[0] + "a";
-             kingTo = from[0] + "c";
-             rookTo = from[0] + "d";
-         }
-
-         console.log("rookFrom", rookFrom);
-         console.log("kingTo", kingTo);
-         console.log("rookTo", rookTo);
+        if (castling === "Q") {
+            rookFrom = from[0] + "a";
+            kingTo = from[0] + "c";
+            rookTo = from[0] + "d";
+        }
 
         const king = document.querySelector(`td[data-position="${from}"] img`);
         const rook = document.querySelector(`td[data-position="${rookFrom}"] img`);
@@ -315,7 +321,6 @@ document.addEventListener("DOMContentLoaded", function() {
         rookTargetSquare.appendChild(rook);
         clearHighlights();
     }
-
 
     function resetSquare(position) {
         const square = document.querySelector(`td[data-position="${position}"]`);
@@ -361,4 +366,22 @@ document.addEventListener("DOMContentLoaded", function() {
         promotionPiece.addEventListener("dragstart", dragStart);
         promotionPiece.addEventListener("click", handleClick);
     }
+
+    // Ensure the formatTime and startTimer functions are accessible here
+    window.formatTime = function(time) {
+        const minutes = Math.floor(time / 60);
+        const seconds = time % 60;
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    };
+
+    window.startTimer = function(turn) {
+        clearInterval(whiteInterval);
+        clearInterval(blackInterval);
+
+        if (turn === 'white') {
+            whiteInterval = setInterval(() => updateTimer('white'), 1000);
+        } else {
+            blackInterval = setInterval(() => updateTimer('black'), 1000);
+        }
+    };
 });
