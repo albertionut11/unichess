@@ -164,6 +164,8 @@ def get_moves(request, game_id):
         play = Play(game.data)
         # breakpoint()
         moves, EP, castling = play.getMoves(from_row, from_col)
+        # moves, EP, castling = play.getAllMoves(from_row, from_col)
+
         if castling:
             moves += castling
         return JsonResponse({"status": "ok", "moves": moves})

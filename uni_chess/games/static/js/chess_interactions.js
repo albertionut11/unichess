@@ -54,40 +54,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     };
 
-     function performCastlingMove(castling, from) {
-         // const kingColor = turn === "white" ? "b" : "w";
-
-         console.log("from", from);
-         console.log("castling", castling);
-         // kingside castle
-         let rookFrom = from[0] + "h";
-         let kingTo = from[0] + "g";
-         let rookTo = from[0] + "f";
-
-         if (castling === "Q") {
-             rookFrom = from[0] + "a";
-             kingTo = from[0] + "c";
-             rookTo = from[0] + "d";
-         }
-
-         console.log("rookFrom", rookFrom);
-         console.log("kingTo", kingTo);
-         console.log("rookTo", rookTo);
-
-        const king = document.querySelector(`td[data-position="${from}"] img`);
-        const rook = document.querySelector(`td[data-position="${rookFrom}"] img`);
-
-        const kingTargetSquare = document.querySelector(`td[data-position="${kingTo}"]`);
-        const rookTargetSquare = document.querySelector(`td[data-position="${rookTo}"]`);
-
-        resetSquare(from);
-        resetSquare(rookFrom);
-
-        kingTargetSquare.appendChild(king);
-        rookTargetSquare.appendChild(rook);
-        clearHighlights();
-    }
-
     function updateDraggable() {
         pieces.forEach(piece => {
             piece.removeEventListener("dragstart", dragStart);
@@ -164,77 +130,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    function isPawnPromotion(piece, toPosition) {
-        // const pieceSrc = piece.getAttribute("src"); // cheap workaround around wrong data-piece data for bishop promotion
-        // const pieceTypeSrc = pieceSrc.slice(-5)[0];
-        // console.log(pieceTypeSrc);
-        const pieceType = piece.getAttribute("data-piece");
-        const toRow = toPosition[0];
-        return pieceType === "P" && ((userRole === "white" && toRow === "8") || (userRole === "black" && toRow === "1"));
-    }
-
-    function showPromotionOptions(fromPosition, toPosition, targetSquare) {
-        const promotionChoices = ["Q", "R", "B", "N"];
-        const promotionContainer = document.getElementById("promotion-container");
-        promotionContainer.innerHTML = "";
-        promotionChoices.forEach(choice => {
-            const btn = document.createElement("button");
-            btn.innerText = choice;
-            btn.addEventListener("click", () => {
-                promotionPiece = choice;
-                promotionContainer.innerHTML = "";
-                makeMove(fromPosition, toPosition, targetSquare, choice);
-            });
-            promotionContainer.appendChild(btn);
-        });
-    }
-
-    function makeMove(fromPosition, toPosition, targetSquare, promotion = null) {
-        fetch(`/move_piece/${gameId}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCookie("csrftoken"),
-            },
-            body: JSON.stringify({ from: fromPosition, to: toPosition, turn: turn, promotion: promotion }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === "ok") {
-                if (data.enPassant) {
-                    const fromRow = fromPosition[0];
-                    const capturedPosition = fromRow + toPosition[1];
-                    resetSquare(capturedPosition);
-                }
-
-                resetSquare(fromPosition);
-                resetSquare(toPosition);
-
-                if (targetSquare) {
-                    targetSquare.appendChild(selectedPiece);
-                }
-
-                if (data.winner) {
-                    console.log("Winner:", data.winner);
-                }
-
-                turn = data.new_turn;
-                document.getElementById("turn").value = turn;
-                clearHighlights();
-                updateDraggable();
-
-                // Check if promotion occurred and handle it
-                if (promotion) {
-                    promotePawn(toPosition, userRole[0] + promotion); // e.g., "wQ" for white Queen
-                }
-            } else {
-                console.error("Invalid move");
-            }
-        });
-    }
-
-
-    function handleClick(e) {
+     function handleClick(e) {
         const piece = e.target;
         const fromPosition = piece.parentNode.getAttribute("data-position");
 
@@ -315,6 +211,111 @@ document.addEventListener("DOMContentLoaded", function() {
             makeMove(fromPosition, toPosition, targetSquare);
         }
     }
+
+
+    function makeMove(fromPosition, toPosition, targetSquare, promotion = null) {
+        fetch(`/move_piece/${gameId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+            },
+            body: JSON.stringify({ from: fromPosition, to: toPosition, turn: turn, promotion: promotion }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "ok") {
+                if (data.enPassant) {
+                    const fromRow = fromPosition[0];
+                    const capturedPosition = fromRow + toPosition[1];
+                    resetSquare(capturedPosition);
+                }
+
+                resetSquare(fromPosition);
+                resetSquare(toPosition);
+
+                if (targetSquare) {
+                    targetSquare.appendChild(selectedPiece);
+                }
+
+                if (data.winner) {
+                    console.log("Winner:", data.winner);
+                }
+
+                turn = data.new_turn;
+                document.getElementById("turn").value = turn;
+                clearHighlights();
+                updateDraggable();
+
+                // Check if promotion occurred and handle it
+                if (promotion) {
+                    promotePawn(toPosition, userRole[0] + promotion); // e.g., "wQ" for white Queen
+                }
+            } else {
+                console.error("Invalid move");
+            }
+        });
+    }
+
+    function isPawnPromotion(piece, toPosition) {
+        // const pieceSrc = piece.getAttribute("src"); // cheap workaround around wrong data-piece data for bishop promotion
+        // const pieceTypeSrc = pieceSrc.slice(-5)[0];
+        // console.log(pieceTypeSrc);
+        const pieceType = piece.getAttribute("data-piece");
+        const toRow = toPosition[0];
+        return pieceType === "P" && ((userRole === "white" && toRow === "8") || (userRole === "black" && toRow === "1"));
+    }
+
+    function showPromotionOptions(fromPosition, toPosition, targetSquare) {
+        const promotionChoices = ["Q", "R", "B", "N"];
+        const promotionContainer = document.getElementById("promotion-container");
+        promotionContainer.innerHTML = "";
+        promotionChoices.forEach(choice => {
+            const btn = document.createElement("button");
+            btn.innerText = choice;
+            btn.addEventListener("click", () => {
+                promotionPiece = choice;
+                promotionContainer.innerHTML = "";
+                makeMove(fromPosition, toPosition, targetSquare, choice);
+            });
+            promotionContainer.appendChild(btn);
+        });
+    }
+
+     function performCastlingMove(castling, from) {
+         // const kingColor = turn === "white" ? "b" : "w";
+
+         console.log("from", from);
+         console.log("castling", castling);
+         // kingside castle
+         let rookFrom = from[0] + "h";
+         let kingTo = from[0] + "g";
+         let rookTo = from[0] + "f";
+
+         if (castling === "Q") {
+             rookFrom = from[0] + "a";
+             kingTo = from[0] + "c";
+             rookTo = from[0] + "d";
+         }
+
+         console.log("rookFrom", rookFrom);
+         console.log("kingTo", kingTo);
+         console.log("rookTo", rookTo);
+
+        const king = document.querySelector(`td[data-position="${from}"] img`);
+        const rook = document.querySelector(`td[data-position="${rookFrom}"] img`);
+
+        const kingTargetSquare = document.querySelector(`td[data-position="${kingTo}"]`);
+        const rookTargetSquare = document.querySelector(`td[data-position="${rookTo}"]`);
+
+        resetSquare(from);
+        resetSquare(rookFrom);
+
+        kingTargetSquare.appendChild(king);
+        rookTargetSquare.appendChild(rook);
+        clearHighlights();
+    }
+
 
     function resetSquare(position) {
         const square = document.querySelector(`td[data-position="${position}"]`);

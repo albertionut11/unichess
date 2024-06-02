@@ -29,7 +29,6 @@ class Piece:
         return piece
 
     def getSafeMoves(self, board, from_row, from_col):
-        # breakpoint()
         all_moves, enPassantPos, castling = self.getAvailableMoves(board, from_row, from_col)
         safe_moves = []
         for move in all_moves:
