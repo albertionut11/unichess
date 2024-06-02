@@ -29,7 +29,6 @@ class Piece:
         return piece
 
     def getSafeMoves(self, board, from_row, from_col):
-        # breakpoint()
         all_moves, enPassantPos, castling = self.getAvailableMoves(board, from_row, from_col)
         safe_moves = []
         for move in all_moves:
@@ -41,6 +40,7 @@ class Piece:
 
 class King(Piece):
     def getAvailableMoves(self, board, from_row, from_col):
+        # breakpoint()
         directions = [
             (1, 0), (-1, 0), (0, 1), (0, -1),
             (1, 1), (1, -1), (-1, 1), (-1, -1)
@@ -52,7 +52,7 @@ class King(Piece):
             to_col = chr(ord(from_col) + direction[1])
             if not self.outOfBounds(to_row, to_col):
                 piece = board.get_piece(to_row, to_col)
-                if not piece or piece.get_color() != self.color:
+                if (not piece or piece.get_color() != self.color) and not self.king_nearby(board, to_row, to_col):
                     moves.append(to_row + to_col)
 
         # Check for castling
@@ -71,6 +71,23 @@ class King(Piece):
             castling_moves.append(row + 'c')
 
         return castling_moves
+
+    def king_nearby(self, board, to_row, to_col):
+        directions = [
+            (1, 0), (-1, 0), (0, 1), (0, -1),
+            (1, 1), (1, -1), (-1, 1), (-1, -1)
+        ]
+        opponent_color = "white" if self.get_color() == "black" else "black"
+
+        for direction in directions:
+            row = str(int(to_row) + direction[0])
+            col = chr(ord(to_col) + direction[1])
+            if not self.outOfBounds(row, col):
+                piece = board.get_piece(row, col)
+                if isinstance(piece, King) and piece.get_color() == opponent_color:
+                    return True
+
+        return False
 
     def __str__(self):
         return f'{self.color[0]}K'

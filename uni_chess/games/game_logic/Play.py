@@ -17,6 +17,7 @@ class Play:
                 self.checkmate = "White"
 
     def getMoves(self, from_row, from_col):
+        # breakpoint()
         piece = self.board.get_piece(from_row, from_col)
         if piece:
             return piece.getSafeMoves(self.board, from_row, from_col)
@@ -35,7 +36,7 @@ class Play:
                         return False
         return True if self.board.is_king_in_check(color) else False
 
-    def getAllMoves(self):
+    def getAllMoves(self, from_row, from_col):
         moves = []
         for row in self.board.table.keys():
             for col in self.board.table[row].keys():
@@ -43,4 +44,4 @@ class Play:
                 moves.append(pos)
 
         # print(moves)
-        return moves, None
+        return moves, None, None
