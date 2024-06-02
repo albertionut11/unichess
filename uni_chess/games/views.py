@@ -200,6 +200,14 @@ def save_time(request, game_id):
         return JsonResponse({"status": "ok"})
     return JsonResponse({"status": "fail"})
 
+@login_required
+def get_timer_state(request, game_id):
+    game = get_object_or_404(Game, pk=game_id)
+    return JsonResponse({
+        'white_time_remaining': game.white_time_remaining,
+        'black_time_remaining': game.black_time_remaining
+    })
+
 
 @login_required
 def get_games(request):

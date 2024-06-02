@@ -56,6 +56,8 @@ document.addEventListener("DOMContentLoaded", function() {
         // Update timers
         whiteTime = data.white_time_remaining;
         blackTime = data.black_time_remaining;
+        whiteTimerElement.textContent = formatTime(whiteTime);
+        blackTimerElement.textContent = formatTime(blackTime);
         startTimer(data.turn);
     };
 
@@ -217,7 +219,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    function makeMove(fromPosition, toPosition, targetSquare, promotion = null) {
+     function makeMove(fromPosition, toPosition, targetSquare, promotion = null) {
         fetch(`/move_piece/${gameId}`, {
             method: "POST",
             headers: {

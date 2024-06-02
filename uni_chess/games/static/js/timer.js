@@ -2,8 +2,7 @@ let whiteTime;
 let blackTime;
 
 document.addEventListener("DOMContentLoaded", function() {
-    whiteTime = parseInt(document.getElementById("initial_white_time").value); // Time in seconds
-    blackTime = parseInt(document.getElementById("initial_black_time").value); // Time in seconds
+    const gameId = document.getElementById("game_id").value;
     const increment = parseInt(document.getElementById("time_increment").value);
 
     let whiteTimerElement = document.getElementById("white-timer");
@@ -12,12 +11,21 @@ document.addEventListener("DOMContentLoaded", function() {
     let whiteInterval, blackInterval;
     let gameOver = false;
 
+    const COUNTER_KEY_WHITE = `white-counter-${gameId}`;
+    const COUNTER_KEY_BLACK = `black-counter-${gameId}`;
+
+    function saveToSessionStorage() {
+        window.sessionStorage.setItem(COUNTER_KEY_WHITE, whiteTime);
+        window.sessionStorage.setItem(COUNTER_KEY_BLACK, blackTime);
+    }
+
     function startTimer(turn) {
+        clearInterval(whiteInterval);
+        clearInterval(blackInterval);
+
         if (turn === 'white') {
-            clearInterval(blackInterval);
             whiteInterval = setInterval(() => updateTimer('white'), 1000);
         } else {
-            clearInterval(whiteInterval);
             blackInterval = setInterval(() => updateTimer('black'), 1000);
         }
     }
@@ -40,6 +48,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 blackTimerElement.textContent = formatTime(blackTime);
             }
         }
+        saveToSessionStorage();
     }
 
     function formatTime(time) {
@@ -58,29 +67,16 @@ document.addEventListener("DOMContentLoaded", function() {
         alert(message);
     }
 
-    const gameId = document.getElementById("game_id").value;
-    let turn = document.getElementById("turn").value;
+    function initializeTimers() {
+        whiteTime = parseInt(window.sessionStorage.getItem(COUNTER_KEY_WHITE)) || parseInt(document.getElementById("initial_white_time").value) * 60;
+        blackTime = parseInt(window.sessionStorage.getItem(COUNTER_KEY_BLACK)) || parseInt(document.getElementById("initial_black_time").value) * 60;
 
-    const socket = new WebSocket(`ws://${window.location.host}/ws/game/${gameId}/`);
+        whiteTimerElement.textContent = formatTime(whiteTime);
+        blackTimerElement.textContent = formatTime(blackTime);
 
-    socket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-        turn = data.turn;
+        let turn = document.getElementById("turn").value;
+        startTimer(turn);
+    }
 
-        whiteTime = data.white_time_remaining;
-        blackTime = data.black_time_remaining;
-
-        document.getElementById("turn").value = turn;
-        document.getElementById("turn-display").innerText = turn;
-
-        // Update the timer
-        if (data.turn === 'white') {
-            blackTime += increment;
-        } else {
-            whiteTime += increment;
-        }
-        startTimer(data.turn);
-    };
-
-    startTimer(turn);
+    initializeTimers();
 });

@@ -23,17 +23,22 @@
         <div id="promotion-container"></div>
     </div>
     <div class="timer-container">
-        <div>Time: {{context.duration}}:{{context.increment}}</div>
-        <div id="white-timer" class="timer white-timer">{{context.white_time_remaining}}</div>
-        <div id="black-timer" class="timer black-timer">{{context.black_time_remaining}}</div>
+            <div id="timers">
+                <div> Time: {{context.duration}}:{{context.increment}} </div>
+                <div id="white-timer" class="timer white-timer"> {{context.duration}} </div>
+                <div id="black-timer" class="timer black-timer"> {{context.duration}} </div>
+            </div>
+        </div>
     </div>
 </div>
+
 <input type="hidden" id="game_id" value="{{ context.game_id }}">
 <input type="hidden" id="user_role" value="{{ context.user_role }}">
 <input type="hidden" id="turn" value="{{ context.turn }}">
-<input type="hidden" id="initial_white_time" value="{{ context.white_time_remaining }}">
-<input type="hidden" id="initial_black_time" value="{{ context.black_time_remaining }}">
+<input type="hidden" id="initial_white_time" value="{{ context.duration }}">
+<input type="hidden" id="initial_black_time" value="{{ context.duration }}">
 <input type="hidden" id="time_increment" value="{{ context.increment }}">
+
 <script src="{% static 'js/chess_interactions.js' %}"></script>
 <script src="{% static 'js/timer.js' %}"></script>
 {% endblock %}
