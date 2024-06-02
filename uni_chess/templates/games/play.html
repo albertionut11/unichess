@@ -4,12 +4,12 @@
 
 {% block content %}
 <div class="game-container">
-    <div class="chat-container">
+    <div class="chat-container box">
         <p><a href="{% url 'games' %}"> GAMES </a></p>
-        <div id="chat-box">Chat</div>
+        <div id="chat-box" class="chat-container box">Game Chat</div>
     </div>
-    <div class="board-container">
-        <p>Turn: <span id="turn-display">{{ context.turn }}</span></p>
+    <div class="board-container box">
+        <p class="info-box">Turn: <span id="turn-display">{{ context.turn }}</span></p>
         <div id="checkmate-message" class="checkmate-message">
             {% if context.checkmate %}
                 Checkmate: {{ context.checkmate }} wins!
@@ -22,11 +22,13 @@
         </div>
         <div id="promotion-container"></div>
     </div>
-    <div class="timer-container">
+    <div class="timer-container box">
         <div id="timers">
-            <div> Time: {{context.duration}}:{{context.increment}} </div>
-            <div id="white-timer" class="timer white-timer"> {{context.duration}} </div>
-            <div id="black-timer" class="timer black-timer"> {{context.duration}} </div>
+            <div class="time-format-box">Time Format: {{context.duration}}+{{context.increment}}</div>
+            <div class="username-box">White: {{ context.white_username }}</div>
+            <div id="white-timer" class="timer white-timer">{{context.duration}}</div>
+            <div id="black-timer" class="timer black-timer">{{context.duration}}</div>
+            <div class="username-box">Black: {{ context.black_username }}</div>
         </div>
     </div>
 </div>
