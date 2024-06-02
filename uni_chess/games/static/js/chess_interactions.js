@@ -40,10 +40,10 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         updateDraggable();
-        console.log("DATA:" ,data);
+        console.log("DATA:", data);
 
         if (data.promotion) {
-            const promotionColor = turn === "white" ? "b" : "w"
+            const promotionColor = turn === "white" ? "b" : "w";
             console.log('Promotion to', promotionColor + data.promotion);
             promotePawn(to, promotionColor + data.promotion);
         }
@@ -52,6 +52,11 @@ document.addEventListener("DOMContentLoaded", function() {
             console.log('onMessage here');
             displayCheckmateMessage(turn);
         }
+
+        // Update timers
+        whiteTime = data.white_time_remaining;
+        blackTime = data.black_time_remaining;
+        startTimer(data.turn);
     };
 
     function updateDraggable() {
@@ -122,7 +127,7 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-         // Check for pawn promotion situation
+        // Check for pawn promotion situation
         if (isPawnPromotion(piece, toPosition)) {
             showPromotionOptions(fromPosition, toPosition, targetSquare);
         } else {
@@ -130,7 +135,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-     function handleClick(e) {
+    function handleClick(e) {
         const piece = e.target;
         const fromPosition = piece.parentNode.getAttribute("data-position");
 
@@ -212,7 +217,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-
     function makeMove(fromPosition, toPosition, targetSquare, promotion = null) {
         fetch(`/move_piece/${gameId}`, {
             method: "POST",
@@ -220,7 +224,14 @@ document.addEventListener("DOMContentLoaded", function() {
                 "Content-Type": "application/json",
                 "X-CSRFToken": getCookie("csrftoken"),
             },
-            body: JSON.stringify({ from: fromPosition, to: toPosition, turn: turn, promotion: promotion }),
+            body: JSON.stringify({
+                from: fromPosition,
+                to: toPosition,
+                turn: turn,
+                promotion: promotion,
+                white_time_remaining: whiteTime,
+                black_time_remaining: blackTime
+            }),
         })
         .then(response => response.json())
         .then(data => {
@@ -258,9 +269,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function isPawnPromotion(piece, toPosition) {
-        // const pieceSrc = piece.getAttribute("src"); // cheap workaround around wrong data-piece data for bishop promotion
-        // const pieceTypeSrc = pieceSrc.slice(-5)[0];
-        // console.log(pieceTypeSrc);
         const pieceType = piece.getAttribute("data-piece");
         const toRow = toPosition[0];
         return pieceType === "P" && ((userRole === "white" && toRow === "8") || (userRole === "black" && toRow === "1"));
@@ -282,25 +290,16 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-     function performCastlingMove(castling, from) {
-         // const kingColor = turn === "white" ? "b" : "w";
+    function performCastlingMove(castling, from) {
+        let rookFrom = from[0] + "h";
+        let kingTo = from[0] + "g";
+        let rookTo = from[0] + "f";
 
-         console.log("from", from);
-         console.log("castling", castling);
-         // kingside castle
-         let rookFrom = from[0] + "h";
-         let kingTo = from[0] + "g";
-         let rookTo = from[0] + "f";
-
-         if (castling === "Q") {
-             rookFrom = from[0] + "a";
-             kingTo = from[0] + "c";
-             rookTo = from[0] + "d";
-         }
-
-         console.log("rookFrom", rookFrom);
-         console.log("kingTo", kingTo);
-         console.log("rookTo", rookTo);
+        if (castling === "Q") {
+            rookFrom = from[0] + "a";
+            kingTo = from[0] + "c";
+            rookTo = from[0] + "d";
+        }
 
         const king = document.querySelector(`td[data-position="${from}"] img`);
         const rook = document.querySelector(`td[data-position="${rookFrom}"] img`);
@@ -315,7 +314,6 @@ document.addEventListener("DOMContentLoaded", function() {
         rookTargetSquare.appendChild(rook);
         clearHighlights();
     }
-
 
     function resetSquare(position) {
         const square = document.querySelector(`td[data-position="${position}"]`);

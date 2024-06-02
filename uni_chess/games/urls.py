@@ -12,4 +12,5 @@ urlpatterns = [
     path('move_piece/<int:game_id>', views.move_piece, name='move_piece'),
     path('get_moves/<int:game_id>', views.get_moves, name='get_moves'),
     path('tournaments', views.get_tournaments, name='tournaments'),
-    path('tournaments/<int:id>', views.tournament_info, name='tournament_info')]
+    path('tournaments/<int:id>', views.tournament_info, name='tournament_info'),
+    path('save_time/<int:game_id>/', views.save_time, name='save_time')]
