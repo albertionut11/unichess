@@ -22,9 +22,10 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        from_pos = data['from']
-        to_pos = data['to']
-        turn = data['turn']
+        print(data)
+        from_pos = data.get('from', False)
+        to_pos = data.get('to', False)
+        turn = data.get('turn', False)
         enPassant = data.get('enPassant', False)
         checkmate = data.get('checkmate', False)
         promotion = data.get('promotion', False)
@@ -52,6 +53,7 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def game_move(self, event):
         # Send move to WebSocket
         await self.send(text_data=json.dumps({
+            'type': 'game_move',
             'from': event['from'],
             'to': event['to'],
             'turn': event['turn'],
@@ -61,4 +63,20 @@ class GameConsumer(AsyncWebsocketConsumer):
             'castling': event['castling'],
             'white_time_remaining': event['white_time_remaining'],
             'black_time_remaining': event['black_time_remaining']
+        }))
+
+    async def draw_offer(self, event):
+        from_user = event['from']
+        to_user = event['to']
+        await self.send(text_data=json.dumps({
+            'type': 'draw_offer',
+            'from': from_user,
+            'to': to_user
+        }))
+
+    async def end_game(self, event):
+        message = event['message']
+        await self.send(text_data=json.dumps({
+            'type': 'end_game',
+            'message': message
         }))

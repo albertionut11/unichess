@@ -3,6 +3,13 @@ let whiteTimerElement;
 let blackTimerElement;
 
 document.addEventListener("DOMContentLoaded", function() {
+
+    const isActive = document.getElementById("is_active").value === "True";
+    if (!isActive) {
+        document.getElementById("endgame-message").style.display = "block";
+        return;
+    }
+
     pieces = document.querySelectorAll("img[draggable='true']");
     const squares = document.querySelectorAll("td[data-position]");
     const gameId = document.getElementById("game_id").value;
@@ -20,51 +27,59 @@ document.addEventListener("DOMContentLoaded", function() {
 
     socket.onmessage = function(e) {
         const data = JSON.parse(e.data);
-        const from = data.from;
-        const to = data.to;
-        turn = data.turn;
-        const enPassant = data.enPassant || false;
 
-        document.getElementById("turn").value = turn;
-        document.getElementById("turn-display").innerText = turn;
+        const messageType = data.type;
 
-        const piece = document.querySelector(`td[data-position="${from}"] img`);
-        const targetSquare = document.querySelector(`td[data-position="${to}"]`);
-
-        if (enPassant) {
-            const fromRow = from[0];
-            const capturedPosition = fromRow + to[1];
-            resetSquare(capturedPosition);
+        if (messageType === 'end_game') {
+            displayEndgameMessage(data.message);
         }
+        else {
+            const from = data.from;
+            const to = data.to;
+            turn = data.turn;
+            const enPassant = data.enPassant || false;
 
-        if (data.castling) {
-            performCastlingMove(data.castling, from);
-        } else {
-            resetSquare(from);
-            resetSquare(to);
-            targetSquare.appendChild(piece);
+            document.getElementById("turn").value = turn;
+            document.getElementById("turn-display").innerText = turn;
+
+            const piece = document.querySelector(`td[data-position="${from}"] img`);
+            const targetSquare = document.querySelector(`td[data-position="${to}"]`);
+
+            if (enPassant) {
+                const fromRow = from[0];
+                const capturedPosition = fromRow + to[1];
+                resetSquare(capturedPosition);
+            }
+
+            if (data.castling) {
+                performCastlingMove(data.castling, from);
+            } else {
+                resetSquare(from);
+                resetSquare(to);
+                targetSquare.appendChild(piece);
+            }
+
+            updateDraggable();
+            console.log("DATA:", data);
+
+            if (data.promotion) {
+                const promotionColor = turn === "white" ? "b" : "w";
+                console.log('Promotion to', promotionColor + data.promotion);
+                promotePawn(to, promotionColor + data.promotion);
+            }
+
+            if (data.checkmate) {
+                const winner = turn === "white" ? "Black" : "White";
+                displayEndgameMessage(`Checkmate! ${winner} wins!`);
+            }
+
+            // Update timers
+            whiteTime = data.white_time_remaining;
+            blackTime = data.black_time_remaining;
+            whiteTimerElement.textContent = formatTime(whiteTime);
+            blackTimerElement.textContent = formatTime(blackTime);
+            startTimer(data.turn);
         }
-
-        updateDraggable();
-        console.log("DATA:", data);
-
-        if (data.promotion) {
-            const promotionColor = turn === "white" ? "b" : "w";
-            console.log('Promotion to', promotionColor + data.promotion);
-            promotePawn(to, promotionColor + data.promotion);
-        }
-
-        if (data.checkmate) {
-            console.log('onMessage here');
-            displayCheckmateMessage(turn);
-        }
-
-        // Update timers
-        whiteTime = data.white_time_remaining;
-        blackTime = data.black_time_remaining;
-        whiteTimerElement.textContent = formatTime(whiteTime);
-        blackTimerElement.textContent = formatTime(blackTime);
-        startTimer(data.turn);
     };
 
     function updateDraggable() {
@@ -329,11 +344,20 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    function displayCheckmateMessage(turn) {
-        const winner = turn === "white" ? "Black" : "White";
-        const messageDiv = document.getElementById("checkmate-message");
-        messageDiv.innerText = `Checkmate: ${winner} wins!`;
-        messageDiv.classList.add("checkmate-message");
+    function displayEndgameMessage(message) {
+        const messageDiv = document.getElementById("endgame-message");
+        messageDiv.innerText = message;
+        messageDiv.classList.add("endgame-message");
+        messageDiv.style.display = "block"; // Ensure the message is displayed
+        pieces.forEach(piece => {
+            piece.removeEventListener("dragstart", dragStart);
+            piece.removeEventListener("click", handleClick);
+            piece.setAttribute("draggable", false);
+        });
+        document.getElementById("resign-button").disabled = true;
+        document.getElementById("offer-draw-button").disabled = true;
+        clearInterval(whiteInterval);
+        clearInterval(blackInterval);
     }
 
     function getCookie(name) {
@@ -384,4 +408,72 @@ document.addEventListener("DOMContentLoaded", function() {
             blackInterval = setInterval(() => updateTimer('black'), 1000);
         }
     };
+
+    document.getElementById("resign-button").addEventListener("click", function() {
+        if (confirm("Are you sure you want to resign?")) {
+            fetch(`/resign/${gameId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken")
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "ok") {
+                    const message = `${data.loser} resigns! ${data.winner} wins!`;
+                    displayEndgameMessage(message);
+
+                } else {
+                    console.error("Failed to resign");
+                }
+            });
+        }
+    });
+
+     document.getElementById("offer-draw-button").addEventListener("click", function() {
+        fetch(`/offer_draw/${gameId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken")
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "ok") {
+                alert("Draw offer sent. Waiting for opponent's response...");
+                setTimeout(() => {
+                    fetch(`/check_draw_offer/${gameId}`, {
+                        method: "GET"
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "expired") {
+                            alert("Draw offer expired.");
+                        }
+                    });
+                }, 30000); // 30 seconds expiry
+            } else {
+                console.error("Failed to offer draw");
+            }
+        });
+    });
+
+    function handleDrawResponse(response) {
+        if (response.status === "accepted") {
+            displayEndgameMessage("Draw agreed.");
+            game.isActive = 0;
+            pieces.forEach(piece => {
+                piece.removeEventListener("dragstart", dragStart);
+                piece.removeEventListener("click", handleClick);
+                piece.setAttribute("draggable", false);
+            });
+            clearInterval(whiteInterval);
+            clearInterval(blackInterval);
+        } else if (response.status === "declined") {
+            alert("Draw offer declined.");
+        }
+    }
+
 });
