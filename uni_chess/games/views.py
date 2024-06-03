@@ -258,12 +258,15 @@ def resign(request, game_id):
 
 @csrf_exempt
 def offer_draw(request, game_id):
-    breakpoint()
+    data = json.loads(request.body)
+    turn = data['turn']
+
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
         f'game_{game_id}',
         {
             'type': 'offer_draw',
+            'turn': turn
         }
     )
 
@@ -272,7 +275,6 @@ def offer_draw(request, game_id):
 
 @csrf_exempt
 def cancel_draw(request, game_id):
-    breakpoint()
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
         f'game_{game_id}',

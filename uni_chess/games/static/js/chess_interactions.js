@@ -33,6 +33,15 @@ document.addEventListener("DOMContentLoaded", function() {
         if (messageType === 'end_game') {
             displayEndgameMessage(data.message);
         }
+        else if (messageType === 'offer_draw') {
+            const offerDrawButton = document.getElementById("offer-draw-button");
+            turn = data.turn;
+            console.log(userRole);
+            console.log(turn);
+            if (userRole !== turn){
+                offerDrawButton.textContent = "Accept Draw";
+            }
+        }
         else if (messageType === 'cancel_draw') {
             const offerDrawButton = document.getElementById("offer-draw-button");
             offerDrawButton.textContent = "Offer Draw";
@@ -445,12 +454,14 @@ document.addEventListener("DOMContentLoaded", function() {
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRFToken": getCookie("csrftoken")
-                }
+                },
+                body: JSON.stringify ({
+                    turn: userRole
+                })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.status === "ok") {
-                    alert("Draw offer sent. Waiting for opponent's response...");
                     offerDrawButton.textContent = "Cancel Draw";
                 } else {
                     console.error("Failed to offer draw");
@@ -493,7 +504,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     function handleDrawResponse() {
-        displayEndgameMessage("Draw agreed.");
+        displayEndgameMessage("Game drawn!");
         disableInteraction();
     }
 

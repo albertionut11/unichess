@@ -51,6 +51,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         )
 
     async def game_move(self, event):
+        print("in game move")
         # Send move to WebSocket
         await self.send(text_data=json.dumps({
             'type': 'game_move',
@@ -73,26 +74,18 @@ class GameConsumer(AsyncWebsocketConsumer):
         }))
 
     async def offer_draw(self, event):
-        print('here')
-        await self.channel_layer.group_send(
-            self.game_group_name,
-            {
-                'type': 'offer_draw',
-            }
-        )
+        turn = event['turn']
+        await self.send(text_data=json.dumps({
+            'type': 'offer_draw',
+            'turn': turn
+        }))
 
     async def accept_draw(self, event):
-        await self.channel_layer.group_send(
-            self.game_group_name,
-            {
-                'type': 'accept_draw',
-            }
-        )
+        await self.send(text_data=json.dumps({
+            'type': 'accept_draw',
+        }))
 
     async def cancel_draw(self, event):
-        await self.channel_layer.group_send(
-            self.game_group_name,
-            {
-                'type': 'cancel_draw',
-            }
-        )
+        await self.send(text_data=json.dumps({
+            'type': 'cancel_draw',
+        }))
