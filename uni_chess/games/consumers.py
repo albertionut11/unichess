@@ -22,7 +22,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        print(data)
+        print("WE ARE HERE")
         from_pos = data.get('from', False)
         to_pos = data.get('to', False)
         turn = data.get('turn', False)
@@ -65,18 +65,34 @@ class GameConsumer(AsyncWebsocketConsumer):
             'black_time_remaining': event['black_time_remaining']
         }))
 
-    async def draw_offer(self, event):
-        from_user = event['from']
-        to_user = event['to']
-        await self.send(text_data=json.dumps({
-            'type': 'draw_offer',
-            'from': from_user,
-            'to': to_user
-        }))
-
     async def end_game(self, event):
         message = event['message']
         await self.send(text_data=json.dumps({
             'type': 'end_game',
             'message': message
         }))
+
+    async def offer_draw(self, event):
+        print('here')
+        await self.channel_layer.group_send(
+            self.game_group_name,
+            {
+                'type': 'offer_draw',
+            }
+        )
+
+    async def accept_draw(self, event):
+        await self.channel_layer.group_send(
+            self.game_group_name,
+            {
+                'type': 'accept_draw',
+            }
+        )
+
+    async def cancel_draw(self, event):
+        await self.channel_layer.group_send(
+            self.game_group_name,
+            {
+                'type': 'cancel_draw',
+            }
+        )

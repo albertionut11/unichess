@@ -27,11 +27,18 @@ document.addEventListener("DOMContentLoaded", function() {
 
     socket.onmessage = function(e) {
         const data = JSON.parse(e.data);
-
+        console.log("DATA SENT:", data);
         const messageType = data.type;
 
         if (messageType === 'end_game') {
             displayEndgameMessage(data.message);
+        }
+        else if (messageType === 'cancel_draw') {
+            const offerDrawButton = document.getElementById("offer-draw-button");
+            offerDrawButton.textContent = "Offer Draw";
+        }
+        else if (messageType === 'accept_draw') {
+            handleDrawResponse();
         }
         else {
             const from = data.from;
@@ -60,7 +67,6 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             updateDraggable();
-            console.log("DATA:", data);
 
             if (data.promotion) {
                 const promotionColor = turn === "white" ? "b" : "w";
@@ -431,49 +437,75 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-     document.getElementById("offer-draw-button").addEventListener("click", function() {
-        fetch(`/offer_draw/${gameId}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCookie("csrftoken")
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === "ok") {
-                alert("Draw offer sent. Waiting for opponent's response...");
-                setTimeout(() => {
-                    fetch(`/check_draw_offer/${gameId}`, {
-                        method: "GET"
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === "expired") {
-                            alert("Draw offer expired.");
-                        }
-                    });
-                }, 30000); // 30 seconds expiry
-            } else {
-                console.error("Failed to offer draw");
-            }
-        });
+    document.getElementById("offer-draw-button").addEventListener("click", function() {
+        const offerDrawButton = document.getElementById("offer-draw-button");
+        if (offerDrawButton.textContent === "Offer Draw") {
+            fetch(`/offer_draw/${gameId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken")
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "ok") {
+                    alert("Draw offer sent. Waiting for opponent's response...");
+                    offerDrawButton.textContent = "Cancel Draw";
+                } else {
+                    console.error("Failed to offer draw");
+                }
+            });
+        } else if (offerDrawButton.textContent === "Cancel Draw"){
+            fetch(`/cancel_draw/${gameId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken")
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "ok") {
+                    offerDrawButton.textContent = "Offer Draw";
+                } else {
+                    console.error("Failed to cancel draw offer");
+                }
+            });
+        }
+        else {
+            fetch(`/accept_draw/${gameId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken")
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "ok") {
+                    handleDrawResponse();
+                } else {
+                    console.error("Failed to cancel draw offer");
+                }
+            });
+        }
     });
 
-    function handleDrawResponse(response) {
-        if (response.status === "accepted") {
-            displayEndgameMessage("Draw agreed.");
-            game.isActive = 0;
-            pieces.forEach(piece => {
-                piece.removeEventListener("dragstart", dragStart);
-                piece.removeEventListener("click", handleClick);
-                piece.setAttribute("draggable", false);
-            });
-            clearInterval(whiteInterval);
-            clearInterval(blackInterval);
-        } else if (response.status === "declined") {
-            alert("Draw offer declined.");
-        }
+    function handleDrawResponse() {
+        displayEndgameMessage("Draw agreed.");
+        disableInteraction();
     }
 
+    function disableInteraction() {
+        pieces.forEach(piece => {
+            piece.removeEventListener("dragstart", dragStart);
+            piece.removeEventListener("click", handleClick);
+            piece.setAttribute("draggable", false);
+        });
+        document.getElementById("resign-button").disabled = true;
+        document.getElementById("offer-draw-button").disabled = true;
+        clearInterval(whiteInterval);
+        clearInterval(blackInterval);
+    }
 });

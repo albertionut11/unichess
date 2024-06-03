@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     socket.onmessage = function(e) {
             const data = JSON.parse(e.data);
-            if (data.type !== "end_game"){
+            if (data.type === "game_move"){
                         let turn = data.turn;
             console.log(data);
 

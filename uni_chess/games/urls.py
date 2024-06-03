@@ -16,5 +16,7 @@ urlpatterns = [
     path('save_time/<int:game_id>/', views.save_time, name='save_time'),
     path('get_timer_state/<int:game_id>/', views.get_timer_state, name='get_timer_state'),
     path('resign/<int:game_id>', views.resign, name='resign'),
-    path('offer_draw/<int:game_id>/', views.offer_draw, name='offer_draw'),
+    path('offer_draw/<int:game_id>', views.offer_draw, name='offer_draw'),
+    path('cancel_draw/<int:game_id>', views.cancel_draw, name='cancel_draw'),
+    path('accept_draw/<int:game_id>', views.accept_draw, name='accept_draw'),
 ]

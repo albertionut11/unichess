@@ -256,31 +256,54 @@ def resign(request, game_id):
     print(winner, loser)
     return JsonResponse({"status": "ok", "winner": winner, "loser": loser})
 
-@login_required
 @csrf_exempt
 def offer_draw(request, game_id):
-    game = get_object_or_404(Game, pk=game_id)
-    opponent = game.black if request.user == game.white else game.white
-    # Notify the opponent about the draw offer
+    breakpoint()
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
         f'game_{game_id}',
         {
-            'type': 'draw_offer',
-            'from': request.user.username,
-            'to': opponent.username
+            'type': 'offer_draw',
         }
     )
+
     return JsonResponse({"status": "ok"})
 
 
-@login_required
 @csrf_exempt
-def check_draw_offer(request, game_id):
-    # Check if the draw offer is still valid or expired
+def cancel_draw(request, game_id):
+    breakpoint()
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f'game_{game_id}',
+        {
+            'type': 'cancel_draw',
+        }
+    )
+
+    return JsonResponse({"status": "ok"})
+
+
+@csrf_exempt
+def accept_draw(request, game_id):
     game = get_object_or_404(Game, pk=game_id)
-    # Logic to check draw offer status (e.g., expiry)
-    return JsonResponse({"status": "expired"})
+    if game.isActive:
+        game.result = 0
+        game.endgame = 'draw'
+        game.isActive = False
+        game.save()
+
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f'game_{game.id}',
+            {
+                'type': 'accept_draw'
+            }
+        )
+
+        return JsonResponse({"status": "ok"})
+    return JsonResponse({"status": "fail"})
+
 
 @login_required
 def get_games(request):
