@@ -70,7 +70,7 @@ class Board:
             '1': {'a': Rook('white'), 'b': Knight('white'), 'c': Bishop('white'), 'd': Queen('white'), 'e': King('white'), 'f': Bishop('white'), 'g': Knight('white'), 'h': Rook('white')},
         }
 
-        # self.pp_table()
+        # self.stalemate_table()
 
     def pp_table(self):
         self.table = {
@@ -96,6 +96,21 @@ class Board:
             '3': {'a': Queen('white'), 'b': Knight('white'), 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
             '2': {'a': Pawn('white'), 'b': Pawn('white'), 'c': Pawn('white'), 'd': Pawn('white'), 'e': Pawn('white'), 'f': Pawn('white'), 'g': Pawn('white'), 'h': Pawn('white')},
             '1': {'a': Rook('white'), 'b': None, 'c': None, 'd': None, 'e': King('white'), 'f': None, 'g': None, 'h': Rook('white')},
+        }
+
+    def stalemate_table(self):
+        self.table = {
+            '8': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '7': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '6': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '5': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '4': {'a': None, 'b': King('white'), 'c': None, 'd': None, 'e': None, 'f': King('black'), 'g': None,
+                  'h': None},
+            '3': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '2': {'a': Pawn('black'), 'b': Pawn('black'), 'c': Pawn('black'), 'd': Pawn('black'),
+                  'e': Pawn('black'),
+                  'f': Pawn('black'), 'g': Pawn('black'), 'h': Pawn('black')},
+            '1': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
         }
 
     def render(self, context):

@@ -51,8 +51,6 @@ class GameConsumer(AsyncWebsocketConsumer):
         )
 
     async def game_move(self, event):
-        print("in game move")
-        # Send move to WebSocket
         await self.send(text_data=json.dumps({
             'type': 'game_move',
             'from': event['from'],

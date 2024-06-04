@@ -62,7 +62,6 @@ document.addEventListener("DOMContentLoaded", function() {
         const messageDiv = document.getElementById("endgame-message");
         messageDiv.innerText = message;
         messageDiv.classList.add("checkmate-message");
-        alert(message);
     }
 
     function initializeTimers() {

@@ -68,6 +68,8 @@ class PlayView(LoginRequiredMixin, TemplateView):
                 context['endgame_message'] = f"Checkmate! {winner} wins!"
             elif game.endgame == 'resign':
                 context['endgame_message'] = f"{loser} resigns! {winner} wins!"
+            elif game.endgame == 'stalemate':
+                context['endgame_message'] = "Stalemate!"
 
         return {'context': context}
 
@@ -140,13 +142,11 @@ def move_piece(request, game_id):
             game.black_time_remaining = data.get("black_time_remaining")
 
         game.save()
-
         # perform move on the table to be able to correctly check for checkmate
         play.board.make_move(from_pos[0], from_pos[1], to_pos[0], to_pos[1], promotion, C)
-        checkmate = False
+        checkmate = ''
         if play.board.is_king_in_check(new_turn):
-            if play.is_checkmate(new_turn):
-                checkmate = True
+            checkmate = play.is_checkmate(new_turn)
 
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
@@ -165,8 +165,11 @@ def move_piece(request, game_id):
             }
         )
 
-        if checkmate:
-            game.endgame = 'checkmate'
+        if checkmate != 'false':
+            if checkmate == 'true':
+                game.endgame = 'checkmate'
+            else:
+                game.endgame = checkmate
             game.save()
             return JsonResponse({"status": "ok", "winner": turn})
 

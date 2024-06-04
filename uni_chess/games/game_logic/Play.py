@@ -11,9 +11,9 @@ class Play:
             self.board.new_table()
         else:
             self.board.load_table(self.data)
-            if self.is_checkmate("white"):
+            if self.is_checkmate("white") == 'true':
                 self.checkmate = "Black"
-            elif self.is_checkmate("black"):
+            elif self.is_checkmate("black") == 'true':
                 self.checkmate = "White"
 
     def getMoves(self, from_row, from_col):
@@ -33,8 +33,8 @@ class Play:
                     moves, _, _ = piece.getSafeMoves(self.board, row, col)
                     if moves:
                         # print(piece.__str__, row, col, moves)
-                        return False
-        return True if self.board.is_king_in_check(color) else False
+                        return 'false'
+        return 'true' if self.board.is_king_in_check(color) else 'stalemate'
 
     def getAllMoves(self, from_row, from_col):
         moves = []

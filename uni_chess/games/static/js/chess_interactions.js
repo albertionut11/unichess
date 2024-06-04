@@ -83,9 +83,14 @@ document.addEventListener("DOMContentLoaded", function() {
                 promotePawn(to, promotionColor + data.promotion);
             }
 
-            if (data.checkmate) {
+            if (data.checkmate == 'true') {
+                console.log('here');
+                console.log(data.checkmate);
                 const winner = turn === "white" ? "Black" : "White";
                 displayEndgameMessage(`Checkmate! ${winner} wins!`);
+            }
+            else if (data.checkmate == 'stalemate'){
+                displayEndgameMessage("Stalemate!")
             }
 
             // Update timers
