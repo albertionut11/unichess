@@ -3,6 +3,7 @@ import json
 import uuid
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
@@ -14,7 +15,7 @@ from django.utils import timezone
 
 from .game_logic.Play import Play
 from .models import Game, Tournament
-from .forms import GameForm
+from .forms import GameForm, SignUpForm
 
 
 @login_required
@@ -308,6 +309,21 @@ def accept_draw(request, game_id):
 
         return JsonResponse({"status": "ok"})
     return JsonResponse({"status": "fail"})
+
+
+def register(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            return redirect('home')
+    else:
+        form = SignUpForm()
+    return render(request, 'registration/register.html', {'form': form})
 
 
 @login_required

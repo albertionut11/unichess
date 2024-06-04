@@ -4,21 +4,30 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock %}</title>
-    <link rel="stylesheet"
-          href="{% static 'website/style.css' %}">
+    <link rel="stylesheet" href="{% static 'website/style.css' %}">
 </head>
 <body>
-    {% if user.is_authenticated %}
-    Logged in as: {{ user.get_username }}
-    <form method="post" action="{% url 'logout' %}" style="float:right">
-        {% csrf_token %}
-        <button type="submit">Logout</button>
-    </form>
-    {% else %}
-        <a href="{% url 'login' %}">Login</a>
-    {% endif %}
+    <header class="navbar">
+        <div class="container">
+            {% if user.is_authenticated %}
+            <div class="auth-controls">
+                <div class="user-info">
+                    Logged in as: <strong>{{ user.get_username }}</strong>
+                </div>
+                <form method="post" action="{% url 'logout' %}" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button">Logout</button>
+                </form>
+            </div>
+            {% else %}
+            <a href="{% url 'login' %}" class="login-link">Login</a>
+            {% endif %}
+        </div>
+    </header>
 
-    {% block content %}
-    {% endblock %}
+    <div class="main-content">
+        {% block content %}
+        {% endblock %}
+    </div>
 </body>
 </html>
