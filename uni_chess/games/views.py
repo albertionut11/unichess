@@ -25,6 +25,7 @@ def create(request):
             game = form.save(commit=False)
             game.white_time_remaining = game.duration * 60  # Initialize time in seconds
             game.black_time_remaining = game.duration * 60  # Initialize time in seconds
+            game.isActive = 1
             game.save()
             return redirect("game_play", game_id=game.id)
     else:
@@ -53,9 +54,22 @@ class PlayView(LoginRequiredMixin, TemplateView):
         context['black_time_remaining'] = game.black_time_remaining
         context['white_username'] = game.white
         context['black_username'] = game.black
+        context['is_active'] = game.isActive
 
         if play.checkmate:
             context['checkmate'] = play.checkmate
+
+        if not game.isActive:
+            winner = "Black" if game.turn == "white" else "Black"
+            loser = "White" if game.turn == "white" else "White"
+            if game.endgame == 'draw':
+                context['endgame_message'] = "Game drawn!"
+            elif game.endgame == 'checkmate':
+                context['endgame_message'] = f"Checkmate! {winner} wins!"
+            elif game.endgame == 'resign':
+                context['endgame_message'] = f"{loser} resigns! {winner} wins!"
+            elif game.endgame == 'stalemate':
+                context['endgame_message'] = "Stalemate!"
 
         return {'context': context}
 
@@ -128,13 +142,11 @@ def move_piece(request, game_id):
             game.black_time_remaining = data.get("black_time_remaining")
 
         game.save()
-
         # perform move on the table to be able to correctly check for checkmate
         play.board.make_move(from_pos[0], from_pos[1], to_pos[0], to_pos[1], promotion, C)
-        checkmate = False
+        checkmate = ''
         if play.board.is_king_in_check(new_turn):
-            if play.is_checkmate(new_turn):
-                checkmate = True
+            checkmate = play.is_checkmate(new_turn)
 
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
@@ -153,7 +165,12 @@ def move_piece(request, game_id):
             }
         )
 
-        if checkmate:
+        if checkmate != 'false':
+            if checkmate == 'true':
+                game.endgame = 'checkmate'
+            else:
+                game.endgame = checkmate
+            game.save()
             return JsonResponse({"status": "ok", "winner": turn})
 
         return JsonResponse({"status": "ok", "new_turn": new_turn, "enPassant": EP, "castling": C})
@@ -209,6 +226,88 @@ def get_timer_state(request, game_id):
         'white_time_remaining': game.white_time_remaining,
         'black_time_remaining': game.black_time_remaining
     })
+
+
+@login_required
+@csrf_exempt
+def resign(request, game_id):
+    game = get_object_or_404(Game, pk=game_id)
+    if request.user == game.white:
+        winner = "Black"
+        loser = "White"
+    elif request.user == game.black:
+        winner = "White"
+        loser = "Black"
+    else:
+        return JsonResponse({"status": "fail"})
+
+    game.isActive = False
+    game.endgame = "resign"
+    game.save()
+
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f'game_{game_id}',
+        {
+            'type': 'end_game',
+            'winner': winner,
+            'loser': loser,
+            'message': f'{loser} resigns! {winner} wins!'
+        }
+    )
+
+    print(winner, loser)
+    return JsonResponse({"status": "ok", "winner": winner, "loser": loser})
+
+@csrf_exempt
+def offer_draw(request, game_id):
+    data = json.loads(request.body)
+    turn = data['turn']
+
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f'game_{game_id}',
+        {
+            'type': 'offer_draw',
+            'turn': turn
+        }
+    )
+
+    return JsonResponse({"status": "ok"})
+
+
+@csrf_exempt
+def cancel_draw(request, game_id):
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f'game_{game_id}',
+        {
+            'type': 'cancel_draw',
+        }
+    )
+
+    return JsonResponse({"status": "ok"})
+
+
+@csrf_exempt
+def accept_draw(request, game_id):
+    game = get_object_or_404(Game, pk=game_id)
+    if game.isActive:
+        game.result = 0
+        game.endgame = 'draw'
+        game.isActive = False
+        game.save()
+
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f'game_{game.id}',
+            {
+                'type': 'accept_draw'
+            }
+        )
+
+        return JsonResponse({"status": "ok"})
+    return JsonResponse({"status": "fail"})
 
 
 @login_required

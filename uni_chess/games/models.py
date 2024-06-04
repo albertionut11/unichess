@@ -26,6 +26,7 @@ class Game(models.Model):
     data = models.CharField(max_length=1000, default='')
     isActive = models.BooleanField(default=True)
     turn = models.CharField(max_length=10, default='white')
+    endgame = models.CharField(max_length=100, default='')
 
     def __str__(self):
         return f"Game between White: {self.white} and Black: {self.black}"

@@ -3,6 +3,13 @@ let whiteTimerElement;
 let blackTimerElement;
 
 document.addEventListener("DOMContentLoaded", function() {
+
+    const isActive = document.getElementById("is_active").value === "True";
+    if (!isActive) {
+        document.getElementById("endgame-message").style.display = "block";
+        return;
+    }
+
     pieces = document.querySelectorAll("img[draggable='true']");
     const squares = document.querySelectorAll("td[data-position]");
     const gameId = document.getElementById("game_id").value;
@@ -20,51 +27,79 @@ document.addEventListener("DOMContentLoaded", function() {
 
     socket.onmessage = function(e) {
         const data = JSON.parse(e.data);
-        const from = data.from;
-        const to = data.to;
-        turn = data.turn;
-        const enPassant = data.enPassant || false;
+        console.log("DATA SENT:", data);
+        const messageType = data.type;
 
-        document.getElementById("turn").value = turn;
-        document.getElementById("turn-display").innerText = turn;
-
-        const piece = document.querySelector(`td[data-position="${from}"] img`);
-        const targetSquare = document.querySelector(`td[data-position="${to}"]`);
-
-        if (enPassant) {
-            const fromRow = from[0];
-            const capturedPosition = fromRow + to[1];
-            resetSquare(capturedPosition);
+        if (messageType === 'end_game') {
+            displayEndgameMessage(data.message);
         }
-
-        if (data.castling) {
-            performCastlingMove(data.castling, from);
-        } else {
-            resetSquare(from);
-            resetSquare(to);
-            targetSquare.appendChild(piece);
+        else if (messageType === 'offer_draw') {
+            const offerDrawButton = document.getElementById("offer-draw-button");
+            turn = data.turn;
+            console.log(userRole);
+            console.log(turn);
+            if (userRole !== turn){
+                offerDrawButton.textContent = "Accept Draw";
+            }
         }
-
-        updateDraggable();
-        console.log("DATA:", data);
-
-        if (data.promotion) {
-            const promotionColor = turn === "white" ? "b" : "w";
-            console.log('Promotion to', promotionColor + data.promotion);
-            promotePawn(to, promotionColor + data.promotion);
+        else if (messageType === 'cancel_draw') {
+            const offerDrawButton = document.getElementById("offer-draw-button");
+            offerDrawButton.textContent = "Offer Draw";
         }
-
-        if (data.checkmate) {
-            console.log('onMessage here');
-            displayCheckmateMessage(turn);
+        else if (messageType === 'accept_draw') {
+            handleDrawResponse();
         }
+        else {
+            const from = data.from;
+            const to = data.to;
+            turn = data.turn;
+            const enPassant = data.enPassant || false;
 
-        // Update timers
-        whiteTime = data.white_time_remaining;
-        blackTime = data.black_time_remaining;
-        whiteTimerElement.textContent = formatTime(whiteTime);
-        blackTimerElement.textContent = formatTime(blackTime);
-        startTimer(data.turn);
+            document.getElementById("turn").value = turn;
+            document.getElementById("turn-display").innerText = turn;
+
+            const piece = document.querySelector(`td[data-position="${from}"] img`);
+            const targetSquare = document.querySelector(`td[data-position="${to}"]`);
+
+            if (enPassant) {
+                const fromRow = from[0];
+                const capturedPosition = fromRow + to[1];
+                resetSquare(capturedPosition);
+            }
+
+            if (data.castling) {
+                performCastlingMove(data.castling, from);
+            } else {
+                resetSquare(from);
+                resetSquare(to);
+                targetSquare.appendChild(piece);
+            }
+
+            updateDraggable();
+
+            if (data.promotion) {
+                const promotionColor = turn === "white" ? "b" : "w";
+                console.log('Promotion to', promotionColor + data.promotion);
+                promotePawn(to, promotionColor + data.promotion);
+            }
+
+            if (data.checkmate == 'true') {
+                console.log('here');
+                console.log(data.checkmate);
+                const winner = turn === "white" ? "Black" : "White";
+                displayEndgameMessage(`Checkmate! ${winner} wins!`);
+            }
+            else if (data.checkmate == 'stalemate'){
+                displayEndgameMessage("Stalemate!")
+            }
+
+            // Update timers
+            whiteTime = data.white_time_remaining;
+            blackTime = data.black_time_remaining;
+            whiteTimerElement.textContent = formatTime(whiteTime);
+            blackTimerElement.textContent = formatTime(blackTime);
+            startTimer(data.turn);
+        }
     };
 
     function updateDraggable() {
@@ -329,11 +364,20 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    function displayCheckmateMessage(turn) {
-        const winner = turn === "white" ? "Black" : "White";
-        const messageDiv = document.getElementById("checkmate-message");
-        messageDiv.innerText = `Checkmate: ${winner} wins!`;
-        messageDiv.classList.add("checkmate-message");
+    function displayEndgameMessage(message) {
+        const messageDiv = document.getElementById("endgame-message");
+        messageDiv.innerText = message;
+        messageDiv.classList.add("endgame-message");
+        messageDiv.style.display = "block"; // Ensure the message is displayed
+        pieces.forEach(piece => {
+            piece.removeEventListener("dragstart", dragStart);
+            piece.removeEventListener("click", handleClick);
+            piece.setAttribute("draggable", false);
+        });
+        document.getElementById("resign-button").disabled = true;
+        document.getElementById("offer-draw-button").disabled = true;
+        clearInterval(whiteInterval);
+        clearInterval(blackInterval);
     }
 
     function getCookie(name) {
@@ -384,4 +428,100 @@ document.addEventListener("DOMContentLoaded", function() {
             blackInterval = setInterval(() => updateTimer('black'), 1000);
         }
     };
+
+    document.getElementById("resign-button").addEventListener("click", function() {
+        if (confirm("Are you sure you want to resign?")) {
+            fetch(`/resign/${gameId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken")
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "ok") {
+                    const message = `${data.loser} resigns! ${data.winner} wins!`;
+                    displayEndgameMessage(message);
+
+                } else {
+                    console.error("Failed to resign");
+                }
+            });
+        }
+    });
+
+    document.getElementById("offer-draw-button").addEventListener("click", function() {
+        const offerDrawButton = document.getElementById("offer-draw-button");
+        if (offerDrawButton.textContent === "Offer Draw") {
+            fetch(`/offer_draw/${gameId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken")
+                },
+                body: JSON.stringify ({
+                    turn: userRole
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "ok") {
+                    offerDrawButton.textContent = "Cancel Draw";
+                } else {
+                    console.error("Failed to offer draw");
+                }
+            });
+        } else if (offerDrawButton.textContent === "Cancel Draw"){
+            fetch(`/cancel_draw/${gameId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken")
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "ok") {
+                    offerDrawButton.textContent = "Offer Draw";
+                } else {
+                    console.error("Failed to cancel draw offer");
+                }
+            });
+        }
+        else {
+            fetch(`/accept_draw/${gameId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken")
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "ok") {
+                    handleDrawResponse();
+                } else {
+                    console.error("Failed to cancel draw offer");
+                }
+            });
+        }
+    });
+
+    function handleDrawResponse() {
+        displayEndgameMessage("Game drawn!");
+        disableInteraction();
+    }
+
+    function disableInteraction() {
+        pieces.forEach(piece => {
+            piece.removeEventListener("dragstart", dragStart);
+            piece.removeEventListener("click", handleClick);
+            piece.setAttribute("draggable", false);
+        });
+        document.getElementById("resign-button").disabled = true;
+        document.getElementById("offer-draw-button").disabled = true;
+        clearInterval(whiteInterval);
+        clearInterval(blackInterval);
+    }
 });
