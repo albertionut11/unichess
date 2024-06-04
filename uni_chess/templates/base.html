@@ -9,19 +9,21 @@
 <body>
     <header class="navbar">
         <div class="container">
-            {% if user.is_authenticated %}
-            <div class="auth-controls">
-                <div class="user-info">
-                    Logged in as: <strong>{{ user.get_username }}</strong>
+            <div class="navbar-content">
+                {% if user.is_authenticated %}
+                <div class="auth-controls">
+                    <div class="user-info">
+                        Logged in as: <strong>{{ user.get_username }}</strong>
+                    </div>
+                    <form method="post" action="{% url 'logout' %}" class="logout-form">
+                        {% csrf_token %}
+                        <button type="submit" class="logout-button">Logout</button>
+                    </form>
                 </div>
-                <form method="post" action="{% url 'logout' %}" class="logout-form">
-                    {% csrf_token %}
-                    <button type="submit" class="logout-button">Logout</button>
-                </form>
+                {% else %}
+                <a href="{% url 'login' %}" class="login-link">Login</a>
+                {% endif %}
             </div>
-            {% else %}
-            <a href="{% url 'login' %}" class="login-link">Login</a>
-            {% endif %}
         </div>
     </header>
 

@@ -3,20 +3,11 @@
 {% block title %} Welcome {% endblock %}
 
 {% block content %}
+<div class="welcome-content">
     <h1>Play Online Chess on UniChess!</h1>
     <p>
         This is a demo application which will support a fully working online chess application.
     </p>
-    <h2>Games</h2>
-    <ul>
-        {% for game in games %}
-            <li>
-                <a href = "{% url 'game_play' game.id %}">
-                    {{game}}
-                </a>
-            </li>
-        {% endfor %}
-    </ul>
     <p>
        <a href="{% url 'game_create' %}"> NEW GAME </a>
     </p>
@@ -26,6 +17,14 @@
     <p>
        <a href="{% url 'tournaments' %}"> TOURNAMENTS </a>
     </p>
-
-
+    <ul>
+        {% for game in games %}
+        <li>
+            <a href="{% url 'game_play' game.id %}">
+                {{ game }}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
 {% endblock %}

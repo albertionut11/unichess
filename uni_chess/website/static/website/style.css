@@ -223,17 +223,21 @@ input[type="email"] {
     padding: 10px 20px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    height: 70px; /* Ensure this height matches the min-height adjustment */
 }
 
 .container {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
+}
+
+.navbar-content {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
 }
 
 .auth-controls {
@@ -281,4 +285,62 @@ input[type="email"] {
 
 .main-content {
     padding: 20px;
+    min-height: calc(100vh - 70px); /* Adjusted to consider the navbar height */
+    box-sizing: border-box;
+}
+
+.welcome-content {
+    text-align: center;
+    padding: 20px;
+}
+
+.welcome-content h1 {
+    font-size: 3em;
+    color: #543310;
+    margin-bottom: 20px;
+}
+
+.welcome-content p {
+    font-size: 1.2em;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.welcome-content h2 {
+    font-size: 2em;
+    color: #543310;
+    margin-bottom: 10px;
+}
+
+.welcome-content ul {
+    list-style: none;
+    padding: 0;
+}
+
+.welcome-content ul li {
+    margin-bottom: 10px;
+}
+
+.welcome-content ul li a {
+    text-decoration: none;
+    color: #7d5451;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.welcome-content ul li a:hover {
+    color: #bc7a77;
+}
+
+.welcome-content a {
+    text-decoration: none;
+    color: #7d5451;
+    font-weight: bold;
+    font-size: 1.2em;
+    display: inline-block;
+    margin-top: 10px;
+}
+
+.welcome-content a:hover {
+    color: #bc7a77;
 }
