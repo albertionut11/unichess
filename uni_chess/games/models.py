@@ -1,17 +1,27 @@
 from datetime import time, datetime
+
+import jsonfield
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 
 
 class Tournament(models.Model):
-    name = models.CharField(max_length=200)
-    date = models.DateField()
-    start_time = models.TimeField(default=time(9))
-    prize = models.IntegerField(default=0)
+    name = models.CharField(max_length=100)
+    owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True)
+    players = jsonfield.JSONField(default=list)
+    minimum_players = models.IntegerField(default=2)
+    maximum_players = models.IntegerField(default=20)
+    date = models.DateTimeField(default=timezone.now)
+    start_minutes = models.IntegerField(default=10)
+    start_date = models.DateTimeField(default=timezone.now)
+    prize = models.DecimalField(max_digits=10, decimal_places=2)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"Tournament {self.name} with prize of {self.prize}$ at {self.start_time} on {self.date}"
+        return self.name
+
 
 
 class Game(models.Model):

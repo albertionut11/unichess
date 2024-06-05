@@ -1,21 +1,21 @@
-import base64
 import json
-import uuid
+from datetime import timedelta
+
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-from django.views.generic import View, TemplateView, FormView
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import TemplateView
 
 from .game_logic.Play import Play
 from .models import Game, Tournament
-from .forms import GameForm, SignUpForm
+from .forms import GameForm, SignUpForm, TournamentForm, AddPlayerForm, RemovePlayerForm
 
 
 @login_required
@@ -326,6 +326,70 @@ def register(request):
     else:
         form = SignUpForm()
     return render(request, 'registration/register.html', {'form': form})
+
+
+@login_required
+def create_tournament(request):
+    if request.method == 'POST':
+        form = TournamentForm(request.POST)
+        if form.is_valid():
+            tournament = form.save(commit=False)
+            tournament.owner = request.user
+            tournament.date = timezone.now()
+            tournament.start_date = tournament.date + timedelta(minutes=tournament.start_minutes)
+            tournament.save()
+            return redirect('tournaments')
+    else:
+        form = TournamentForm()
+    return render(request, 'tournaments/create_tournament.html', {'form': form})
+
+
+@login_required
+def join_tournament(request, tournament_id):
+    tournament = get_object_or_404(Tournament, id=tournament_id)
+    if request.user.username not in tournament.players:
+        tournament.players.append(request.user.username)
+        tournament.save()
+    return redirect('tournament_info', tournament_id)
+
+
+@login_required
+def add_players(request, tournament_id):
+    tournament = get_object_or_404(Tournament, id=tournament_id)
+    if request.user != tournament.owner:
+        return redirect('tournaments')
+
+    if request.method == 'POST':
+        form = AddPlayerForm(request.POST, tournament=tournament)
+        if form.is_valid():
+            user = form.cleaned_data['user']
+            if user.username not in tournament.players:
+                tournament.players.append(user.username)
+                tournament.save()
+                return redirect('tournament_info', tournament.id)
+    else:
+        form = AddPlayerForm(tournament=tournament)
+
+    return render(request, 'tournaments/add_players.html', {'form': form, 'tournament': tournament})
+
+
+@login_required
+def remove_player(request, tournament_id):
+    tournament = get_object_or_404(Tournament, id=tournament_id)
+    if request.user != tournament.owner:
+        return redirect('tournament_info', tournament_id=tournament_id)
+
+    if request.method == 'POST':
+        form = RemovePlayerForm(request.POST, tournament=tournament)
+        if form.is_valid():
+            user = form.cleaned_data['user']
+            tournament.players.remove(user.username)
+            tournament.save()
+            return redirect('tournament_info', tournament_id)
+    else:
+        form = RemovePlayerForm(tournament=tournament)
+
+    return render(request, 'tournaments/remove_players.html', {'form': form, 'tournament': tournament})
 
 
 @login_required

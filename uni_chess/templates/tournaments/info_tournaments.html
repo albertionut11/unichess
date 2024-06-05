@@ -4,8 +4,34 @@
 
 {% block content %}
 <div class="welcome-content">
-    <h1>Tournament Info</h1>
-    <p>{{ tournament_info }}</p>
+    <h1>{{ tournament.name }}</h1>
+    <p><strong>Creator:</strong> {{ tournament.owner.username }}</p>
+    <p><strong>Start Date:</strong> {{ tournament.start_date }}</p>
+    <p><strong>Prize:</strong> {{ tournament.prize }} $</p>
+    <p><strong>Minimum Players:</strong> {{ tournament.minimum_players }}</p>
+    <p><strong>Maximum Players:</strong> {{ tournament.maximum_players }}</p>
+    <p><strong>Players Joined:</strong></p>
+    <ul>
+        {% for player in tournament.players %}
+            <li>{{ player }}</li>
+        {% empty %}
+            <li>No players have joined yet.</li>
+        {% endfor %}
+    </ul>
+    <form method="post" action="{% url 'join_tournament' tournament.id %}">
+        {% csrf_token %}
+        <button type="submit" class="join-button">Join</button>
+    </form>
+    {% if user == tournament.owner %}
+    <form method="post" action="{% url 'add_players' tournament.id %}">
+        {% csrf_token %}
+        <button type="submit" class="join-button">Add Players</button>
+    </form>
+    <form method="post" action="{% url 'remove_player' tournament.id %}">
+        {% csrf_token %}
+        <button type="submit" class="remove-button">Remove Players</button>
+    </form>
+    {% endif %}
     <p>
         <a href="{% url 'tournaments' %}" class="back-button">Back</a>
     </p>
