@@ -29,4 +29,12 @@ class Game(models.Model):
     endgame = models.CharField(max_length=100, default='')
 
     def __str__(self):
-        return f"Game between White: {self.white} and Black: {self.black}"
+        if self.isActive:
+            return f"{self.white} vs {self.black}"
+        else:
+            if self.result == 0:
+                return f"{self.white} 1/2 - 1/2 {self.black}"
+            elif self.result == 1:
+                return f"{self.white} 1 - 0 {self.black}"
+            elif self.result == 2:
+                return f"{self.white} 0 - 1 {self.black}"

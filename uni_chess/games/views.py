@@ -236,9 +236,11 @@ def resign(request, game_id):
     if request.user == game.white:
         winner = "Black"
         loser = "White"
+        game.result = 2
     elif request.user == game.black:
         winner = "White"
         loser = "Black"
+        game.result = 1
     else:
         return JsonResponse({"status": "fail"})
 
