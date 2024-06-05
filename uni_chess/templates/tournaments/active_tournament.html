@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %} Tournament Info {% endblock %}
+
+{% block content %}
+<div class="welcome-content">
+    <h1>{{ tournament.name }}</h1>
+    <div class="rankings">
+        <h2>Rankings</h2>
+        <table class="ranking-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rank, player, points in rankings %}
+                <tr>
+                    <td>{{ rank }}</td>
+                    <td>{{ player }}</td>
+                    <td>{{ points }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="rounds">
+        <h2>Rounds</h2>
+        {% for round in tournament.rounds.all %}
+        <div class="round">
+            <h3>{{ round }}</h3>
+            {% for game in round.games.all %}
+            <p>
+            <a href="{% url 'game_play' game.id %}">
+                {{ game }}
+            </a>
+            </p>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+    <p>
+        <a href="{% url 'tournaments' %}" class="back-button">Back</a>
+    </p>
+</div>
+{% endblock %}

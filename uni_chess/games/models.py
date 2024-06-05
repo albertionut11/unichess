@@ -17,11 +17,20 @@ class Tournament(models.Model):
     start_minutes = models.IntegerField(default=10)
     start_date = models.DateTimeField(default=timezone.now)
     prize = models.DecimalField(max_digits=10, decimal_places=2)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
+    duration = models.IntegerField(default=5)
+    increment = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
 
+
+class Round(models.Model):
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name='rounds')
+    round_number = models.IntegerField()
+
+    def __str__(self):
+        return f"Round {self.round_number} of {self.tournament.name}"
 
 
 class Game(models.Model):
@@ -37,6 +46,8 @@ class Game(models.Model):
     isActive = models.BooleanField(default=True)
     turn = models.CharField(max_length=10, default='white')
     endgame = models.CharField(max_length=100, default='')
+    round = models.ForeignKey(Round, on_delete=models.CASCADE, related_name='games', null=True)
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         if self.isActive:

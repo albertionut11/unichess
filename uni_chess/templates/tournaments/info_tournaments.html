@@ -31,6 +31,10 @@
         {% csrf_token %}
         <button type="submit" class="remove-button">Remove Players</button>
     </form>
+    <form method="post" action="{% url 'start_tournament' tournament.id %}">
+        {% csrf_token %}
+        <button type="submit" class="start-button">Start Tournament</button>
+    </form>
     {% endif %}
     <p>
         <a href="{% url 'tournaments' %}" class="back-button">Back</a>

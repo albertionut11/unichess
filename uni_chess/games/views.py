@@ -1,5 +1,6 @@
 import json
 from datetime import timedelta
+from itertools import combinations
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -14,7 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 
 from .game_logic.Play import Play
-from .models import Game, Tournament
+from .models import Game, Tournament, Round
 from .forms import GameForm, SignUpForm, TournamentForm, AddPlayerForm, RemovePlayerForm
 
 
@@ -393,6 +394,84 @@ def remove_player(request, tournament_id):
 
 
 @login_required
+def start_tournament(request, tournament_id):
+    tournament = get_object_or_404(Tournament, id=tournament_id)
+    if request.user == tournament.owner and not tournament.is_active:
+        players = [User.objects.get(username=player) for player in tournament.players]
+        generated_rounds = RoundRobinGeneration(players)
+        round_counter = 1
+        for matches in generated_rounds:
+            round_obj = Round.objects.create(tournament=tournament, round_number=round_counter)
+            for white, black in matches:
+                Game.objects.create(
+                    white=white,
+                    black=black,
+                    duration=tournament.duration,
+                    increment=tournament.increment,
+                    round=round_obj,
+                    tournament=tournament
+                )
+            round_counter += 1
+        tournament.is_active = True
+        tournament.save()
+    return redirect('tournament_info', tournament.id)
+
+
+def RoundRobinGeneration(players):
+    # breakpoint()
+    n = len(players)
+    rounds = []
+
+    if n % 2 == 1:
+        n += 1
+        players.append(None)  # If odd number of players, add a dummy player
+
+    for round_num in range(n - 1):
+        round_matches = []
+        for i in range(n // 2):
+            player1 = players[i]
+            player2 = players[n - i - 1]
+            if player1 is not None and player2 is not None:
+                round_matches.append((player1, player2))
+        players.insert(1, players.pop())  # Rotate players
+        rounds.append(round_matches)
+
+    return rounds
+
+
+@login_required
+def tournament_info(request, id):
+    tournament = get_object_or_404(Tournament, id=id)
+    if tournament.is_active:
+        rounds = Game.objects.filter(tournament=tournament)
+        rankings = get_tournament_rankings(tournament)
+        return render(request, 'tournaments/active_tournament.html', {'tournament': tournament, 'rounds': rounds, 'rankings': rankings})
+    else:
+        return render(request, 'tournaments/info_tournaments.html', {'tournament': tournament})
+
+
+def get_tournament_rankings(tournament):
+    # breakpoint()
+    players = tournament.players
+    rankings = {player: 0 for player in players}
+
+    games = Game.objects.filter(tournament=tournament, isActive=False)
+    for game in games:
+        if game.result == 1:
+            rankings[game.white.username] += 1
+        elif game.result == 2:
+            rankings[game.black.username] += 1
+        elif game.result == 0:
+            rankings[game.white.username] += 0.5
+            rankings[game.black.username] += 0.5
+
+    sorted_rankings = sorted(rankings.items(), key=lambda item: item[1], reverse=True)
+    ranked_rankings = [(index + 1, player, points) for index, (player, points) in enumerate(sorted_rankings)]
+
+    return ranked_rankings
+
+
+@login_required
 def get_games(request):
     games = Game.objects.all()
     return render(request, 'games/games_list.html', {'games': games})
@@ -408,12 +487,6 @@ def game_info(request, id):
 def get_tournaments(request):
     tournaments = Tournament.objects.all()
     return render(request, 'tournaments/tournaments.html', {'tournaments': tournaments})
-
-
-@login_required
-def tournament_info(request, id):
-    tournament = get_object_or_404(Tournament, pk=id)
-    return render(request, 'tournaments/info_tournaments.html', {'tournament': tournament})
 
 
 @login_required

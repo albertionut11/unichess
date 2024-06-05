@@ -418,6 +418,7 @@ input[type="email"] {
 .welcome-content a.back-button,
 .welcome-content a.game-button,
 .welcome-content a.join-button,
+.welcome-content a.start-button,
 .welcome-content a.remove-button{
     color: white !important;
     font-weight: normal; /* Ensure the font-weight is normal */
@@ -507,4 +508,51 @@ input[type="email"] {
 
 .remove-button:hover {
     background-color: #bc7a77;
+}
+
+.start-button {
+    background-color: #7d5451;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 1em;
+    margin-top: 10px; /* Add margin to separate buttons */
+}
+
+.start-button:hover {
+    background-color: #bc7a77;
+}
+
+.rankings {
+    margin: 20px 0;
+}
+
+.ranking-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.ranking-table th, .ranking-table td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+}
+
+.ranking-table th {
+    background-color: #f8f4e1;
+    color: #543310;
+}
+
+.rounds {
+    margin: 20px 0;
+}
+
+.round {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
 }
