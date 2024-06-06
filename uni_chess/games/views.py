@@ -15,7 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 
 from .game_logic.Play import Play
-from .models import Game, Tournament, Round
+from .models import Game, Tournament, Round, Profile
 from .forms import GameForm, SignUpForm, TournamentForm, AddPlayerForm, RemovePlayerForm
 
 
@@ -469,6 +469,18 @@ def get_tournament_rankings(tournament):
     ranked_rankings = [(index + 1, player, points) for index, (player, points) in enumerate(sorted_rankings)]
 
     return ranked_rankings
+
+
+@login_required
+def profile(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    profile = get_object_or_404(Profile, user=user)
+    games = Game.objects.filter(white=request.user) | Game.objects.filter(black=request.user)
+    context = {
+        'profile': profile,
+        'games': games
+    }
+    return render(request, 'user/profile.html', context)
 
 
 @login_required

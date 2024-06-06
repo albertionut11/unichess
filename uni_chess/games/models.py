@@ -59,3 +59,22 @@ class Game(models.Model):
                 return f"{self.white} 1 - 0 {self.black}"
             elif self.result == 2:
                 return f"{self.white} 0 - 1 {self.black}"
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    elo = models.IntegerField(default=1200)
+    games_white = models.IntegerField(default=0)
+    games_black = models.IntegerField(default=0)
+    wins_white = models.IntegerField(default=0)
+    wins_black = models.IntegerField(default=0)
+    losses_white = models.IntegerField(default=0)
+    losses_black = models.IntegerField(default=0)
+    draws_white = models.IntegerField(default=0)
+    draws_black = models.IntegerField(default=0)
+    tournaments_participated = models.IntegerField(default=0)
+    tournaments_won = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.user.username
+

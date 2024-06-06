@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %} Profile {% endblock %}
+
+{% block content %}
+<div class="welcome-content">
+    <h1>Profile of {{ profile.user.username }}</h1>
+    <div class="stats">
+        <h2>Statistics</h2>
+        <p><strong>ELO:</strong> {{ profile.elo }}</p>
+        <p><strong>Games as White:</strong> {{ profile.games_white }}</p>
+        <p><strong>Games as Black:</strong> {{ profile.games_black }}</p>
+        <p><strong>Wins as White:</strong> {{ profile.wins_white }}</p>
+        <p><strong>Wins as Black:</strong> {{ profile.wins_black }}</p>
+        <p><strong>Losses as White:</strong> {{ profile.losses_white }}</p>
+        <p><strong>Losses as Black:</strong> {{ profile.losses_black }}</p>
+        <p><strong>Draws as White:</strong> {{ profile.draws_white }}</p>
+        <p><strong>Draws as Black:</strong> {{ profile.draws_black }}</p>
+        <p><strong>Tournaments Participated:</strong> {{ profile.tournaments_participated }}</p>
+    </div>
+    <div class="games">
+        <h2>Games</h2>
+        <ul>
+            {% for game in games %}
+                <li>{{ game }}</li>
+            {% empty %}
+                <li>No games played yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
