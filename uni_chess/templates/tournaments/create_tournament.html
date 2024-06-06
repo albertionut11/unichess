@@ -8,10 +8,10 @@
     <form method="post" class="tournament-form">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit" class="game-button">Create Tournament</button>
+        <button type="submit" class="game-button button-common">Create Tournament</button>
     </form>
     <p>
-        <a href="{% url 'tournaments' %}" class="back-button">Back</a>
+        <a href="{% url 'tournaments' %}" class="back-button button-common">Back</a>
     </p>
 </div>
 {% endblock %}

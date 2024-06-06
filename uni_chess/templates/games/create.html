@@ -1,17 +1,30 @@
 {% extends "base.html" %}
 
-{% block title %} Create Game {% endblock %}
+{% block title %} Create a New Game {% endblock %}
 
 {% block content %}
 <div class="welcome-content">
     <h1>Create a New Game</h1>
     <form method="post" class="game-form">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="game-button">Create Game</button>
+        <div class="form-group">
+            <label for="white">White:</label>
+            {{ form.white }}
+        </div>
+        <div class="form-group">
+            <label for="black">Black:</label>
+            {{ form.black }}
+        </div>
+        <div class="form-group">
+            <label for="duration">Duration:</label>
+            {{ form.duration }}
+        </div>
+        <div class="form-group">
+            <label for="increment">Increment:</label>
+            {{ form.increment }}
+        </div>
+        <button type="submit" class="button-common game-button">Create Game</button>
+        <a href="{% url 'home' %}" class="button-common back-button">Back</a>
     </form>
-    <p>
-        <a href="{% url 'games' %}" class="back-button">Back</a>
-    </p>
 </div>
 {% endblock %}

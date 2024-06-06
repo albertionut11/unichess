@@ -64,6 +64,7 @@ class Game(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     elo = models.IntegerField(default=1200)
+    games = models.IntegerField(default=0)
     games_white = models.IntegerField(default=0)
     games_black = models.IntegerField(default=0)
     wins_white = models.IntegerField(default=0)
@@ -76,5 +77,5 @@ class Profile(models.Model):
     tournaments_won = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.user.username
+        return f'{self.user.first_name} {self.user.last_name}'
 

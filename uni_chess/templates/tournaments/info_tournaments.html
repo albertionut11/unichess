@@ -20,24 +20,24 @@
     </ul>
     <form method="post" action="{% url 'join_tournament' tournament.id %}">
         {% csrf_token %}
-        <button type="submit" class="join-button">Join</button>
+        <button type="submit" class="join-button button-common">Join</button>
     </form>
     {% if user == tournament.owner %}
     <form method="post" action="{% url 'add_players' tournament.id %}">
         {% csrf_token %}
-        <button type="submit" class="join-button">Add Players</button>
+        <button type="submit" class="join-button button-common">Add Players</button>
     </form>
     <form method="post" action="{% url 'remove_player' tournament.id %}">
         {% csrf_token %}
-        <button type="submit" class="remove-button">Remove Players</button>
+        <button type="submit" class="remove-button button-common">Remove Players</button>
     </form>
     <form method="post" action="{% url 'start_tournament' tournament.id %}">
         {% csrf_token %}
-        <button type="submit" class="start-button">Start Tournament</button>
+        <button type="submit" class="start-button button-common">Start Tournament</button>
     </form>
     {% endif %}
     <p>
-        <a href="{% url 'tournaments' %}" class="back-button">Back</a>
+        <a href="{% url 'tournaments' %}" class="back-button button-common">Back</a>
     </p>
 </div>
 {% endblock %}

@@ -4,22 +4,19 @@
 
 {% block content %}
 <div class="welcome-content">
-    <h1>Play Online Chess on UniChess!</h1>
+    <h1>UNICHESS</h1>
     <p>
-        This is a demo application which will support a fully working online chess application.
+       <a href="{% url 'game_create' %}" class="button-common"> NEW GAME </a>
     </p>
     <p>
-       <a href="{% url 'game_create' %}" > NEW GAME </a>
+       <a href="{% url 'games' %}" class="button-common"> GAMES </a>
     </p>
     <p>
-       <a href="{% url 'games' %}" > GAMES </a>
-    </p>
-    <p>
-       <a href="{% url 'tournaments' %}" > TOURNAMENTS </a>
+       <a href="{% url 'tournaments' %}" class="button-common"> TOURNAMENTS </a>
     </p>
     {% if user.is_authenticated %}
     <p>
-       <a href="{% url 'profile' user_id=user.id %}" > PROFILE </a>
+       <a href="{% url 'profile' user_id=user.id %}" class="button-common"> PROFILE </a>
     </p>
     {% endif %}
 </div>

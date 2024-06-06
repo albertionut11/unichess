@@ -9,21 +9,17 @@
 <body>
     <header class="navbar">
         <div class="container">
-            <div class="navbar-content">
-                <a href="{% url 'home' %}" class="home-button">Home</a>
-                {% if user.is_authenticated %}
-                <div class="auth-controls">
-                    <a href="{% url 'profile' user_id=user.id %}" class="profile-link">
-                        {{ user.get_username }}
-                    </a>
+                <div class="navbar-content">
+                    <a href="{% url 'home' %}" class="button-common">Home</a>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'profile' user.id %}" class="button-common">{{ user.first_name }} {{ user.last_name }}</a>
                     <form method="post" action="{% url 'logout' %}" class="logout-form">
                         {% csrf_token %}
-                        <button type="submit" class="logout-button">Logout</button>
+                        <button type="submit" class="button-common">Logout</button>
                     </form>
-                </div>
-                {% else %}
-                <a href="{% url 'login' %}" class="login-link">Login</a>
-                {% endif %}
+                    {% else %}
+                    <a href="{% url 'login' %}" class="button-common">Login</a>
+                    {% endif %}
             </div>
         </div>
     </header>

@@ -1,7 +1,13 @@
 body {
-    font-family: sans-serif;
+    font-family: 'Amiri', serif;
     color: #543310;
     background-color: #F8F4E1;
+    background-image: url('/static/website/img/background4.webp');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    opacity: 1;
 }
 
 html, body {
@@ -218,69 +224,75 @@ input[type="email"] {
 }
 
 .navbar {
-    background-color: #f8f4e1;
-    color: #543310;
-    padding: 10px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    background-image: url('/static/website/img/background4.webp');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
+    padding: 10px 0;
 }
 
 .navbar-content {
     display: flex;
-    justify-content: space-between;
-    width: 100%;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.navbar-content a,
+.navbar-content .logout-form {
+    display: inline-flex;
     align-items: center;
 }
 
-.auth-controls {
-    display: flex;
-    align-items: center;
-}
-
-.user-info {
-    font-size: 16px;
-    margin-right: 15px;
-}
-
-.logout-form {
-    margin: 0;
-}
-
-.logout-button {
-    background-color: #7d5451;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    cursor: pointer;
-    border-radius: 4px;
-    font-size: 16px;
-}
-
-.logout-button:hover {
-    background-color: #bc7a77;
-}
-
-.login-link {
-    background-color: #7d5451;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    cursor: pointer;
-    border-radius: 4px;
-    font-size: 16px;
+.navbar-content a,
+.navbar-content .button-common {
+    background-color: rgba(255, 255, 255, 0.5);
+    color: #4D3E3E;
+    border: 2px solid #4D3E3E;
+    border-radius: 5px;
+    padding: 10px 20px;
+    text-align: center;
     text-decoration: none;
+    font-size: 16px;
+    font-family: 'Amiri', serif;
+    font-weight: bold;
 }
 
-.login-link:hover {
+.navbar-content a:hover,
+.navbar-content .button-common:hover {
+    background-color: rgba(255, 255, 255, 0.8);
+    color: #4D3E3E;
+}
+
+/* Common button styling */
+.button-common {
+    background-color: #7d5451;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 1em;
+    margin-top: 10px;
+}
+
+.button-common:hover {
     background-color: #bc7a77;
+}
+
+.home-button,
+.profile-link,
+.logout-button,
+.login-link,
+.join-button,
+.back-button,
+.remove-button,
+.start-button,
+.game-button {
+    @extend .button-common;
 }
 
 .main-content {
@@ -333,35 +345,27 @@ input[type="email"] {
 }
 
 .welcome-content a {
+    display: block;
     text-decoration: none;
     color: #7d5451;
     font-weight: bold;
     font-size: 1.2em;
-    display: inline-block;
-    margin-top: 10px;
+    margin: 10px auto;
+    padding: 10px;
+    border: 2px solid #7d5451;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    max-width: 300px;
 }
 
 .welcome-content a:hover {
-    color: #bc7a77;
-}
-
-.home-button {
-    background-color: #7d5451;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    cursor: pointer;
-    border-radius: 4px;
-    font-size: 16px;
-    text-decoration: none;
-    margin-right: 15px;
-}
-
-.home-button:hover {
     background-color: #bc7a77;
+    color: white;
 }
 
-.game-form {
+.game-form,
+.tournament-form {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -369,71 +373,7 @@ input[type="email"] {
 
 .game-form input[type="text"],
 .game-form input[type="number"],
-.game-form select {
-    width: 80%;
-    padding: 5px;
-    margin: 5px 0;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-}
-
-.game-button {
-    background-color: #7d5451;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    text-align: center;
-    margin-top: 10px;
-}
-
-.game-button:hover {
-    background-color: #bc7a77;
-}
-
-.back-button {
-    background-color: #7d5451;
-    color: white !important;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-    font-size: 1em;
-    text-decoration: none;
-    display: inline-block;
-    font-weight: normal; /* Ensure the font-weight is normal */
-    margin-top: 10px;
-}
-
-.back-button:hover {
-    background-color: #bc7a77;
-}
-
-/* Additional styles to ensure the back button text is visible */
-/* Ensure buttons within the welcome-content have proper spacing and visibility */
-.welcome-content a.back-button,
-.welcome-content a.game-button,
-.welcome-content a.join-button,
-.welcome-content a.start-button,
-.welcome-content a.remove-button{
-    color: white !important;
-    font-weight: normal; /* Ensure the font-weight is normal */
-    font-size: 1.2em;
-    margin-top: 10px;
-    display: inline-block;
-}
-
-/* Additional styles for the tournament form */
-.tournament-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
+.game-form select,
 .tournament-form input[type="text"],
 .tournament-form input[type="number"],
 .tournament-form select {
@@ -445,35 +385,17 @@ input[type="email"] {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
 
+.game-form .form-group {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.game-form .game-button,
+.game-form .back-button,
 .tournament-form .game-button {
-    background-color: #7d5451;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    text-align: center;
-}
-
-.tournament-form .game-button:hover {
-    background-color: #bc7a77;
-}
-
-.join-button {
-    background-color: #7d5451;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-    font-size: 1em;
-    margin-top: 10px; /* Add margin to separate buttons */
-}
-
-.join-button:hover {
-    background-color: #bc7a77;
+    width: 200px;
+    margin: 10px auto;
+    display: block;
 }
 
 .center-label {
@@ -482,61 +404,26 @@ input[type="email"] {
     margin-bottom: 10px;
 }
 
-.game-form .form-group {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.game-form .game-button,
-.game-form .back-button {
-    width: 200px;
-    margin: 10px auto;
-    display: block;
-}
-
-.remove-button {
-    background-color: #7d5451;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-    font-size: 1em;
-    margin-top: 10px; /* Add margin to separate buttons */
-}
-
-.remove-button:hover {
-    background-color: #bc7a77;
-}
-
-.start-button {
-    background-color: #7d5451;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-    font-size: 1em;
-    margin-top: 10px; /* Add margin to separate buttons */
-}
-
-.start-button:hover {
-    background-color: #bc7a77;
-}
-
-.rankings {
+/* Additional styles for rankings, rounds, stats, and games */
+.rankings,
+.rounds,
+.stats,
+.games {
     margin: 20px 0;
 }
 
-.ranking-table {
+.ranking-table,
+.games ul {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
+    list-style: none;
+    padding: 0;
 }
 
-.ranking-table th, .ranking-table td {
+.ranking-table th,
+.ranking-table td,
+.games ul li {
     border: 1px solid #ccc;
     padding: 10px;
     text-align: left;
@@ -547,52 +434,30 @@ input[type="email"] {
     color: #543310;
 }
 
-.rounds {
-    margin: 20px 0;
-}
-
 .round {
     border: 1px solid #ccc;
     padding: 10px;
     margin-bottom: 10px;
 }
 
-.stats {
-    text-align: left;
+.stats-container {
+    display: flex;
+    justify-content: space-around;
     margin: 20px 0;
 }
 
-.stats p {
+.stats-section {
+    flex: 1;
+    padding: 10px;
+}
+
+.stats-section h2 {
+    text-align: center;
+    color: #543310;
+}
+
+.stats-section p {
     font-size: 1.2em;
     color: #666;
     margin-bottom: 10px;
-}
-
-.games {
-    margin: 20px 0;
-}
-
-.games ul {
-    list-style: none;
-    padding: 0;
-}
-
-.games ul li {
-    margin-bottom: 10px;
-}
-
-.profile-link {
-    background-color: #7d5451;
-    color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    text-decoration: none;
-    font-size: 16px;
-    margin-right: 15px;
-}
-
-.profile-link:hover {
-    background-color: #bc7a77;
 }
