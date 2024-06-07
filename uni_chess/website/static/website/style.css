@@ -1,7 +1,14 @@
+/* Existing styles */
 body {
-    font-family: sans-serif;
+    font-family: 'Amiri', serif;
     color: #543310;
     background-color: #F8F4E1;
+    background-image: url('/static/website/img/background4.webp');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    opacity: 1;
 }
 
 html, body {
@@ -63,12 +70,11 @@ html, body {
     grid-template-columns: 1fr 3fr 1fr;
     gap: 10px;
     height: 100vh;
-    background-color: #F8F4E1;
     overflow: hidden;
 }
 
 .box {
-    background-color: #F8F4E1;
+    background-color: rgba(255, 255, 255, 0.7); /* Light transparent background */
     padding: 10px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -140,4 +146,364 @@ html, body {
 .black-timer {
     background-color: rgba(0, 0, 0, 0.8);
     color: white;
+}
+
+.auth-page {
+    text-align: center;
+    padding-top: 50px;  /* Adjusted padding to ensure it centers well */
+}
+
+.main-title {
+    font-size: 3em;
+    color: #333;
+    margin-bottom: 10px;  /* Space between titles */
+}
+
+.subtitle {
+    font-size: 1.5em;
+    color: #666;
+    margin-bottom: 30px;  /* Space between subtitle and form */
+}
+
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;  /* Ensures it takes enough height to be centered */
+}
+
+.auth-box {
+    background-color: #FFFFFF;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.auth-button {
+    background-color: #7d5451;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    width: 100%;
+}
+
+.auth-button:hover {
+    background-color: #bc7a77;
+}
+
+.error-message {
+    color: red;
+    margin-bottom: 10px;
+}
+
+.register-link {
+    margin-top: 15px;
+    font-size: 0.9em;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+    width: calc(100% - 20px);
+    padding: 8px 10px;
+    margin: 5px 0;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.navbar {
+    background-image: url('/static/website/img/background4.webp');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px 0;
+}
+
+.navbar-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.navbar-content a,
+.navbar-content .logout-form {
+    display: inline-flex;
+    align-items: center;
+}
+
+.navbar-content a,
+.navbar-content .button-common {
+    background-color: rgba(255, 255, 255, 0.5);
+    color: #4D3E3E;
+    border: 2px solid #4D3E3E;
+    border-radius: 5px;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    font-family: 'Amiri', serif;
+    font-weight: bold;
+}
+
+.navbar-content a:hover,
+.navbar-content .button-common:hover {
+    background-color: rgba(255, 255, 255, 0.8);
+    color: #4D3E3E;
+}
+
+.main-content {
+    padding: 20px;
+    box-sizing: border-box;
+    min-height: 100vh;
+}
+
+.welcome-content {
+    text-align: center;
+    padding: 20px;
+}
+
+.welcome-content h1 {
+    font-size: 3em;
+    color: #543310;
+    margin-bottom: 20px;
+}
+
+.welcome-content p {
+    font-size: 1.2em;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.welcome-content h2 {
+    font-size: 2em;
+    color: #543310;
+    margin-bottom: 10px;
+}
+
+.welcome-content ul {
+    list-style: none;
+    padding: 0;
+}
+
+.welcome-content ul li {
+    margin-bottom: 10px;
+}
+
+.welcome-content ul li a {
+    text-decoration: none;
+    color: #7d5451;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.welcome-content ul li a:hover {
+    background-color: #bc7a77; /* Add background change for hover */
+    color: white; /* Change text color to white on hover */
+}
+
+.welcome-content a {
+    display: block;
+    text-decoration: none;
+    color: #7d5451;
+    font-weight: bold;
+    font-size: 1.2em;
+    margin: 10px auto;
+    padding: 10px;
+    border: 2px solid #7d5451;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    max-width: 300px;
+}
+
+.welcome-content a:hover {
+    background-color: #bc7a77;
+    color: white;
+}
+
+.welcome-content .game-form button.game-button,
+.welcome-content .tournament-form button.game-button {
+    display: block;
+    text-decoration: none;
+    color: #7d5451;
+    font-weight: bold;
+    font-size: 1.2em;
+    margin: 10px auto;
+    padding: 10px;
+    border: 2px solid #7d5451;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    width: 200px;
+}
+
+.welcome-content .game-form button.game-button:hover,
+.welcome-content .tournament-form button.game-button:hover {
+    background-color: #bc7a77;
+    color: white;
+}
+
+.game-form,
+.tournament-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.game-form input[type="text"],
+.game-form input[type="number"],
+.game-form select,
+.tournament-form input[type="text"],
+.tournament-form input[type="number"],
+.tournament-form select {
+    width: 80%;
+    padding: 5px;
+    margin: 5px 0;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.game-form .form-group {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.game-form .game-button,
+.game-form .back-button,
+.tournament-form .game-button,
+.tournament-form .back-button {
+    width: 100px;
+    margin: 10px auto;
+    display: block;
+}
+
+.join-button,
+.add-button,
+.remove-button,
+.start-button,
+.game-button,
+.back-button {
+    display: inline-block;
+    background-color: rgba(255, 255, 255, 0.8);
+    color: #7d5451;
+    border: 2px solid #7d5451;
+    border-radius: 5px;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 10px auto;
+    width: 200px;
+}
+
+.join-button:hover,
+.add-button:hover,
+.remove-button:hover,
+.start-button:hover,
+.game-button:hover,
+.back-button:hover {
+    background-color: #bc7a77;
+    color: white;
+}
+
+/* Specific button styles for the forms */
+.welcome-content .game-form button,
+.welcome-content .tournament-form button {
+    width: 200px;
+}
+
+
+.center-label {
+    display: block;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.stats-container {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+    background-color: rgba(255, 255, 255, 0.7); /* Light transparent background */
+    border-radius: 10px; /* Rounded corners */
+    padding: 20px; /* Inner padding */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+}
+
+.stats-section {
+    flex: 1;
+    padding: 10px;
+}
+
+.stats-section h2 {
+    text-align: center;
+    color: #543310;
+}
+
+.stats-section p {
+    font-size: 1.2em;
+    color: #222;
+    margin-bottom: 10px;
+}
+
+.tournament-info {
+    background-color: rgba(255, 255, 255, 0.7); /* Light transparent background */
+    border-radius: 10px; /* Rounded corners */
+    padding: 20px; /* Inner padding */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    color: #222; /* Adjusted text color for better visibility */
+}
+
+.rankings,
+.rounds {
+    margin: 20px 0;
+    background-color: rgba(255, 255, 255, 0.9); /* Light transparent background */
+    border-radius: 10px; /* Rounded corners */
+    padding: 20px; /* Inner padding */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    color: #222; /* Adjusted text color for better visibility */
+}
+
+.ranking-table,
+.games ul {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    list-style: none;
+    padding: 0;
+}
+
+.ranking-table th,
+.ranking-table td,
+.games ul li {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+}
+
+.ranking-table th {
+    background-color: #f8f4e1;
+    color: #543310;
+}
+
+.round {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
 }

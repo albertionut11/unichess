@@ -1,16 +1,45 @@
 {% extends "base.html" %}
 
-{% block title %} {{tournament.name}} {% endblock %}
+{% block title %} Tournament Info {% endblock %}
 
 {% block content %}
-    <p>Date: <b>{{tournament.date}} </b></p>
-    <p>Start time: <b>{{tournament.start_time}}</b></p>
-    <p>Prize: <b>{{tournament.prize}} $</b></p>
+<div class="welcome-content">
+    <h1>{{ tournament.name }}</h1>
+    <div class ="tournament-info">
+        <p><strong>Creator:</strong> {{ tournament.owner.first_name }} {{ tournament.owner.last_name }}</p>
+        <p><strong>Start Date:</strong> {{ tournament.start_date }}</p>
+        <p><strong>Prize:</strong> {{ tournament.prize }} $</p>
+        <p><strong>Minimum Players:</strong> {{ tournament.minimum_players }}</p>
+        <p><strong>Maximum Players:</strong> {{ tournament.maximum_players }}</p>
+        <p><strong>Players Joined:</strong></p>
+        <ul>
+            {% for player in tournament.players %}
+                <li>{{ player }}</li>
+            {% empty %}
+                <li>No players have joined yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <form method="post" action="{% url 'join_tournament' tournament.id %}">
+        {% csrf_token %}
+        <button type="submit" class="join-button">Join</button>
+    </form>
+    {% if user == tournament.owner %}
+    <form method="post" action="{% url 'add_players' tournament.id %}">
+        {% csrf_token %}
+        <button type="submit" class="add-button">Add Players</button>
+    </form>
+    <form method="post" action="{% url 'remove_player' tournament.id %}">
+        {% csrf_token %}
+        <button type="submit" class="remove-button">Remove Players</button>
+    </form>
+    <form method="post" action="{% url 'start_tournament' tournament.id %}">
+        {% csrf_token %}
+        <button type="submit" class="start-button">Start Tournament</button>
+    </form>
+    {% endif %}
     <p>
-       <a href="{% url 'tournaments' %}"> HOME </a>
+        <a href="{% url 'tournaments' %}" class="back-button">Back</a>
     </p>
-    <p>
-       <a href="{% url 'tournaments' %}"> TOURNAMENTS </a>
-    </p>
-
+</div>
 {% endblock %}

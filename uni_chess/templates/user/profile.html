@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %} Profile {% endblock %}
+
+{% block content %}
+<div class="welcome-content">
+    <h1>{{ profile.user.first_name}} {{profile.user.last_name}}</h1>
+    <h2>Statistics</h2>
+    <div class="stats-container">
+        <div class="stats-section">
+            <h2>Overall</h2>
+            <p><strong>ELO:</strong> {{ profile.elo }}</p>
+            <p><strong>Games</strong> {{ profile.games }}</p>
+            <p><strong>Tournaments Played:</strong> {{ profile.tournaments_participated }}</p>
+            <p><strong>Tournaments Won:</strong> {{ profile.tournaments_won }}</p>
+        </div>
+        <div class="stats-section">
+            <h2>White</h2>
+            <p><strong>Games:</strong> {{ profile.games_white }}</p>
+            <p><strong>Wins:</strong> {{ profile.wins_white }}</p>
+            <p><strong>Losses:</strong> {{ profile.losses_white }}</p>
+            <p><strong>Draws:</strong> {{ profile.draws_white }}</p>
+        </div>
+        <div class="stats-section">
+            <h2>Black</h2>
+            <p><strong>Games</strong> {{ profile.games_black }}</p>
+            <p><strong>Wins</strong> {{ profile.wins_black }}</p>
+            <p><strong>Losses</strong> {{ profile.losses_black }}</p>
+            <p><strong>Draws</strong> {{ profile.draws_black }}</p>
+        </div>
+    </div>
+        <h2>Games</h2>
+        <ul>
+            {% for game in games %}
+                {% if not game.isActive %}
+                <li>
+                    <a href="{% url 'game_play' game.id %}">
+                        {{ game }}
+                    </a>
+                </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+</div>
+{% endblock %}

@@ -3,22 +3,19 @@
 {% block title %} Tournaments {% endblock %}
 
 {% block content %}
+<div class="welcome-content">
     <h1>Tournaments</h1>
     <ul>
-        {% for t in tournaments %}
-            <li>
-                <a href = "{% url 'tournament_info' t.id %}">
-                    {{t.name}}
-                </a>
-            </li>
+        {% for tournament in tournaments %}
+        <li>
+            <a href="{% url 'tournament_info' tournament.id %}">
+                {{ tournament }}
+            </a>
+        </li>
         {% endfor %}
     </ul>
-
     <p>
-       <a href="{% url 'home' %}"> HOME </a>
+        <a href="{% url 'create_tournament' %}" class="game-button">Create Tournament</a>
     </p>
-    <p>
-       <a href="{% url 'games' %}"> GAMES </a>
-    </p>
-
+</div>
 {% endblock %}

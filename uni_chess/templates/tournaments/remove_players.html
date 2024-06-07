@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %} Remove Players {% endblock %}
+
+{% block content %}
+<div class="welcome-content">
+    <h1>Remove Players from {{ tournament.name }}</h1>
+    <form method="post" class="game-form">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_user" class="center-label">Select a player:</label>
+            {{ form.user }}
+        </div>
+        <button type="submit" class="remove-button">Remove Player</button>
+    </form>
+    <p>
+        <a href="{% url 'tournament_info' tournament.id %}" class="back-button">Back</a>
+    </p>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %} Create Tournament {% endblock %}
+
+{% block content %}
+<div class="welcome-content">
+    <h1>Create a New Tournament</h1>
+    <form method="post" class="tournament-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="game-button">Create Tournament</button>
+        <p>
+            <a href="{% url 'tournaments' %}" class="back-button">Back</a>
+        </p>
+    </form>
+</div>
+{% endblock %}

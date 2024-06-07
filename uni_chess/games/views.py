@@ -1,20 +1,22 @@
-import base64
 import json
-import uuid
+from datetime import timedelta
+from itertools import combinations
+
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-from django.views.generic import View, TemplateView, FormView
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import TemplateView
 
 from .game_logic.Play import Play
-from .models import Game, Tournament
-from .forms import GameForm
+from .models import Game, Tournament, Round, Profile
+from .forms import GameForm, SignUpForm, TournamentForm, AddPlayerForm, RemovePlayerForm
 
 
 @login_required
@@ -171,6 +173,7 @@ def move_piece(request, game_id):
             else:
                 game.endgame = checkmate
             game.save()
+            update_stats(game)
             return JsonResponse({"status": "ok", "winner": turn})
 
         return JsonResponse({"status": "ok", "new_turn": new_turn, "enPassant": EP, "castling": C})
@@ -235,15 +238,18 @@ def resign(request, game_id):
     if request.user == game.white:
         winner = "Black"
         loser = "White"
+        game.result = 2
     elif request.user == game.black:
         winner = "White"
         loser = "Black"
+        game.result = 1
     else:
         return JsonResponse({"status": "fail"})
 
     game.isActive = False
     game.endgame = "resign"
     game.save()
+    update_stats(game)
 
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
@@ -297,6 +303,7 @@ def accept_draw(request, game_id):
         game.endgame = 'draw'
         game.isActive = False
         game.save()
+        update_stats(game)
 
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
@@ -308,6 +315,235 @@ def accept_draw(request, game_id):
 
         return JsonResponse({"status": "ok"})
     return JsonResponse({"status": "fail"})
+
+
+def register(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            return redirect('home')
+    else:
+        form = SignUpForm()
+    return render(request, 'registration/register.html', {'form': form})
+
+
+@login_required
+def create_tournament(request):
+    if request.method == 'POST':
+        form = TournamentForm(request.POST)
+        if form.is_valid():
+            tournament = form.save(commit=False)
+            tournament.owner = request.user
+            tournament.date = timezone.now()
+            tournament.start_date = tournament.date + timedelta(minutes=tournament.start_minutes)
+            tournament.save()
+            return redirect('tournaments')
+    else:
+        form = TournamentForm()
+    return render(request, 'tournaments/create_tournament.html', {'form': form})
+
+
+@login_required
+def join_tournament(request, tournament_id):
+    tournament = get_object_or_404(Tournament, id=tournament_id)
+    if request.user.username not in tournament.players:
+        tournament.players.append(request.user.username)
+        tournament.save()
+    return redirect('tournament_info', tournament_id)
+
+
+@login_required
+def add_players(request, tournament_id):
+    tournament = get_object_or_404(Tournament, id=tournament_id)
+    if request.user != tournament.owner:
+        return redirect('tournaments')
+
+    if request.method == 'POST':
+        form = AddPlayerForm(request.POST, tournament=tournament)
+        if form.is_valid():
+            user = form.cleaned_data['user']
+            if user.username not in tournament.players:
+                tournament.players.append(user.username)
+                tournament.save()
+                return redirect('tournament_info', tournament.id)
+    else:
+        form = AddPlayerForm(tournament=tournament)
+
+    return render(request, 'tournaments/add_players.html', {'form': form, 'tournament': tournament})
+
+
+@login_required
+def remove_player(request, tournament_id):
+    tournament = get_object_or_404(Tournament, id=tournament_id)
+    if request.user != tournament.owner:
+        return redirect('tournament_info', tournament_id=tournament_id)
+
+    if request.method == 'POST':
+        form = RemovePlayerForm(request.POST, tournament=tournament)
+        if form.is_valid():
+            user = form.cleaned_data['user']
+            tournament.players.remove(user.username)
+            tournament.save()
+            return redirect('tournament_info', tournament_id)
+    else:
+        form = RemovePlayerForm(tournament=tournament)
+
+    return render(request, 'tournaments/remove_players.html', {'form': form, 'tournament': tournament})
+
+
+@login_required
+def start_tournament(request, tournament_id):
+    tournament = get_object_or_404(Tournament, id=tournament_id)
+    if request.user == tournament.owner and not tournament.is_active:
+        players = [User.objects.get(username=player) for player in tournament.players]
+        generated_rounds = RoundRobinGeneration(players)
+        round_counter = 1
+        for matches in generated_rounds:
+            round_obj = Round.objects.create(tournament=tournament, round_number=round_counter)
+            for white, black in matches:
+                Game.objects.create(
+                    white=white,
+                    black=black,
+                    duration=tournament.duration,
+                    increment=tournament.increment,
+                    round=round_obj,
+                    tournament=tournament
+                )
+            round_counter += 1
+        tournament.is_active = True
+        tournament.save()
+    return redirect('tournament_info', tournament.id)
+
+
+def RoundRobinGeneration(players):
+    # breakpoint()
+    n = len(players)
+    rounds = []
+
+    if n % 2 == 1:
+        n += 1
+        players.append(None)  # If odd number of players, add a dummy player
+
+    for round_num in range(n - 1):
+        round_matches = []
+        for i in range(n // 2):
+            player1 = players[i]
+            player2 = players[n - i - 1]
+            if player1 is not None and player2 is not None:
+                round_matches.append((player1, player2))
+        players.insert(1, players.pop())  # Rotate players
+        rounds.append(round_matches)
+
+    return rounds
+
+
+@login_required
+def tournament_info(request, id):
+    tournament = get_object_or_404(Tournament, id=id)
+    if tournament.is_active:
+        rounds = Game.objects.filter(tournament=tournament)
+        rankings = get_tournament_rankings(tournament)
+        return render(request, 'tournaments/active_tournament.html', {'tournament': tournament, 'rounds': rounds, 'rankings': rankings})
+    else:
+        return render(request, 'tournaments/info_tournaments.html', {'tournament': tournament})
+
+
+def get_tournament_rankings(tournament):
+    # breakpoint()
+    players = tournament.players
+    rankings = dict()
+
+    for player in players:
+        user = get_object_or_404(User, username=player)
+        player_user_name = f'{user.first_name} {user.last_name}'
+        rankings[player_user_name] = 0
+
+    games = Game.objects.filter(tournament=tournament, isActive=False)
+    for game in games:
+        user = get_object_or_404(User, username=game.white.username)
+        white_user_name = f'{user.first_name} {user.last_name}'
+        user = get_object_or_404(User, username=game.black.username)
+        black_user_name = f'{user.first_name} {user.last_name}'
+        if game.result == 1:
+            rankings[white_user_name] += 1
+        elif game.result == 2:
+            rankings[black_user_name] += 1
+        elif game.result == 0:
+            rankings[white_user_name] += 0.5
+            rankings[black_user_name] += 0.5
+
+    sorted_rankings = sorted(rankings.items(), key=lambda item: item[1], reverse=True)
+    ranked_rankings = [(index + 1, player, points) for index, (player, points) in enumerate(sorted_rankings)]
+
+    return ranked_rankings
+
+
+@login_required
+def profile(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    profile = get_object_or_404(Profile, user=user)
+    games = Game.objects.filter(white=request.user) | Game.objects.filter(black=request.user)
+    context = {
+        'profile': profile,
+        'games': games
+    }
+    return render(request, 'user/profile.html', context)
+
+
+def leaderboard(request):
+    users = User.objects.select_related('profile').order_by('-profile__elo')
+    rankings = [(index + 1, f'{user.first_name} {user.last_name}', user.profile.elo) for index, user in enumerate(users)]
+    return render(request, 'user/leaderboard.html', {'rankings': rankings})
+
+
+def update_stats(game):
+    white_profile = get_object_or_404(Profile, user=game.white)
+    black_profile = get_object_or_404(Profile, user=game.black)
+
+    # Update games played
+    white_profile.games += 1
+    black_profile.games += 1
+
+    white_profile.games_white += 1
+    black_profile.games_black += 1
+
+    # Update wins, losses, draws
+    if game.result == 1:
+        white_profile.wins_white += 1
+        black_profile.losses_black += 1
+    elif game.result == 2:
+        black_profile.wins_black += 1
+        white_profile.losses_white += 1
+    elif game.result == 0:
+        white_profile.draws_white += 1
+        black_profile.draws_black += 1
+
+    # Update ELO
+    white_elo = white_profile.elo
+    black_elo = black_profile.elo
+
+    # Simple ELO adjustment calculation
+    k = 30  # K-factor
+    expected_white = 1 / (1 + 10 ** ((black_elo - white_elo) / 400))
+    expected_black = 1 / (1 + 10 ** ((white_elo - black_elo) / 400))
+
+    if game.result == 1:
+        white_profile.elo += k * (1 - expected_white)
+        black_profile.elo += k * (0 - expected_black)
+    elif game.result == 2:
+        white_profile.elo += k * (0 - expected_white)
+        black_profile.elo += k * (1 - expected_black)
+    elif game.result == 0:
+        white_profile.elo += k * (0.5 - expected_white)
+        black_profile.elo += k * (0.5 - expected_black)
+
+    white_profile.save()
+    black_profile.save()
 
 
 @login_required
@@ -326,12 +562,6 @@ def game_info(request, id):
 def get_tournaments(request):
     tournaments = Tournament.objects.all()
     return render(request, 'tournaments/tournaments.html', {'tournaments': tournaments})
-
-
-@login_required
-def tournament_info(request, id):
-    tournament = get_object_or_404(Tournament, pk=id)
-    return render(request, 'tournaments/info_tournaments.html', {'tournament': tournament})
 
 
 @login_required
