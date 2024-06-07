@@ -5,7 +5,7 @@
 {% block content %}
 <div class="welcome-content">
     <h1>{{ tournament.name }}</h1>
-    <p><strong>Creator:</strong> {{ tournament.owner.username }}</p>
+    <p><strong>Creator:</strong> {{ tournament.owner.first_name }} {{ tournament.owner.last_name }}</p>
     <p><strong>Start Date:</strong> {{ tournament.start_date }}</p>
     <p><strong>Prize:</strong> {{ tournament.prize }} $</p>
     <p><strong>Minimum Players:</strong> {{ tournament.minimum_players }}</p>
@@ -20,24 +20,24 @@
     </ul>
     <form method="post" action="{% url 'join_tournament' tournament.id %}">
         {% csrf_token %}
-        <button type="submit" class="join-button button-common">Join</button>
+        <button type="submit" class="join-button">Join</button>
     </form>
     {% if user == tournament.owner %}
     <form method="post" action="{% url 'add_players' tournament.id %}">
         {% csrf_token %}
-        <button type="submit" class="join-button button-common">Add Players</button>
+        <button type="submit" class="add-button">Add Players</button>
     </form>
     <form method="post" action="{% url 'remove_player' tournament.id %}">
         {% csrf_token %}
-        <button type="submit" class="remove-button button-common">Remove Players</button>
+        <button type="submit" class="remove-button">Remove Players</button>
     </form>
     <form method="post" action="{% url 'start_tournament' tournament.id %}">
         {% csrf_token %}
-        <button type="submit" class="start-button button-common">Start Tournament</button>
+        <button type="submit" class="start-button">Start Tournament</button>
     </form>
     {% endif %}
     <p>
-        <a href="{% url 'tournaments' %}" class="back-button button-common">Back</a>
+        <a href="{% url 'tournaments' %}" class="back-button">Back</a>
     </p>
 </div>
 {% endblock %}

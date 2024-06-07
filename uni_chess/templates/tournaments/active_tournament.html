@@ -31,13 +31,15 @@
         {% for round in tournament.rounds.all %}
         <div class="round">
             <h3>{{ round }}</h3>
-            {% for game in round.games.all %}
-            <p>
-            <a href="{% url 'game_play' game.id %}">
-                {{ game }}
-            </a>
-            </p>
-            {% endfor %}
+            <ul class="games">
+                {% for game in round.games.all %}
+                <li>
+                    <a href="{% url 'game_play' game.id %}">
+                        {{ game }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
         </div>
         {% endfor %}
     </div>

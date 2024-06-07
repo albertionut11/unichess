@@ -11,10 +11,10 @@
             <label for="id_user" class="center-label">Select a player:</label>
             {{ form.user }}
         </div>
-        <button type="submit" class="join-button button-common">Add Player</button>
+        <button type="submit" class="join-button">Add Player</button>
     </form>
     <p>
-        <a href="{% url 'tournament_info' tournament.id %}" class="back-button button-common">Back</a>
+        <a href="{% url 'tournament_info' tournament.id %}" class="back-button">Back</a>
     </p>
 </div>
 {% endblock %}

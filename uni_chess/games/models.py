@@ -51,14 +51,14 @@ class Game(models.Model):
 
     def __str__(self):
         if self.isActive:
-            return f"{self.white} vs {self.black}"
+            return f"{self.white.first_name} {self.white.last_name} vs {self.black.first_name} {self.black.last_name}"
         else:
             if self.result == 0:
-                return f"{self.white} 1/2 - 1/2 {self.black}"
+                return f"{self.white.first_name} {self.white.last_name}  DRAW  {self.black.first_name} {self.black.last_name}"
             elif self.result == 1:
-                return f"{self.white} 1 - 0 {self.black}"
+                return f"{self.white.first_name} {self.white.last_name} 1 - 0 {self.black.first_name} {self.black.last_name}"
             elif self.result == 2:
-                return f"{self.white} 0 - 1 {self.black}"
+                return f"{self.white.first_name} {self.white.last_name} 0 - 1 {self.black.first_name} {self.black.last_name}"
 
 
 class Profile(models.Model):

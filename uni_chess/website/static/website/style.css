@@ -1,3 +1,4 @@
+/* Existing styles */
 body {
     font-family: 'Amiri', serif;
     color: #543310;
@@ -148,7 +149,6 @@ html, body {
     color: white;
 }
 
-/* General styles for the authentication forms */
 .auth-page {
     text-align: center;
     padding-top: 50px;  /* Adjusted padding to ensure it centers well */
@@ -266,35 +266,6 @@ input[type="email"] {
     color: #4D3E3E;
 }
 
-/* Common button styling */
-.button-common {
-    background-color: #7d5451;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-    font-size: 1em;
-    margin-top: 10px;
-}
-
-.button-common:hover {
-    background-color: #bc7a77;
-}
-
-.home-button,
-.profile-link,
-.logout-button,
-.login-link,
-.join-button,
-.back-button,
-.remove-button,
-.start-button,
-.game-button {
-    @extend .button-common;
-}
-
 .main-content {
     padding: 20px;
     box-sizing: border-box;
@@ -341,7 +312,8 @@ input[type="email"] {
 }
 
 .welcome-content ul li a:hover {
-    color: #bc7a77;
+    background-color: #bc7a77; /* Add background change for hover */
+    color: white; /* Change text color to white on hover */
 }
 
 .welcome-content a {
@@ -360,6 +332,28 @@ input[type="email"] {
 }
 
 .welcome-content a:hover {
+    background-color: #bc7a77;
+    color: white;
+}
+
+.welcome-content .game-form button.game-button,
+.welcome-content .tournament-form button.game-button {
+    display: block;
+    text-decoration: none;
+    color: #7d5451;
+    font-weight: bold;
+    font-size: 1.2em;
+    margin: 10px auto;
+    padding: 10px;
+    border: 2px solid #7d5451;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    width: 200px;
+}
+
+.welcome-content .game-form button.game-button:hover,
+.welcome-content .tournament-form button.game-button:hover {
     background-color: #bc7a77;
     color: white;
 }
@@ -392,11 +386,50 @@ input[type="email"] {
 
 .game-form .game-button,
 .game-form .back-button,
-.tournament-form .game-button {
-    width: 200px;
+.tournament-form .game-button,
+.tournament-form .back-button {
+    width: 100px;
     margin: 10px auto;
     display: block;
 }
+
+.join-button,
+.add-button,
+.remove-button,
+.start-button,
+.game-button,
+.back-button {
+    display: inline-block;
+    background-color: rgba(255, 255, 255, 0.8);
+    color: #7d5451;
+    border: 2px solid #7d5451;
+    border-radius: 5px;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 10px auto;
+    width: 200px;
+}
+
+.join-button:hover,
+.add-button:hover,
+.remove-button:hover,
+.start-button:hover,
+.game-button:hover,
+.back-button:hover {
+    background-color: #bc7a77;
+    color: white;
+}
+
+/* Specific button styles for the forms */
+.welcome-content .game-form button,
+.welcome-content .tournament-form button {
+    width: 200px;
+}
+
 
 .center-label {
     display: block;
