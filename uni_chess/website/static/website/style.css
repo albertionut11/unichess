@@ -437,12 +437,48 @@ input[type="email"] {
     margin-bottom: 10px;
 }
 
-/* Additional styles for rankings, rounds, stats, and games */
-.rankings,
-.rounds,
-.stats,
-.games {
+.stats-container {
+    display: flex;
+    justify-content: space-around;
     margin: 20px 0;
+    background-color: rgba(255, 255, 255, 0.7); /* Light transparent background */
+    border-radius: 10px; /* Rounded corners */
+    padding: 20px; /* Inner padding */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+}
+
+.stats-section {
+    flex: 1;
+    padding: 10px;
+}
+
+.stats-section h2 {
+    text-align: center;
+    color: #543310;
+}
+
+.stats-section p {
+    font-size: 1.2em;
+    color: #222;
+    margin-bottom: 10px;
+}
+
+.tournament-info {
+    background-color: rgba(255, 255, 255, 0.7); /* Light transparent background */
+    border-radius: 10px; /* Rounded corners */
+    padding: 20px; /* Inner padding */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    color: #222; /* Adjusted text color for better visibility */
+}
+
+.rankings,
+.rounds {
+    margin: 20px 0;
+    background-color: rgba(255, 255, 255, 0.7); /* Light transparent background */
+    border-radius: 10px; /* Rounded corners */
+    padding: 20px; /* Inner padding */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    color: #222; /* Adjusted text color for better visibility */
 }
 
 .ranking-table,
@@ -470,27 +506,5 @@ input[type="email"] {
 .round {
     border: 1px solid #ccc;
     padding: 10px;
-    margin-bottom: 10px;
-}
-
-.stats-container {
-    display: flex;
-    justify-content: space-around;
-    margin: 20px 0;
-}
-
-.stats-section {
-    flex: 1;
-    padding: 10px;
-}
-
-.stats-section h2 {
-    text-align: center;
-    color: #543310;
-}
-
-.stats-section p {
-    font-size: 1.2em;
-    color: #666;
     margin-bottom: 10px;
 }

@@ -5,19 +5,21 @@
 {% block content %}
 <div class="welcome-content">
     <h1>{{ tournament.name }}</h1>
-    <p><strong>Creator:</strong> {{ tournament.owner.first_name }} {{ tournament.owner.last_name }}</p>
-    <p><strong>Start Date:</strong> {{ tournament.start_date }}</p>
-    <p><strong>Prize:</strong> {{ tournament.prize }} $</p>
-    <p><strong>Minimum Players:</strong> {{ tournament.minimum_players }}</p>
-    <p><strong>Maximum Players:</strong> {{ tournament.maximum_players }}</p>
-    <p><strong>Players Joined:</strong></p>
-    <ul>
-        {% for player in tournament.players %}
-            <li>{{ player }}</li>
-        {% empty %}
-            <li>No players have joined yet.</li>
-        {% endfor %}
-    </ul>
+    <div class ="tournament-info">
+        <p><strong>Creator:</strong> {{ tournament.owner.first_name }} {{ tournament.owner.last_name }}</p>
+        <p><strong>Start Date:</strong> {{ tournament.start_date }}</p>
+        <p><strong>Prize:</strong> {{ tournament.prize }} $</p>
+        <p><strong>Minimum Players:</strong> {{ tournament.minimum_players }}</p>
+        <p><strong>Maximum Players:</strong> {{ tournament.maximum_players }}</p>
+        <p><strong>Players Joined:</strong></p>
+        <ul>
+            {% for player in tournament.players %}
+                <li>{{ player }}</li>
+            {% empty %}
+                <li>No players have joined yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
     <form method="post" action="{% url 'join_tournament' tournament.id %}">
         {% csrf_token %}
         <button type="submit" class="join-button">Join</button>
