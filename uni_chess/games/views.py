@@ -453,17 +453,26 @@ def tournament_info(request, id):
 def get_tournament_rankings(tournament):
     # breakpoint()
     players = tournament.players
-    rankings = {player: 0 for player in players}
+    rankings = dict()
+
+    for player in players:
+        user = get_object_or_404(User, username=player)
+        player_user_name = f'{user.first_name} {user.last_name}'
+        rankings[player_user_name] = 0
 
     games = Game.objects.filter(tournament=tournament, isActive=False)
     for game in games:
+        user = get_object_or_404(User, username=game.white.username)
+        white_user_name = f'{user.first_name} {user.last_name}'
+        user = get_object_or_404(User, username=game.black.username)
+        black_user_name = f'{user.first_name} {user.last_name}'
         if game.result == 1:
-            rankings[game.white.username] += 1
+            rankings[white_user_name] += 1
         elif game.result == 2:
-            rankings[game.black.username] += 1
+            rankings[black_user_name] += 1
         elif game.result == 0:
-            rankings[game.white.username] += 0.5
-            rankings[game.black.username] += 0.5
+            rankings[white_user_name] += 0.5
+            rankings[black_user_name] += 0.5
 
     sorted_rankings = sorted(rankings.items(), key=lambda item: item[1], reverse=True)
     ranked_rankings = [(index + 1, player, points) for index, (player, points) in enumerate(sorted_rankings)]
@@ -481,6 +490,12 @@ def profile(request, user_id):
         'games': games
     }
     return render(request, 'user/profile.html', context)
+
+
+def leaderboard(request):
+    users = User.objects.select_related('profile').order_by('-profile__elo')
+    rankings = [(index + 1, f'{user.first_name} {user.last_name}', user.profile.elo) for index, user in enumerate(users)]
+    return render(request, 'user/leaderboard.html', {'rankings': rankings})
 
 
 @login_required

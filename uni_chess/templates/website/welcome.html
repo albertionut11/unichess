@@ -14,6 +14,9 @@
     <p>
        <a href="{% url 'tournaments' %}" class="button-common"> TOURNAMENTS </a>
     </p>
+    <p>
+       <a href="{% url 'leaderboard' %}" class="button-common"> LEADERBOARD </a>
+    </p>
     {% if user.is_authenticated %}
     <p>
        <a href="{% url 'profile' user_id=user.id %}" class="button-common"> PROFILE </a>

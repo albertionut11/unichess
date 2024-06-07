@@ -26,4 +26,5 @@ urlpatterns = [
     path('accept_draw/<int:game_id>', views.accept_draw, name='accept_draw'),
     path('auth/register', views.register, name='register'),
     path('profile/<int:user_id>', views.profile, name='profile'),
+    path('leaderboard/', views.leaderboard, name='leaderboard')
 ]

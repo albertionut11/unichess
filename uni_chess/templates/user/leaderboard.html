@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %} Leaderboard {% endblock %}
+
+{% block content %}
+<div class="welcome-content">
+    <div class="rankings">
+        <h1>Leaderboard</h1>
+        <table class="ranking-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>ELO</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rank, player, elo in rankings %}
+                <tr>
+                    <td>{{ rank }}</td>
+                    <td>{{ player }}</td>
+                    <td>{{ elo }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

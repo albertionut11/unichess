@@ -70,12 +70,11 @@ html, body {
     grid-template-columns: 1fr 3fr 1fr;
     gap: 10px;
     height: 100vh;
-    background-color: #F8F4E1;
     overflow: hidden;
 }
 
 .box {
-    background-color: #F8F4E1;
+    background-color: rgba(255, 255, 255, 0.7); /* Light transparent background */
     padding: 10px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -474,7 +473,7 @@ input[type="email"] {
 .rankings,
 .rounds {
     margin: 20px 0;
-    background-color: rgba(255, 255, 255, 0.7); /* Light transparent background */
+    background-color: rgba(255, 255, 255, 0.9); /* Light transparent background */
     border-radius: 10px; /* Rounded corners */
     padding: 20px; /* Inner padding */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
