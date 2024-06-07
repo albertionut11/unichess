@@ -173,6 +173,7 @@ def move_piece(request, game_id):
             else:
                 game.endgame = checkmate
             game.save()
+            update_stats(game)
             return JsonResponse({"status": "ok", "winner": turn})
 
         return JsonResponse({"status": "ok", "new_turn": new_turn, "enPassant": EP, "castling": C})
@@ -248,6 +249,7 @@ def resign(request, game_id):
     game.isActive = False
     game.endgame = "resign"
     game.save()
+    update_stats(game)
 
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
@@ -301,6 +303,7 @@ def accept_draw(request, game_id):
         game.endgame = 'draw'
         game.isActive = False
         game.save()
+        update_stats(game)
 
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
@@ -496,6 +499,51 @@ def leaderboard(request):
     users = User.objects.select_related('profile').order_by('-profile__elo')
     rankings = [(index + 1, f'{user.first_name} {user.last_name}', user.profile.elo) for index, user in enumerate(users)]
     return render(request, 'user/leaderboard.html', {'rankings': rankings})
+
+
+def update_stats(game):
+    white_profile = get_object_or_404(Profile, user=game.white)
+    black_profile = get_object_or_404(Profile, user=game.black)
+
+    # Update games played
+    white_profile.games += 1
+    black_profile.games += 1
+
+    white_profile.games_white += 1
+    black_profile.games_black += 1
+
+    # Update wins, losses, draws
+    if game.result == 1:
+        white_profile.wins_white += 1
+        black_profile.losses_black += 1
+    elif game.result == 2:
+        black_profile.wins_black += 1
+        white_profile.losses_white += 1
+    elif game.result == 0:
+        white_profile.draws_white += 1
+        black_profile.draws_black += 1
+
+    # Update ELO
+    white_elo = white_profile.elo
+    black_elo = black_profile.elo
+
+    # Simple ELO adjustment calculation
+    k = 30  # K-factor
+    expected_white = 1 / (1 + 10 ** ((black_elo - white_elo) / 400))
+    expected_black = 1 / (1 + 10 ** ((white_elo - black_elo) / 400))
+
+    if game.result == 1:
+        white_profile.elo += k * (1 - expected_white)
+        black_profile.elo += k * (0 - expected_black)
+    elif game.result == 2:
+        white_profile.elo += k * (0 - expected_white)
+        black_profile.elo += k * (1 - expected_black)
+    elif game.result == 0:
+        white_profile.elo += k * (0.5 - expected_white)
+        black_profile.elo += k * (0.5 - expected_black)
+
+    white_profile.save()
+    black_profile.save()
 
 
 @login_required
