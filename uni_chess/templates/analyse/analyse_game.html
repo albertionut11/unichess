@@ -5,6 +5,10 @@
 {% block content %}
 <div class="game-container">
     <div class="evaluation-container box">
+        <div class="navigation-buttons">
+            <button id="prev-move" class="nav-button">←</button>
+            <button id="next-move" class="nav-button">→</button>
+        </div>
         <div id="evaluation-box">Evaluation: {{ evaluation }}</div>
         <div id="suggestions-box">
             <h3>Suggested Moves:</h3>
@@ -13,10 +17,6 @@
                     <li>{{ suggestion }}</li>
                 {% endfor %}
             </ul>
-        </div>
-        <div class="navigation-buttons">
-            <button id="prev-move" class="nav-button">←</button>
-            <button id="next-move" class="nav-button">→</button>
         </div>
     </div>
     <div class="board-container box">
