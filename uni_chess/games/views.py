@@ -1,6 +1,5 @@
 import json
 from datetime import timedelta
-from itertools import combinations
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -25,8 +24,8 @@ def create(request):
         form = GameForm(request.POST)
         if form.is_valid():
             game = form.save(commit=False)
-            game.white_time_remaining = game.duration * 60  # Initialize time in seconds
-            game.black_time_remaining = game.duration * 60  # Initialize time in seconds
+            game.white_time_remaining = game.duration * 60
+            game.black_time_remaining = game.duration * 60
             game.isActive = 1
             game.save()
             return redirect("game_play", game_id=game.id)
@@ -348,13 +347,17 @@ def create_tournament(request):
     return render(request, 'tournaments/create_tournament.html', {'form': form})
 
 
-@login_required
 def join_tournament(request, tournament_id):
     tournament = get_object_or_404(Tournament, id=tournament_id)
-    if request.user.username not in tournament.players:
-        tournament.players.append(request.user.username)
-        tournament.save()
-    return redirect('tournament_info', tournament_id)
+    if request.method == 'POST':
+        if len(tournament.players) < tournament.maximum_players:
+            tournament.players.append(request.user.username)
+            tournament.save()
+            return redirect('tournament_info', tournament.id)
+        else:
+            return render(request, 'tournaments/info_tournaments.html', {'tournament': tournament, 'error': 'Maximum number of players reached'})
+    return redirect('tournament_info', tournament.id)
+
 
 
 @login_required
@@ -421,14 +424,11 @@ def start_tournament(request, tournament_id):
 
 
 def RoundRobinGeneration(players):
-    # breakpoint()
     n = len(players)
     rounds = []
-
     if n % 2 == 1:
         n += 1
-        players.append(None)  # If odd number of players, add a dummy player
-
+        players.append(None)
     for round_num in range(n - 1):
         round_matches = []
         for i in range(n // 2):
@@ -436,9 +436,8 @@ def RoundRobinGeneration(players):
             player2 = players[n - i - 1]
             if player1 is not None and player2 is not None:
                 round_matches.append((player1, player2))
-        players.insert(1, players.pop())  # Rotate players
+        players.insert(1, players.pop())
         rounds.append(round_matches)
-
     return rounds
 
 
@@ -545,6 +544,54 @@ def update_stats(game):
     white_profile.save()
     black_profile.save()
 
+
+def analyse_game(request, game_id):
+    # breakpoint()
+    context = dict()
+    game = get_object_or_404(Game, id=game_id)
+    moves = game.data.split(' ')
+
+    parsed_moves = parse_moves(moves)
+
+    play = Play(game.data)
+    html_table = play.board.render(context)
+
+    context = {
+        'context': game,
+        'evaluation': 'N/A',  # Placeholder for evaluation score
+        'parsed_moves': parsed_moves,
+        'moves': moves,
+        'html_table': html_table
+    }
+
+    return render(request, 'analyse/analyse_game.html', context)
+
+
+def parse_moves(moves):
+    n = len(moves)
+    parsed_moves = []
+
+    if n % 2 == 0:
+        for i in range(0, n, 2):
+            pair = {'white': show_move(moves[i]), 'black': show_move(moves[i + 1])}
+            parsed_moves.append(pair)
+    else:
+        for i in range(0, n-1, 2):
+            pair = {'white': show_move(moves[i]), 'black': show_move(moves[i + 1])}
+            parsed_moves.append(pair)
+        parsed_moves.append({'white': show_move(moves[-1]), 'black': 'N/A'})
+
+    return parsed_moves
+
+
+def show_move(move):
+    n = len(move)
+    if n == 4:
+        return move[1] + move[0] + move[3] + move[2]
+    elif n == 5:
+        return move[0] + move[2] + move[1] + move[4] + move[3]
+    else:
+        return move[0] + move[2] + move[1] + move[4] + move[3] + move[5]
 
 @login_required
 def get_games(request):

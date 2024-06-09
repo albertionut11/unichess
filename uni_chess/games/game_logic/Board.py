@@ -17,7 +17,9 @@ class Board:
     def load_table(self, data):
         self.new_table()
         self.data = data
-        moves = data.split(' ')[:-1]
+        # breakpoint()
+
+        moves = data.split(' ')[:-1] if self.data[-1] == ' ' else data.split(' ')
 
         self.turn = 'white' if len(moves) % 2 == 0 else 'black'
 
