@@ -17,6 +17,9 @@ from .game_logic.Play import Play
 from .models import Game, Tournament, Round, Profile
 from .forms import GameForm, SignUpForm, TournamentForm, AddPlayerForm, RemovePlayerForm
 
+import chess
+import chess.engine
+
 
 @login_required
 def create(request):
@@ -558,14 +561,87 @@ def analyse_game(request, game_id):
 
     context = {
         'context': game,
-        'evaluation': 'N/A',  # Placeholder for evaluation score
+        'evaluation': 0,
+        'suggestions': ['e2e4', 'd2d4', 'c2c4', 'g1g3', 'c1c3'],
         'parsed_moves': parsed_moves,
         'moves': json.dumps(moves),
         'html_table': html_table,
-        'game_id': game_id
+        'game_id': game_id,
     }
 
     return render(request, 'analyse/analyse_game.html', context)
+
+
+@csrf_exempt
+@login_required
+def analyse_game_move(request, game_id):
+    game = get_object_or_404(Game, pk=game_id)
+
+    if request.method == "POST":
+        # breakpoint()
+        data = json.loads(request.body)
+        indice = data.get("indice")
+        play = Play(game.data, ind=indice)
+        json_table = json.dumps(play.board.get_json_table())
+        # breakpoint()
+        moves = game.data.split(' ')[:indice]
+        evaluation, suggestions = get_evaluation(moves)
+
+        return JsonResponse({"status": "ok", "json_table": json_table, "evaluation": evaluation, "suggestions": suggestions})
+    return JsonResponse({"status": "fail"})
+
+
+
+def get_evaluation(moves):
+    STOCKFISH_PATH = 'C:/Users/alber/Desktop/UniChessRepo/unichess/uni_chess/stockfish/stockfish-windows-x86-64-avx2.exe'
+    board = chess.Board()
+    for move in moves:
+        uci_move = convert_to_uci(move)
+        board.push_uci(uci_move)
+
+    with chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH) as engine:
+        info = engine.analyse(board, chess.engine.Limit(time=0.5))
+        if info['score'].is_mate():
+            if info.get('pv'):
+                score = 'Mate in ' + str(info['score'].relative.mate())
+            else:
+                score = 'Checkmate'
+        else:
+            score = str(info['score'].relative.score() / 100)
+        suggestions = []
+        if info.get('pv'):
+            for i in range(min(len(info['pv']), 10)):
+                mv = info['pv'][i].uci()
+                suggestions.append(mv)
+
+        engine.quit()
+    return score, suggestions
+
+
+def convert_to_uci(move):
+
+    move = show_move(move)
+
+    # Parse simple moves
+    if len(move) == 4:
+        return move
+
+    # Parse EnPassant
+    if move[0] == 'E':
+        return move[1:]
+
+    # Parse Promotion
+    if move[0] == 'P':
+        return move[1:5] + move[5].lower()
+
+    # Parse Castling
+    if move[0] == 'C':
+        if move[-1] == 'K':
+            return 'e1g1' if move[1:3] == 'e1' else 'e8g8'
+        elif move[-1] == 'Q':
+            return 'e1c1' if move[1:3] == 'e1' else 'e8c8'
+
+    raise ValueError(f"Invalid move format: {move}")
 
 
 def parse_moves(moves):
@@ -593,23 +669,6 @@ def show_move(move):
         return move[0] + move[2] + move[1] + move[4] + move[3]
     else:
         return move[0] + move[2] + move[1] + move[4] + move[3] + move[5]
-
-
-@csrf_exempt
-@login_required
-def analyse_game_move(request, game_id):
-    game = get_object_or_404(Game, pk=game_id)
-
-    if request.method == "POST":
-        # breakpoint()
-        data = json.loads(request.body)
-        indice = data.get("indice")
-        play = Play(game.data, ind=indice)
-        json_table = json.dumps(play.board.get_json_table())
-        # breakpoint()
-
-        return JsonResponse({"status": "ok", "json_table": json_table})
-    return JsonResponse({"status": "fail"})
 
 
 @login_required

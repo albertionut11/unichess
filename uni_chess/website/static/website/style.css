@@ -544,25 +544,68 @@ input[type="email"] {
     color: #543310;
 }
 
-.navigation-arrows {
+.evaluation-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin-bottom: 20px;
+    height: 100%;
+}
+
+#evaluation-box {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #543310;
+    margin-bottom: 10px;
+}
+
+#suggestions-box {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+#suggestions-box h3 {
+    font-size: 1.2em;
+    color: #543310;
+    margin-bottom: 10px;
+}
+
+#suggestions-list {
+    list-style: none;
+    padding: 0;
+}
+
+#suggestions-list li {
+    background-color: #f8f4e1;
+    margin-bottom: 5px;
+    padding: 8px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navigation-buttons {
     display: flex;
     justify-content: center;
-    align-items: center;
-    margin-top: 20px;
+    gap: 20px;
 }
 
 .nav-button {
-    background-color: #7d5451;
+    background-color: #543310;
     color: white;
-    padding: 10px 20px;
     border: none;
     border-radius: 5px;
-    margin: 5px;
-    cursor: pointer;
-    text-align: center;
+    padding: 10px 20px;
     font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .nav-button:hover {
-    background-color: #bc7a77;
+    background-color: #775533;
 }

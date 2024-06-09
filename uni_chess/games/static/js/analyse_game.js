@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const gameId = document.getElementById("game_id").value;
     let movesElement = document.getElementById("moves-data");
     let moves = JSON.parse(movesElement.textContent);
-
     let currentMoveIndex = 0;
 
     prevButton.addEventListener("click", () => navigateMoves(-1));
@@ -12,10 +11,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function navigateMoves(direction) {
         currentMoveIndex += direction;
-        if (currentMoveIndex < -1) {
+        if (currentMoveIndex < 0) {
             currentMoveIndex = 0;
-        } else if (currentMoveIndex >= moves.length) {
-            currentMoveIndex = moves.length - 1;
+        } else if (currentMoveIndex > moves.length) {
+            currentMoveIndex = moves.length;
         }
         updateBoard(currentMoveIndex);
     }
@@ -34,6 +33,8 @@ document.addEventListener("DOMContentLoaded", function() {
             if (data.status === "ok") {
                 const jsonTable = JSON.parse(data.json_table);
                 renderBoard(jsonTable);
+                updateEvaluation(data.evaluation);
+                updateSuggestions(data.suggestions);
             } else {
                 console.error("Failed to update board");
             }
@@ -45,8 +46,6 @@ document.addEventListener("DOMContentLoaded", function() {
         for (const [row, columns] of Object.entries(jsonTable)) {
             for (const [col, piece] of Object.entries(columns)) {
                 const position = `${row}${col}`;
-                console.log("Position:", position);
-                console.log("Piece:", piece);
                 const square = document.querySelector(`td[data-position="${position}"]`);
                 if (square) {
                     square.innerHTML = piece !== 'None' ? `<img src="/static/chess/pieces/${piece}.svg" alt="${piece}">` : '';
@@ -55,11 +54,26 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
+    function updateEvaluation(evaluation) {
+        const evaluationBox = document.getElementById("evaluation-box");
+        evaluationBox.textContent = `Evaluation: ${evaluation}`;
+    }
+
+    function updateSuggestions(suggestions) {
+        const suggestionsList = document.getElementById("suggestions-list");
+        suggestionsList.innerHTML = '';
+        suggestions.forEach(suggestion => {
+            const listItem = document.createElement("li");
+            listItem.textContent = suggestion;
+            suggestionsList.appendChild(listItem);
+        });
+    }
+
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
             const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
+            for (let i = 0; cookies.length; i++) {
                 const cookie = cookies[i].trim();
                 if (cookie.substring(0, name.length + 1) === (name + '=')) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
