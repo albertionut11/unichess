@@ -553,15 +553,16 @@ def analyse_game(request, game_id):
 
     parsed_moves = parse_moves(moves)
 
-    play = Play(game.data)
+    play = Play('')
     html_table = play.board.render(context)
 
     context = {
         'context': game,
         'evaluation': 'N/A',  # Placeholder for evaluation score
         'parsed_moves': parsed_moves,
-        'moves': moves,
-        'html_table': html_table
+        'moves': json.dumps(moves),
+        'html_table': html_table,
+        'game_id': game_id
     }
 
     return render(request, 'analyse/analyse_game.html', context)
@@ -592,6 +593,24 @@ def show_move(move):
         return move[0] + move[2] + move[1] + move[4] + move[3]
     else:
         return move[0] + move[2] + move[1] + move[4] + move[3] + move[5]
+
+
+@csrf_exempt
+@login_required
+def analyse_game_move(request, game_id):
+    game = get_object_or_404(Game, pk=game_id)
+
+    if request.method == "POST":
+        # breakpoint()
+        data = json.loads(request.body)
+        indice = data.get("indice")
+        play = Play(game.data, ind=indice)
+        json_table = json.dumps(play.board.get_json_table())
+        # breakpoint()
+
+        return JsonResponse({"status": "ok", "json_table": json_table})
+    return JsonResponse({"status": "fail"})
+
 
 @login_required
 def get_games(request):
