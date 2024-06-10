@@ -600,9 +600,9 @@ def get_evaluation(moves):
         board.push_uci(uci_move)
 
     with chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH) as engine:
-        info = engine.analyse(board, chess.engine.Limit(time=0.5), multipv=10)
+        info = engine.analyse(board, chess.engine.Limit(time=0.5), multipv=7)
         scores = []
-        for i in range(min(10, len(info))):
+        for i in range(min(7, len(info))):
             if info[i]['score'].is_mate():
                 if info[i].get('pv'):
                     score = 'Mate in ' + str(info[i]['score'].relative.mate())
@@ -612,7 +612,7 @@ def get_evaluation(moves):
                 score = str(info[i]['score'].relative.score() / 100)
             scores.append(score)
 
-        suggestions = [(info[i]['pv'][0].uci(), scores[i]) for i in range(min(10, len(info)))]
+        suggestions = [(info[i]['pv'][0].uci(), scores[i]) for i in range(min(7, len(info)))]
         # breakpoint()
         engine.quit()
     return scores[0], suggestions

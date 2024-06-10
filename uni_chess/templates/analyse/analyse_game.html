@@ -19,10 +19,10 @@
                         <th>Score</th>
                     </tr>
                 </thead>
-                <tbody>
-                    {% for move, score in suggestions %}
+                <tbody id="suggestions-list">
+                    {% for suggestion, score in suggestions %}
                     <tr>
-                        <td>{{ move }}</td>
+                        <td>{{ suggestion }}</td>
                         <td>{{ score }}</td>
                     </tr>
                     {% endfor %}

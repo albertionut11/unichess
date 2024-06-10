@@ -607,3 +607,26 @@ input[type="email"] {
     background-color:  #bc7a77;
     color: white;
 }
+
+#suggestions-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+#suggestions-table th, #suggestions-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+#suggestions-table th {
+    background-color: #f8f4e1;
+    color: #543310;
+    font-weight: bold;
+}
+
+#suggestions-table td {
+    background-color: white;
+    color: #543310;
+}
