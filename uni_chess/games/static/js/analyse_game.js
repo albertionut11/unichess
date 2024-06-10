@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     prevButton.addEventListener("click", () => navigateMoves(-1));
     nextButton.addEventListener("click", () => navigateMoves(1));
+    highlightCurrentMove(currentMoveIndex);
 
     function navigateMoves(direction) {
         currentMoveIndex += direction;
@@ -31,6 +32,7 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(data => {
             if (data.status === "ok") {
+                highlightCurrentMove(index);
                 const jsonTable = JSON.parse(data.json_table);
                 renderBoard(jsonTable);
                 updateEvaluation(data.evaluation);
@@ -43,6 +45,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function renderBoard(jsonTable) {
+
         for (const [row, columns] of Object.entries(jsonTable)) {
             for (const [col, piece] of Object.entries(columns)) {
                 const position = `${row}${col}`;
@@ -67,6 +70,59 @@ document.addEventListener("DOMContentLoaded", function() {
             listItem.textContent = suggestion;
             suggestionsList.appendChild(listItem);
         });
+
+        drawSuggestionArrows(suggestions.slice(0, 3));
+    }
+
+    function highlightCurrentMove(index) {
+        document.querySelectorAll('.cell-highlight').forEach(el => el.classList.remove('cell-highlight'));
+
+        const moveRow = Math.floor(index / 2);
+        const moveCol = index % 2 === 0 ? 'white' : 'black';
+
+        const cell = document.querySelector(`.moves-table tbody tr:nth-child(${moveRow + 1}) td:nth-child(${moveCol === 'white' ? 2 : 3})`);
+        if (cell) {
+            cell.classList.add('cell-highlight');
+        }
+    }
+
+    function drawSuggestionArrows(suggestions) {
+        clearArrows();
+        suggestions.forEach(suggestion => {
+            const from = suggestion[1] + suggestion[0];
+            const to = suggestion[3] + suggestion[2];
+            drawArrow(from, to);
+        });
+    }
+
+    function drawArrow(from, to) {
+        const fromSquare = document.querySelector(`td[data-position="${from}"]`);
+        const toSquare = document.querySelector(`td[data-position="${to}"]`);
+        if (fromSquare && toSquare) {
+            const fromRect = fromSquare.getBoundingClientRect();
+            const toRect = toSquare.getBoundingClientRect();
+
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("class", "arrow");
+            svg.setAttribute("style", `position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;`);
+            svg.setAttribute("viewBox", `0 0 ${document.documentElement.clientWidth} ${document.documentElement.clientHeight}`);
+
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", fromRect.left + fromRect.width / 2);
+            line.setAttribute("y1", fromRect.top + fromRect.height / 2);
+            line.setAttribute("x2", toRect.left + toRect.width / 2);
+            line.setAttribute("y2", toRect.top + toRect.height / 2);
+            line.setAttribute("stroke", "red");
+            line.setAttribute("stroke-width", "5");
+            line.setAttribute("marker-end", "url(#arrowhead)");
+
+            svg.appendChild(line);
+            document.body.appendChild(svg);
+        }
+    }
+
+    function clearArrows() {
+        document.querySelectorAll('.arrow').forEach(arrow => arrow.remove());
     }
 
     function getCookie(name) {

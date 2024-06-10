@@ -602,3 +602,22 @@ input[type="email"] {
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+.cell-highlight {
+    background-color:  #bc7a77;
+    color: white;
+}
+
+.arrow {
+    position: absolute;
+    pointer-events: none;
+}
+
+.arrow line {
+    stroke: red;
+    stroke-width: 2;
+}
+
+.arrow marker {
+    fill: red;
+}

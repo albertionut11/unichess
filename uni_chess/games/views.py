@@ -575,6 +575,7 @@ def analyse_game(request, game_id):
 @csrf_exempt
 @login_required
 def analyse_game_move(request, game_id):
+    # breakpoint()
     game = get_object_or_404(Game, pk=game_id)
 
     if request.method == "POST":

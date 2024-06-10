@@ -55,6 +55,15 @@
         </div>
     </div>
 </div>
+
+<svg width="0" height="0" style="position:absolute">
+    <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" />
+        </marker>
+    </defs>
+</svg>
+
 <input type="hidden" id="game_id" value="{{ context.id }}">
 <script id="moves-data" type="application/json">{{ moves|safe }}</script>
 <script src="{% static 'js/analyse_game.js' %}"></script>
