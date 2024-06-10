@@ -592,7 +592,6 @@ def analyse_game_move(request, game_id):
     return JsonResponse({"status": "fail"})
 
 
-
 def get_evaluation(moves):
     STOCKFISH_PATH = 'C:/Users/alber/Desktop/UniChessRepo/unichess/uni_chess/stockfish/stockfish-windows-x86-64-avx2.exe'
     board = chess.Board()
@@ -609,11 +608,10 @@ def get_evaluation(moves):
                 score = 'Checkmate'
         else:
             score = str(info['score'].relative.score() / 100)
-        suggestions = []
-        if info.get('pv'):
-            for i in range(min(len(info['pv']), 10)):
-                mv = info['pv'][i].uci()
-                suggestions.append(mv)
+
+        # Get best moves for the opponent
+        opponent_moves = engine.play(board, chess.engine.Limit(time=0.5)).move
+        suggestions = [opponent_moves.uci()]
 
         engine.quit()
     return score, suggestions
