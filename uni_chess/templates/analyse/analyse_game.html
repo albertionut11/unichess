@@ -12,11 +12,22 @@
         <div id="evaluation-box">Evaluation: {{ evaluation }}</div>
         <div id="suggestions-box">
             <h3>Suggested Moves:</h3>
-            <ul id="suggestions-list">
-                {% for suggestion in suggestions %}
-                    <li>{{ suggestion }}</li>
-                {% endfor %}
-            </ul>
+            <table id="suggestions-table">
+                <thead>
+                    <tr>
+                        <th>Move</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for move, score in suggestions %}
+                    <tr>
+                        <td>{{ move }}</td>
+                        <td>{{ score }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
     <div class="board-container box">

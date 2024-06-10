@@ -62,13 +62,15 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function updateSuggestions(suggestions) {
-        const suggestionsList = document.getElementById("suggestions-list");
-        suggestionsList.innerHTML = '';
-        suggestions.forEach(suggestion => {
-            const listItem = document.createElement("li");
-            listItem.textContent = suggestion;
-            suggestionsList.appendChild(listItem);
-        });
+        const suggestionsTable = document.getElementById("suggestions-table").getElementsByTagName('tbody')[0];
+        suggestionsTable.innerHTML = '';
+        for (let i = 0; i < suggestions.length; i++) {
+            const row = suggestionsTable.insertRow();
+            const moveCell = row.insertCell(0);
+            const scoreCell = row.insertCell(1);
+            moveCell.textContent = suggestions[i][0];
+            scoreCell.textContent = suggestions[i][1];
+        }
 
         drawSuggestionArrows(suggestions.slice(0, 3));
     }
@@ -87,9 +89,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function drawSuggestionArrows(suggestions) {
         clearArrows();
+        console.log(suggestions);
         suggestions.forEach(suggestion => {
-            const from = suggestion[1] + suggestion[0];
-            const to = suggestion[3] + suggestion[2];
+            const from = suggestion[0][1] + suggestion[0][0];
+            const to = suggestion[0][3] + suggestion[0][2];
             drawArrow(from, to);
         });
     }

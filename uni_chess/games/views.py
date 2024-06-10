@@ -562,7 +562,7 @@ def analyse_game(request, game_id):
     context = {
         'context': game,
         'evaluation': 0,
-        'suggestions': ['e2e4', 'd2d4', 'c2c4', 'g1g3', 'c1c3'],
+        'suggestions': [('e2e4', 0.2), ('d2d4', 0.1), ('c2c4', 0.1), ('g1g3', 0), ('c1c3', 0)],
         'parsed_moves': parsed_moves,
         'moves': json.dumps(moves),
         'html_table': html_table,
@@ -600,21 +600,22 @@ def get_evaluation(moves):
         board.push_uci(uci_move)
 
     with chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH) as engine:
-        info = engine.analyse(board, chess.engine.Limit(time=0.5))
-        if info['score'].is_mate():
-            if info.get('pv'):
-                score = 'Mate in ' + str(info['score'].relative.mate())
+        info = engine.analyse(board, chess.engine.Limit(time=0.5), multipv=10)
+        scores = []
+        for i in range(min(10, len(info))):
+            if info[i]['score'].is_mate():
+                if info[i].get('pv'):
+                    score = 'Mate in ' + str(info[i]['score'].relative.mate())
+                else:
+                    score = 'Checkmate'
             else:
-                score = 'Checkmate'
-        else:
-            score = str(info['score'].relative.score() / 100)
+                score = str(info[i]['score'].relative.score() / 100)
+            scores.append(score)
 
-        # Get best moves for the opponent
-        opponent_moves = engine.play(board, chess.engine.Limit(time=0.5)).move
-        suggestions = [opponent_moves.uci()]
-
+        suggestions = [(info[i]['pv'][0].uci(), scores[i]) for i in range(min(10, len(info)))]
+        # breakpoint()
         engine.quit()
-    return score, suggestions
+    return scores[0], suggestions
 
 
 def convert_to_uci(move):
