@@ -112,8 +112,9 @@ document.addEventListener("DOMContentLoaded", function() {
             line.setAttribute("y1", fromRect.top + fromRect.height / 2);
             line.setAttribute("x2", toRect.left + toRect.width / 2);
             line.setAttribute("y2", toRect.top + toRect.height / 2);
-            line.setAttribute("stroke", "red");
+            line.setAttribute("stroke", "blue");
             line.setAttribute("stroke-width", "5");
+            line.setAttribute("stroke-opacity", "0.5"); // Make the arrow transparent
             line.setAttribute("marker-end", "url(#arrowhead)");
 
             svg.appendChild(line);

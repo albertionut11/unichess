@@ -612,12 +612,12 @@ input[type="email"] {
     position: absolute;
     pointer-events: none;
 }
-
 .arrow line {
-    stroke: red;
+    stroke: blue; /* Change arrow color to blue */
     stroke-width: 2;
+    stroke-opacity: 0.5; /* Make the arrow transparent */
 }
 
 .arrow marker {
-    fill: red;
+    fill: blue; /* Change arrowhead color to blue */
 }
