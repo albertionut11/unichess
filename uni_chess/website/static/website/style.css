@@ -607,17 +607,3 @@ input[type="email"] {
     background-color:  #bc7a77;
     color: white;
 }
-
-.arrow {
-    position: absolute;
-    pointer-events: none;
-}
-.arrow line {
-    stroke: blue; /* Change arrow color to blue */
-    stroke-width: 2;
-    stroke-opacity: 0.5; /* Make the arrow transparent */
-}
-
-.arrow marker {
-    fill: blue; /* Change arrowhead color to blue */
-}

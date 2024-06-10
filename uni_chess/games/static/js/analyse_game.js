@@ -45,7 +45,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function renderBoard(jsonTable) {
-
         for (const [row, columns] of Object.entries(jsonTable)) {
             for (const [col, piece] of Object.entries(columns)) {
                 const position = `${row}${col}`;
@@ -96,29 +95,31 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function drawArrow(from, to) {
+        const chessContainer = document.getElementById("chess-container");
         const fromSquare = document.querySelector(`td[data-position="${from}"]`);
         const toSquare = document.querySelector(`td[data-position="${to}"]`);
+
         if (fromSquare && toSquare) {
             const fromRect = fromSquare.getBoundingClientRect();
             const toRect = toSquare.getBoundingClientRect();
+            const containerRect = chessContainer.getBoundingClientRect();
 
             const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
             svg.setAttribute("class", "arrow");
             svg.setAttribute("style", `position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;`);
-            svg.setAttribute("viewBox", `0 0 ${document.documentElement.clientWidth} ${document.documentElement.clientHeight}`);
+            svg.setAttribute("viewBox", `0 0 ${containerRect.width} ${containerRect.height}`);
 
             const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            line.setAttribute("x1", fromRect.left + fromRect.width / 2);
-            line.setAttribute("y1", fromRect.top + fromRect.height / 2);
-            line.setAttribute("x2", toRect.left + toRect.width / 2);
-            line.setAttribute("y2", toRect.top + toRect.height / 2);
-            line.setAttribute("stroke", "blue");
-            line.setAttribute("stroke-width", "5");
-            line.setAttribute("stroke-opacity", "0.5"); // Make the arrow transparent
+            line.setAttribute("x1", fromRect.left + fromRect.width / 2 - containerRect.left);
+            line.setAttribute("y1", fromRect.top + fromRect.height / 2 - containerRect.top);
+            line.setAttribute("x2", toRect.left + toRect.width / 2 - containerRect.left);
+            line.setAttribute("y2", toRect.top + toRect.height / 2 - containerRect.top);
+            line.setAttribute("stroke", "rgba(0, 128, 0, 1)");
+            line.setAttribute("stroke-width", "10");
             line.setAttribute("marker-end", "url(#arrowhead)");
 
             svg.appendChild(line);
-            document.body.appendChild(svg);
+            chessContainer.appendChild(svg);
         }
     }
 
@@ -130,7 +131,7 @@ document.addEventListener("DOMContentLoaded", function() {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
             const cookies = document.cookie.split(';');
-            for (let i = 0; cookies.length; i++) {
+            for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
                 if (cookie.substring(0, name.length + 1) === (name + '=')) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));

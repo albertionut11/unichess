@@ -24,7 +24,7 @@
         <div id="endgame-message" class="endgame-message" style="display: none;">
             {{ context.endgame_message }}
         </div>
-        <div id="chess-container">
+        <div id="chess-container" style="position: relative;">
             <div id="chess-table">
                 {{ html_table|safe }}
             </div>
@@ -58,8 +58,8 @@
 
 <svg width="0" height="0" style="position:absolute">
     <defs>
-        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
-            <polygon points="0 0, 10 3.5, 0 7" />
+        <marker id="arrowhead" markerWidth="4" markerHeight="4" refX="2" refY="2" orient="auto">
+            <polygon points="0 0, 4 2, 0 4" fill="rgba(0, 128, 0, 1)" />
         </marker>
     </defs>
 </svg>
