@@ -4,7 +4,6 @@ let whiteInterval, blackInterval;
 let gameOver = false;
 
 document.addEventListener("DOMContentLoaded", function() {
-    const isActive = document.getElementById("is_active").value === "True";
     const gameId = document.getElementById("game_id").value;
     const increment = parseInt(document.getElementById("time_increment").value);
     const whiteTimerElement = document.getElementById("white-timer");
@@ -18,6 +17,9 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function startTimer(turn) {
+        let isActive = document.getElementById("is_active").value;
+        if (isActive === "False") return;
+
         clearInterval(whiteInterval);
         clearInterval(blackInterval);
 
@@ -29,7 +31,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function updateTimer(player) {
-        if (gameOver) return;
 
         if (player === 'white') {
             whiteTime--;
@@ -56,12 +57,12 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function endGame(winner, message) {
-        gameOver = true;
         clearInterval(whiteInterval);
         clearInterval(blackInterval);
         const messageDiv = document.getElementById("endgame-message");
         messageDiv.innerText = message;
         messageDiv.classList.add("checkmate-message");
+
     }
 
     function initializeTimers() {
@@ -72,9 +73,8 @@ document.addEventListener("DOMContentLoaded", function() {
         blackTimerElement.textContent = formatTime(blackTime);
 
         let turn = document.getElementById("turn").value;
-        if (isActive) {
-            startTimer(turn);
-        }
+
+        startTimer(turn);
     }
 
     initializeTimers();
@@ -82,26 +82,26 @@ document.addEventListener("DOMContentLoaded", function() {
     const socket = new WebSocket(`ws://${window.location.host}/ws/game/${gameId}/`);
 
     socket.onmessage = function(e) {
-            const data = JSON.parse(e.data);
-            if (data.type === "game_move"){
-                        let turn = data.turn;
-            console.log(data);
+        const data = JSON.parse(e.data);
+        if (data.type === "game_move"){
+        let turn = data.turn;
+        console.log(data);
 
-            whiteTime = data.white_time_remaining;
-            blackTime = data.black_time_remaining;
+        whiteTime = data.white_time_remaining;
+        blackTime = data.black_time_remaining;
 
-            if (turn === 'white') {
-                blackTime += increment;
-            }
-            else {
-                whiteTime += increment;
-            }
+        if (turn === 'white') {
+            blackTime += increment;
+        }
+        else {
+            whiteTime += increment;
+        }
 
-            whiteTimerElement.textContent = formatTime(whiteTime);
-            blackTimerElement.textContent = formatTime(blackTime);
-            if (isActive) {
-                startTimer(data.turn);
-            }
+        whiteTimerElement.textContent = formatTime(whiteTime);
+        blackTimerElement.textContent = formatTime(blackTime);
+
+        startTimer(data.turn);
+
         }
     };
 

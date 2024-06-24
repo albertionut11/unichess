@@ -62,10 +62,11 @@ class PlayView(LoginRequiredMixin, TemplateView):
 
         if play.checkmate:
             context['checkmate'] = play.checkmate
+            game.isActive = False
 
         if not game.isActive:
-            winner = "Black" if game.turn == "white" else "Black"
-            loser = "White" if game.turn == "white" else "White"
+            winner = "White" if game.result == 1 else "Black"
+            loser = "Black" if game.result == 1 else "White"
             if game.endgame == 'draw':
                 context['endgame_message'] = "Game drawn!"
             elif game.endgame == 'checkmate':
@@ -90,7 +91,7 @@ class PlayView(LoginRequiredMixin, TemplateView):
 @login_required
 def move_piece(request, game_id):
     game = get_object_or_404(Game, pk=game_id)
-
+    # breakpoint()
     if request.user.username != game.white.username and request.user.username != game.black.username:
         return JsonResponse({"status": "fail"})
 
@@ -169,9 +170,12 @@ def move_piece(request, game_id):
             }
         )
 
-        if checkmate != 'false':
+        if checkmate != 'false' and checkmate != '':
+
+            game.isActive = False
             if checkmate == 'true':
                 game.endgame = 'checkmate'
+                game.result = 1 if turn == 'white' else 2
             else:
                 game.endgame = checkmate
             game.save()

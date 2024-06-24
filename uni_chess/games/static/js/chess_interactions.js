@@ -300,9 +300,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 document.getElementById("turn").value = turn;
                 clearHighlights();
                 updateDraggable();
-                // Check if promotion occurred and handle it
+
                 if (promotion) {
-                    promotePawn(toPosition, userRole[0] + promotion); // e.g., "wQ" for white Queen
+                    promotePawn(toPosition, userRole[0] + promotion);
                 }
             } else {
                 console.error("Invalid move");
@@ -368,7 +368,13 @@ document.addEventListener("DOMContentLoaded", function() {
         const messageDiv = document.getElementById("endgame-message");
         messageDiv.innerText = message;
         messageDiv.classList.add("endgame-message");
-        messageDiv.style.display = "block"; // Ensure the message is displayed
+        messageDiv.style.display = "block";
+
+        const turnDisplay = document.querySelector(".info-box");
+        if (turnDisplay) {
+            turnDisplay.remove();
+        }
+
         pieces.forEach(piece => {
             piece.removeEventListener("dragstart", dragStart);
             piece.removeEventListener("click", handleClick);
@@ -376,8 +382,16 @@ document.addEventListener("DOMContentLoaded", function() {
         });
         document.getElementById("resign-button").disabled = true;
         document.getElementById("offer-draw-button").disabled = true;
+
+        showAnalyseButton();
+
         clearInterval(whiteInterval);
         clearInterval(blackInterval);
+
+        const isActiveElement = document.getElementById("is_active");
+        if (isActiveElement) {
+            isActiveElement.value = "False";
+        }
     }
 
     function getCookie(name) {
@@ -524,4 +538,26 @@ document.addEventListener("DOMContentLoaded", function() {
         clearInterval(whiteInterval);
         clearInterval(blackInterval);
     }
+
+        function showAnalyseButton() {
+        const timersElement = document.getElementById("timers");
+
+        const resignButton = document.getElementById("resign-button");
+        const offerDrawButton = document.getElementById("offer-draw-button");
+        if (resignButton) {
+            timersElement.removeChild(resignButton);
+        }
+        if (offerDrawButton) {
+            timersElement.removeChild(offerDrawButton);
+        }
+
+        const analyseButton = document.createElement("a");
+        analyseButton.href = `/analyse/${gameId}`;
+        analyseButton.className = "game-button";
+        analyseButton.textContent = "Analyse Game";
+
+        const blackTimerElement = document.getElementById("black-timer");
+        timersElement.insertBefore(analyseButton, blackTimerElement);
+    }
+
 });
