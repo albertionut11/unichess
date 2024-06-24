@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} Game Analysis {% endblock %}
+
+{% block content %}
+<div class="game-container">
+    <div class="evaluation-container box">
+        <div class="navigation-buttons">
+            <button id="prev-move" class="nav-button">←</button>
+            <button id="next-move" class="nav-button">→</button>
+        </div>
+        <div id="evaluation-box">Evaluation: {{ evaluation }}</div>
+        <div id="suggestions-box">
+            <h3>Suggested Moves:</h3>
+            <table id="suggestions-table">
+                <thead>
+                    <tr>
+                        <th>Move</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody id="suggestions-list">
+                    {% for suggestion, score in suggestions %}
+                    <tr>
+                        <td>{{ suggestion }}</td>
+                        <td>{{ score }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="board-container box">
+        <p></p>
+        <div id="endgame-message" class="endgame-message" style="display: none;">
+            {{ context.endgame_message }}
+        </div>
+        <div id="chess-container" style="position: relative;">
+            <div id="chess-table">
+                {{ html_table|safe }}
+            </div>
+        </div>
+        <div id="promotion-container"></div>
+    </div>
+    <div class="moves-container box">
+        <h2>Moves</h2>
+        <div id="moves-box">
+            <table class="moves-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>White</th>
+                        <th>Black</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for move in parsed_moves %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ move.white }}</td>
+                        <td>{{ move.black }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute">
+    <defs>
+        <marker id="arrowhead" markerWidth="4" markerHeight="4" refX="2" refY="2" orient="auto">
+            <polygon points="0 0, 4 2, 0 4" fill="rgba(0, 128, 0, 1)" />
+        </marker>
+    </defs>
+</svg>
+
+<input type="hidden" id="game_id" value="{{ context.id }}">
+<script id="moves-data" type="application/json">{{ moves|safe }}</script>
+<script src="{% static 'js/analyse_game.js' %}"></script>
+{% endblock %}

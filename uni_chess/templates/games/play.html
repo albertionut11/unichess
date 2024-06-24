@@ -24,8 +24,12 @@
             <div class="time-format-box">Time Format: {{context.duration}}+{{context.increment}}</div>
             <div class="username-box">White: {{ context.white_username }}</div>
             <div id="white-timer" class="timer white-timer">{{context.duration}}</div>
+            {% if not context.is_active %}
+            <a href="{% url 'analyse_game' game_id=context.game_id %}" class="game-button">Analyse Game</a>
+            {% else %}
             <button id="resign-button" class="action-button">Resign</button>
             <button id="offer-draw-button" class="action-button">Offer Draw</button>
+            {% endif %}
             <div id="black-timer" class="timer black-timer">{{context.duration}}</div>
             <div class="username-box">Black: {{ context.black_username }}</div>
         </div>

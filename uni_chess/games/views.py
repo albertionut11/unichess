@@ -1,6 +1,5 @@
 import json
 from datetime import timedelta
-from itertools import combinations
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -18,6 +17,9 @@ from .game_logic.Play import Play
 from .models import Game, Tournament, Round, Profile
 from .forms import GameForm, SignUpForm, TournamentForm, AddPlayerForm, RemovePlayerForm
 
+import chess
+import chess.engine
+
 
 @login_required
 def create(request):
@@ -25,8 +27,8 @@ def create(request):
         form = GameForm(request.POST)
         if form.is_valid():
             game = form.save(commit=False)
-            game.white_time_remaining = game.duration * 60  # Initialize time in seconds
-            game.black_time_remaining = game.duration * 60  # Initialize time in seconds
+            game.white_time_remaining = game.duration * 60
+            game.black_time_remaining = game.duration * 60
             game.isActive = 1
             game.save()
             return redirect("game_play", game_id=game.id)
@@ -348,13 +350,17 @@ def create_tournament(request):
     return render(request, 'tournaments/create_tournament.html', {'form': form})
 
 
-@login_required
 def join_tournament(request, tournament_id):
     tournament = get_object_or_404(Tournament, id=tournament_id)
-    if request.user.username not in tournament.players:
-        tournament.players.append(request.user.username)
-        tournament.save()
-    return redirect('tournament_info', tournament_id)
+    if request.method == 'POST':
+        if len(tournament.players) < tournament.maximum_players:
+            tournament.players.append(request.user.username)
+            tournament.save()
+            return redirect('tournament_info', tournament.id)
+        else:
+            return render(request, 'tournaments/info_tournaments.html', {'tournament': tournament, 'error': 'Maximum number of players reached'})
+    return redirect('tournament_info', tournament.id)
+
 
 
 @login_required
@@ -421,14 +427,11 @@ def start_tournament(request, tournament_id):
 
 
 def RoundRobinGeneration(players):
-    # breakpoint()
     n = len(players)
     rounds = []
-
     if n % 2 == 1:
         n += 1
-        players.append(None)  # If odd number of players, add a dummy player
-
+        players.append(None)
     for round_num in range(n - 1):
         round_matches = []
         for i in range(n // 2):
@@ -436,9 +439,8 @@ def RoundRobinGeneration(players):
             player2 = players[n - i - 1]
             if player1 is not None and player2 is not None:
                 round_matches.append((player1, player2))
-        players.insert(1, players.pop())  # Rotate players
+        players.insert(1, players.pop())
         rounds.append(round_matches)
-
     return rounds
 
 
@@ -544,6 +546,129 @@ def update_stats(game):
 
     white_profile.save()
     black_profile.save()
+
+
+def analyse_game(request, game_id):
+    # breakpoint()
+    context = dict()
+    game = get_object_or_404(Game, id=game_id)
+    moves = game.data.split(' ')
+
+    parsed_moves = parse_moves(moves)
+
+    play = Play('')
+    html_table = play.board.render(context)
+
+    context = {
+        'context': game,
+        'evaluation': 0,
+        'suggestions': [('e2e4', 0.2), ('d2d4', 0.1), ('c2c4', 0.1), ('g1g3', 0), ('c1c3', 0)],
+        'parsed_moves': parsed_moves,
+        'moves': json.dumps(moves),
+        'html_table': html_table,
+        'game_id': game_id,
+    }
+
+    return render(request, 'analyse/analyse_game.html', context)
+
+
+@csrf_exempt
+@login_required
+def analyse_game_move(request, game_id):
+    # breakpoint()
+    game = get_object_or_404(Game, pk=game_id)
+
+    if request.method == "POST":
+        # breakpoint()
+        data = json.loads(request.body)
+        indice = data.get("indice")
+        play = Play(game.data, ind=indice)
+        json_table = json.dumps(play.board.get_json_table())
+        # breakpoint()
+        moves = game.data.split(' ')[:indice]
+        evaluation, suggestions = get_evaluation(moves)
+
+        return JsonResponse({"status": "ok", "json_table": json_table, "evaluation": evaluation, "suggestions": suggestions})
+    return JsonResponse({"status": "fail"})
+
+
+def get_evaluation(moves):
+    STOCKFISH_PATH = 'C:/Users/alber/Desktop/UniChessRepo/unichess/uni_chess/stockfish/stockfish-windows-x86-64-avx2.exe'
+    board = chess.Board()
+    for move in moves:
+        uci_move = convert_to_uci(move)
+        board.push_uci(uci_move)
+
+    with chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH) as engine:
+        info = engine.analyse(board, chess.engine.Limit(time=0.5), multipv=7)
+        scores = []
+        for i in range(min(7, len(info))):
+            if info[i]['score'].is_mate():
+                if info[i].get('pv'):
+                    score = 'Mate in ' + str(info[i]['score'].relative.mate())
+                else:
+                    score = 'Checkmate'
+            else:
+                score = str(info[i]['score'].relative.score() / 100)
+            scores.append(score)
+
+        suggestions = [(info[i]['pv'][0].uci(), scores[i]) for i in range(min(7, len(info)))]
+        # breakpoint()
+        engine.quit()
+    return scores[0], suggestions
+
+
+def convert_to_uci(move):
+
+    move = show_move(move)
+
+    # Parse simple moves
+    if len(move) == 4:
+        return move
+
+    # Parse EnPassant
+    if move[0] == 'E':
+        return move[1:]
+
+    # Parse Promotion
+    if move[0] == 'P':
+        return move[1:5] + move[5].lower()
+
+    # Parse Castling
+    if move[0] == 'C':
+        if move[-1] == 'K':
+            return 'e1g1' if move[1:3] == 'e1' else 'e8g8'
+        elif move[-1] == 'Q':
+            return 'e1c1' if move[1:3] == 'e1' else 'e8c8'
+
+    raise ValueError(f"Invalid move format: {move}")
+
+
+def parse_moves(moves):
+    n = len(moves)
+    parsed_moves = []
+
+    if n % 2 == 0:
+        for i in range(0, n, 2):
+            pair = {'white': show_move(moves[i]), 'black': show_move(moves[i + 1])}
+            parsed_moves.append(pair)
+    else:
+        for i in range(0, n-1, 2):
+            pair = {'white': show_move(moves[i]), 'black': show_move(moves[i + 1])}
+            parsed_moves.append(pair)
+        parsed_moves.append({'white': show_move(moves[-1]), 'black': 'N/A'})
+
+    return parsed_moves
+
+
+def show_move(move):
+    n = len(move)
+    if n == 4:
+        return move[1] + move[0] + move[3] + move[2]
+    elif n == 5:
+        return move[0] + move[2] + move[1] + move[4] + move[3]
+    else:
+        return move[0] + move[2] + move[1] + move[4] + move[3] + move[5]
 
 
 @login_required

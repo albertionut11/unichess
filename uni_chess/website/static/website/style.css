@@ -507,3 +507,126 @@ input[type="email"] {
     padding: 10px;
     margin-bottom: 10px;
 }
+.moves-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow-y: auto;
+}
+
+.moves-container h2 {
+    text-align: center;
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    color: #543310;
+}
+
+#moves-box {
+    overflow-y: auto;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.8); /* Restored transparent background */
+    border-radius: 5px;
+}
+
+.moves-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.moves-table th, .moves-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.moves-table th {
+    background-color: #f8f4e1;
+    color: #543310;
+}
+
+.navigation-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.nav-button {
+    background-color: #7d5451;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    margin: 5px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 1em;
+}
+
+.nav-button:hover {
+    background-color: #bc7a77;
+}
+
+.evaluation-container {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#evaluation-box {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #543310;
+    margin-bottom: 10px;
+}
+
+#suggestions-box h3 {
+    font-size: 1.2em;
+    color: #543310;
+    margin-bottom: 10px;
+}
+
+#suggestions-list {
+    list-style: none;
+    padding: 0;
+    overflow-y: auto;
+}
+
+#suggestions-list li {
+    background-color: #f8f4e1;
+    margin-bottom: 5px;
+    padding: 8px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.cell-highlight {
+    background-color:  #bc7a77;
+    color: white;
+}
+
+#suggestions-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+#suggestions-table th, #suggestions-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+#suggestions-table th {
+    background-color: #f8f4e1;
+    color: #543310;
+    font-weight: bold;
+}
+
+#suggestions-table td {
+    background-color: white;
+    color: #543310;
+}

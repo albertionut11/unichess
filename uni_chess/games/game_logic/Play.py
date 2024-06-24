@@ -2,19 +2,23 @@ from .Board import Board
 
 
 class Play:
-    def __init__(self, data):
+    def __init__(self, data, ind=None):
         self.board = Board()
         self.data = data
         self.checkmate = None
 
-        if self.data == '':
-            self.board.new_table()
+        if ind is not None:
+            self.board = Board()
+            self.board.load_table(data, ind)
         else:
-            self.board.load_table(self.data)
-            if self.is_checkmate("white") == 'true':
-                self.checkmate = "Black"
-            elif self.is_checkmate("black") == 'true':
-                self.checkmate = "White"
+            if self.data == '':
+                self.board.new_table()
+            else:
+                self.board.load_table(self.data)
+                if self.is_checkmate("white") == 'true':
+                    self.checkmate = "Black"
+                elif self.is_checkmate("black") == 'true':
+                    self.checkmate = "White"
 
     def getMoves(self, from_row, from_col):
         # breakpoint()

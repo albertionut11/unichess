@@ -14,14 +14,22 @@ class Board:
         self.kings_moved = {'white': False, 'black': False}
         self.rooks_moved = {'1a': False, '1h': False, '8a': False, '8h': False}
 
-    def load_table(self, data):
+    def load_table(self, data, ind=None):
         self.new_table()
         self.data = data
-        moves = data.split(' ')[:-1]
+        # breakpoint()
+
+        moves = data.split(' ')[:-1] if self.data[-1] == ' ' else data.split(' ')
 
         self.turn = 'white' if len(moves) % 2 == 0 else 'black'
 
+        i = 0
         for move in moves:
+            if ind is not None and i == ind:
+                break
+
+            i += 1
+
             if move[0] == 'E':
                 # En passant move
                 from_pos = move[1] + move[2]
@@ -112,6 +120,24 @@ class Board:
                   'f': Pawn('black'), 'g': Pawn('black'), 'h': Pawn('black')},
             '1': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
         }
+
+    def get_json_table(self):
+        json_table = {
+            '8': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '7': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '6': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '5': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '4': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '3': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '2': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+            '1': {'a': None, 'b': None, 'c': None, 'd': None, 'e': None, 'f': None, 'g': None, 'h': None},
+        }
+        # breakpoint()
+        for row_key in self.table.keys():
+            for col_key in self.table[row_key].keys():
+                json_table[row_key][col_key] = self.table[row_key][col_key].__str__()
+
+        return json_table
 
     def render(self, context):
         template = loader.get_template(self.template_name)
