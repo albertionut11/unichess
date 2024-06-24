@@ -583,16 +583,17 @@ def analyse_game_move(request, game_id):
         data = json.loads(request.body)
         indice = data.get("indice")
         play = Play(game.data, ind=indice)
+        turn = 'white' if indice % 2 == 0 else 'black'
         json_table = json.dumps(play.board.get_json_table())
         # breakpoint()
         moves = game.data.split(' ')[:indice]
-        evaluation, suggestions = get_evaluation(moves)
+        evaluation, suggestions = get_evaluation(moves, turn)
 
         return JsonResponse({"status": "ok", "json_table": json_table, "evaluation": evaluation, "suggestions": suggestions})
     return JsonResponse({"status": "fail"})
 
 
-def get_evaluation(moves):
+def get_evaluation(moves, turn):
     STOCKFISH_PATH = 'C:/Users/alber/Desktop/UniChessRepo/unichess/uni_chess/stockfish/stockfish-windows-x86-64-avx2.exe'
     board = chess.Board()
     for move in moves:
@@ -613,7 +614,9 @@ def get_evaluation(moves):
             scores.append(score)
 
         suggestions = [(info[i]['pv'][0].uci(), scores[i]) for i in range(min(7, len(info)))]
-        # breakpoint()
+        if turn == 'black':
+            suggestions.reverse()
+
         engine.quit()
     return scores[0], suggestions
 
