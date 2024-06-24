@@ -59,6 +59,7 @@ class PlayView(LoginRequiredMixin, TemplateView):
         context['white_username'] = game.white
         context['black_username'] = game.black
         context['is_active'] = game.isActive
+        context['started'] = game.started
 
         if play.checkmate:
             context['checkmate'] = play.checkmate
@@ -691,6 +692,27 @@ def show_move(move):
 def get_games(request):
     games = Game.objects.all()
     return render(request, 'games/games_list.html', {'games': games})
+
+
+@csrf_exempt
+@login_required
+def start_game(request, game_id):
+    game = get_object_or_404(Game, pk=game_id)
+    if request.user != game.white:
+        return JsonResponse({"status": "fail", "message": "Only the white player can start the game."})
+
+    game.started = True
+    game.save()
+
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f'game_{game_id}',
+        {
+            'type': 'start_game'
+        }
+    )
+
+    return JsonResponse({"status": "ok"})
 
 
 @login_required

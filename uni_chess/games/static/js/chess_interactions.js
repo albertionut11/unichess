@@ -5,6 +5,7 @@ let blackTimerElement;
 document.addEventListener("DOMContentLoaded", function() {
 
     const isActive = document.getElementById("is_active").value === "True";
+    let started = document.getElementById("started").value === "True";
     if (!isActive) {
         document.getElementById("endgame-message").style.display = "block";
         return;
@@ -20,6 +21,11 @@ document.addEventListener("DOMContentLoaded", function() {
     let promotionPiece = null;
     let highlightedMoves = [];
 
+     if (!started && userRole === "white") {
+        const startGameButton = document.getElementById("start-game-button");
+        startGameButton.addEventListener("click", startGame);
+    }
+
     const socket = new WebSocket(`ws://${window.location.host}/ws/game/${gameId}/`);
 
     whiteTimerElement = document.getElementById("white-timer");
@@ -30,7 +36,13 @@ document.addEventListener("DOMContentLoaded", function() {
         console.log("DATA SENT:", data);
         const messageType = data.type;
 
-        if (messageType === 'end_game') {
+        if(messageType === 'start_game'){
+            document.getElementById("started").value = "True";
+            started = true;
+            startTimer(turn);
+            updateDraggable();
+        }
+        else if (messageType === 'end_game') {
             displayEndgameMessage(data.message);
         }
         else if (messageType === 'offer_draw') {
@@ -103,6 +115,8 @@ document.addEventListener("DOMContentLoaded", function() {
     };
 
     function updateDraggable() {
+        if (!started) return;
+
         pieces.forEach(piece => {
             piece.removeEventListener("dragstart", dragStart);
             piece.removeEventListener("click", handleClick);
@@ -560,4 +574,37 @@ document.addEventListener("DOMContentLoaded", function() {
         timersElement.insertBefore(analyseButton, blackTimerElement);
     }
 
+     function startGame() {
+        const gameId = document.getElementById("game_id").value;
+        fetch(`/start_game/${gameId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken")
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "ok") {
+                document.getElementById("started").value = "True";
+
+                // Create the Turn display element
+                const turnDisplayElement = document.createElement("p");
+                turnDisplayElement.className = "info-box";
+                turnDisplayElement.innerHTML = 'Turn: <span id="turn-display">white</span>';
+
+                // Insert the Turn display element before the start-game-button
+                const startGameButton = document.getElementById("start-game-button");
+                startGameButton.parentNode.insertBefore(turnDisplayElement, startGameButton);
+
+                startGameButton.remove();
+
+                started = true;
+                startTimer(turn);
+                updateDraggable();
+            } else {
+                console.error("Failed to start the game");
+            }
+        });
+    }
 });

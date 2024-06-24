@@ -17,8 +17,10 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function startTimer(turn) {
+        let started = document.getElementById("started").value;
         let isActive = document.getElementById("is_active").value;
-        if (isActive === "False") return;
+
+        if (isActive === "False" || started === "False") return;
 
         clearInterval(whiteInterval);
         clearInterval(blackInterval);

@@ -2,6 +2,7 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import async_to_sync
 
+
 class GameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.game_id = self.scope['url_route']['kwargs']['game_id']
@@ -86,4 +87,10 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def cancel_draw(self, event):
         await self.send(text_data=json.dumps({
             'type': 'cancel_draw',
+        }))
+
+    async def start_game(self, event):
+        print('here')
+        await self.send(text_data=json.dumps({
+            'type': 'start_game',
         }))
