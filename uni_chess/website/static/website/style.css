@@ -73,6 +73,14 @@ html, body {
     overflow: hidden;
 }
 
+.active-game-container {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 10px;
+    height: 100vh;
+    overflow: hidden;
+}
+
 .box {
     background-color: rgba(255, 255, 255, 0.7); /* Light transparent background */
     padding: 10px;

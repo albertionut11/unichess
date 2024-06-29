@@ -42,7 +42,7 @@ class SignUpForm(UserCreationForm):
 class TournamentForm(forms.ModelForm):
     class Meta:
         model = Tournament
-        fields = ['name', 'minimum_players', 'maximum_players', 'start_minutes', 'prize', 'duration', 'increment']
+        fields = ['name', 'minimum_players', 'maximum_players', 'prize', 'duration', 'increment']
 
 
 class AddPlayerForm(forms.Form):

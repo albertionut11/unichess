@@ -3,10 +3,7 @@
 {% block title %} Play Game {% endblock %}
 
 {% block content %}
-<div class="game-container">
-    <div class="chat-container box">
-        <div id="chat-box" class="chat-container box">Game Chat</div>
-    </div>
+<div class="active-game-container">
     <div class="board-container box">
         {% if not context.started and context.is_active and context.user_role == 'white' %}
         <button id="start-game-button" class="action-button">Start Game</button>
@@ -33,7 +30,7 @@
             <div id="white-timer" class="timer white-timer">{{context.time.white_min}}:{{context.time.white_sec}}</div>
             {% endif %}
             {% if not context.is_active %}
-            <a href="{% url 'analyse_game' game_id=context.game_id %}" class="game-button">Analyse Game</a>
+            <a href="{% url 'analyse_game' game_id=context.game_id %}" class="game-button" id="analyse-button">Analyse Game</a>
             {% else %}
             <button id="resign-button" class="action-button">Resign</button>
             <button id="offer-draw-button" class="action-button">Offer Draw</button>

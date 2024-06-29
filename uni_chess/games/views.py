@@ -370,6 +370,17 @@ def join_tournament(request, tournament_id):
     return redirect('tournament_info', tournament.id)
 
 
+def leave_tournament(request, tournament_id):
+    tournament = get_object_or_404(Tournament, id=tournament_id)
+    if request.method == 'POST':
+        if request.user.username in tournament.players:
+            tournament.players.remove(request.user.username)
+            tournament.save()
+            return redirect('tournament_info', tournament.id)
+        else:
+            return render(request, 'tournaments/info_tournaments.html', {'tournament': tournament, 'error': 'You are not part of the tournament'})
+    return redirect('tournament_info', tournament.id)
+
 
 @login_required
 def add_players(request, tournament_id):
@@ -425,6 +436,8 @@ def start_tournament(request, tournament_id):
                     black=black,
                     duration=tournament.duration,
                     increment=tournament.increment,
+                    white_time_remaining=tournament.duration*60,
+                    black_time_remaining=tournament.duration*60,
                     round=round_obj,
                     tournament=tournament
                 )
@@ -460,7 +473,10 @@ def tournament_info(request, id):
         rankings = get_tournament_rankings(tournament)
         return render(request, 'tournaments/active_tournament.html', {'tournament': tournament, 'rounds': rounds, 'rankings': rankings})
     else:
-        return render(request, 'tournaments/info_tournaments.html', {'tournament': tournament})
+        leave = False
+        if request.user.username in tournament.players:
+            leave = True
+        return render(request, 'tournaments/info_tournaments.html', {'tournament': tournament, 'leave': leave})
 
 
 def get_tournament_rankings(tournament):
@@ -497,7 +513,8 @@ def get_tournament_rankings(tournament):
 def profile(request, user_id):
     user = get_object_or_404(User, id=user_id)
     profile = get_object_or_404(Profile, user=user)
-    games = Game.objects.filter(white=request.user) | Game.objects.filter(black=request.user)
+    games = list(Game.objects.filter(white=request.user) | Game.objects.filter(black=request.user))[-10:]
+    games.reverse()
     context = {
         'profile': profile,
         'games': games
@@ -693,7 +710,8 @@ def show_move(move):
 
 @login_required
 def get_games(request):
-    games = Game.objects.all()
+    games = list(Game.objects.filter(started=True))[-10:]
+    games.reverse()
     return render(request, 'games/games_list.html', {'games': games})
 
 
@@ -742,7 +760,8 @@ def game_info(request, id):
 
 @login_required
 def get_tournaments(request):
-    tournaments = Tournament.objects.all()
+    tournaments = list(Tournament.objects.all())[-10:]
+    tournaments.reverse()
     return render(request, 'tournaments/tournaments.html', {'tournaments': tournaments})
 
 

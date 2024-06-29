@@ -87,12 +87,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 targetSquare.appendChild(piece);
             }
 
-            updateDraggable();
-
             if (data.promotion) {
                 const promotionColor = turn === "white" ? "b" : "w";
                 console.log('Promotion to', promotionColor + data.promotion);
-                promotePawn(to, promotionColor + data.promotion);
+                promotePawn(to, promotionColor + data.promotion, false);
             }
 
             if (data.checkmate == 'true') {
@@ -104,6 +102,8 @@ document.addEventListener("DOMContentLoaded", function() {
             else if (data.checkmate == 'stalemate'){
                 displayEndgameMessage("Stalemate!")
             }
+
+            updateDraggable();
 
             // Update timers
             whiteTime = data.white_time_remaining;
@@ -317,11 +317,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 turn = data.new_turn;
                 document.getElementById("turn").value = turn;
                 clearHighlights();
-                updateDraggable();
 
                 if (promotion) {
-                    promotePawn(toPosition, userRole[0] + promotion);
+                    promotePawn(toPosition, userRole[0] + promotion, true);
                 }
+                updateDraggable();
             } else {
                 console.error("Invalid move");
             }
@@ -452,19 +452,24 @@ document.addEventListener("DOMContentLoaded", function() {
 
     window.getCookie = getCookie;
 
-    function promotePawn(position, promotion) {
+    function promotePawn(position, promotion, draggable) {
         const targetSquare = document.querySelector(`td[data-position="${position}"]`);
         const promotionPiece = document.createElement("img");
         promotionPiece.src = `/static/chess/pieces/${promotion}.svg`;
-        promotionPiece.setAttribute("data-piece", promotion.slice(1)); // Only the piece type (e.g., "Q", "R", etc.)
-        promotionPiece.setAttribute("data-color", promotion[0]); // "w" for white, "b" for black
-        promotionPiece.setAttribute("draggable", true); // Make it draggable
+        promotionPiece.setAttribute("data-piece", promotion.slice(1));
+
+        if (promotion[0] === "w"){
+            promotionPiece.setAttribute("data-color", "white");
+        }
+        else{
+            promotionPiece.setAttribute("data-color", "black");
+        }
+
+        promotionPiece.setAttribute("id", position);
+        promotionPiece.setAttribute("draggable", draggable);
         resetSquare(position);
         targetSquare.appendChild(promotionPiece);
 
-        // Add event listeners to the new promoted piece
-        promotionPiece.addEventListener("dragstart", dragStart);
-        promotionPiece.addEventListener("click", handleClick);
     }
 
     // Ensure the formatTime and startTimer functions are accessible here
@@ -575,8 +580,12 @@ document.addEventListener("DOMContentLoaded", function() {
             piece.removeEventListener("click", handleClick);
             piece.setAttribute("draggable", false);
         });
-        document.getElementById("resign-button").disabled = true;
-        document.getElementById("offer-draw-button").disabled = true;
+        if (document.getElementById("resign-button")){
+            document.getElementById("resign-button").disabled = true;
+        }
+        if (document.getElementById("offer-draw-button")){
+            document.getElementById("offer-draw-button").disabled = true;
+        }
         clearInterval(whiteInterval);
         clearInterval(blackInterval);
     }
@@ -592,14 +601,18 @@ document.addEventListener("DOMContentLoaded", function() {
         if (offerDrawButton) {
             timersElement.removeChild(offerDrawButton);
         }
+        console.log('showAnalyseButton');
 
-        const analyseButton = document.createElement("a");
-        analyseButton.href = `/analyse/${gameId}`;
-        analyseButton.className = "game-button";
-        analyseButton.textContent = "Analyse Game";
+        if (!document.getElementById("analyse-button")){
+            const analyseButton = document.createElement("a");
+            analyseButton.href = `/analyse/${gameId}`;
+            analyseButton.className = "game-button";
+            analyseButton.textContent = "Analyse Game";
+            analyseButton.id = "analyse-button"
 
         const blackTimerElement = document.getElementById("black-timer");
         timersElement.insertBefore(analyseButton, blackTimerElement);
+        }
     }
 
      function startGame() {

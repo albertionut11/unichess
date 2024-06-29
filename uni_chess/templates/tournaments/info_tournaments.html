@@ -7,7 +7,6 @@
     <h1>{{ tournament.name }}</h1>
     <div class ="tournament-info">
         <p><strong>Creator:</strong> {{ tournament.owner.first_name }} {{ tournament.owner.last_name }}</p>
-        <p><strong>Start Date:</strong> {{ tournament.start_date }}</p>
         <p><strong>Prize:</strong> {{ tournament.prize }} $</p>
         <p><strong>Minimum Players:</strong> {{ tournament.minimum_players }}</p>
         <p><strong>Maximum Players:</strong> {{ tournament.maximum_players }}</p>
@@ -20,10 +19,17 @@
             {% endfor %}
         </ul>
     </div>
+    {% if not leave %}
     <form method="post" action="{% url 'join_tournament' tournament.id %}">
         {% csrf_token %}
         <button type="submit" class="join-button">Join</button>
     </form>
+    {% else %}
+    <form method="post" action="{% url 'leave_tournament' tournament.id %}">
+        {% csrf_token %}
+        <button type="submit" class="join-button">Leave</button>
+    </form>
+    {% endif %}
     {% if user == tournament.owner %}
     <form method="post" action="{% url 'add_players' tournament.id %}">
         {% csrf_token %}
