@@ -407,6 +407,7 @@ document.addEventListener("DOMContentLoaded", function() {
             isActiveElement.value = "False";
         }
     }
+    window.displayEndgameMessage = displayEndgameMessage;
 
     function getCookie(name) {
         let cookieValue = null;
@@ -423,6 +424,8 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         return cookieValue;
     }
+
+    window.getCookie = getCookie;
 
     function promotePawn(position, promotion) {
         const targetSquare = document.querySelector(`td[data-position="${position}"]`);
@@ -588,12 +591,10 @@ document.addEventListener("DOMContentLoaded", function() {
             if (data.status === "ok") {
                 document.getElementById("started").value = "True";
 
-                // Create the Turn display element
                 const turnDisplayElement = document.createElement("p");
                 turnDisplayElement.className = "info-box";
                 turnDisplayElement.innerHTML = 'Turn: <span id="turn-display">white</span>';
 
-                // Insert the Turn display element before the start-game-button
                 const startGameButton = document.getElementById("start-game-button");
                 startGameButton.parentNode.insertBefore(turnDisplayElement, startGameButton);
 

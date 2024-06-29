@@ -27,14 +27,22 @@
         <div id="timers">
             <div class="time-format-box">Time Format: {{context.duration}}+{{context.increment}}</div>
             <div class="username-box">White: {{ context.white_username }}</div>
+            {% if context.is_active %}
             <div id="white-timer" class="timer white-timer">{{context.duration}}</div>
+            {% else %}
+            <div id="white-timer" class="timer white-timer">{{context.time.white_min}}:{{context.time.white_sec}}</div>
+            {% endif %}
             {% if not context.is_active %}
             <a href="{% url 'analyse_game' game_id=context.game_id %}" class="game-button">Analyse Game</a>
             {% else %}
             <button id="resign-button" class="action-button">Resign</button>
             <button id="offer-draw-button" class="action-button">Offer Draw</button>
             {% endif %}
+            {% if context.is_active %}
             <div id="black-timer" class="timer black-timer">{{context.duration}}</div>
+            {% else %}
+            <div id="black-timer" class="timer black-timer">{{context.time.black_min}}:{{context.time.black_sec}}</div>
+            {% endif %}
             <div class="username-box">Black: {{ context.black_username }}</div>
         </div>
     </div>
@@ -48,6 +56,7 @@
 <input type="hidden" id="time_increment" value="{{ context.increment }}">
 <input type="hidden" id="is_active" value="{{ context.is_active }}">
 <input type="hidden" id="started" value="{{ context.started }}">
+<input type="hidden" id="time" value = "{{ context.time }}">
 
 <script src="{% static 'js/chess_interactions.js' %}"></script>
 <script src="{% static 'js/timer.js' %}"></script>

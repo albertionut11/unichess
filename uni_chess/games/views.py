@@ -54,18 +54,19 @@ class PlayView(LoginRequiredMixin, TemplateView):
         context['turn'] = game.turn
         context['duration'] = game.duration
         context['increment'] = game.increment
-        context['white_time_remaining'] = game.white_time_remaining
-        context['black_time_remaining'] = game.black_time_remaining
         context['white_username'] = game.white
         context['black_username'] = game.black
         context['is_active'] = game.isActive
         context['started'] = game.started
 
+        context['time'] = formatTime(game.white_time_remaining, game.black_time_remaining)
+
         if play.checkmate:
             context['checkmate'] = play.checkmate
             game.isActive = False
-
+        # breakpoint()
         if not game.isActive:
+            # breakpoint()
             winner = "White" if game.result == 1 else "Black"
             loser = "Black" if game.result == 1 else "White"
             if game.endgame == 'draw':
@@ -76,6 +77,8 @@ class PlayView(LoginRequiredMixin, TemplateView):
                 context['endgame_message'] = f"{loser} resigns! {winner} wins!"
             elif game.endgame == 'stalemate':
                 context['endgame_message'] = "Stalemate!"
+            elif game.endgame == 'time_expired':
+                context['endgame_message'] = f"{winner} wins! {loser} ran out of time."
 
         return {'context': context}
 
@@ -715,6 +718,22 @@ def start_game(request, game_id):
     return JsonResponse({"status": "ok"})
 
 
+@csrf_exempt
+def expire_game(request, game_id):
+    # breakpoint()
+    if request.method == "POST":
+        game = get_object_or_404(Game, pk=game_id)
+        data = json.loads(request.body)
+        game.isActive = False
+        game.endgame = "time_expired"
+        game.result = 2 if data.get('white_time_remaining') == 0 else 1
+        game.white_time_remaining = data.get('white_time_remaining')
+        game.black_time_remaining = data.get('black_time_remaining')
+        game.save()
+        return JsonResponse({"status": "ok"})
+    return JsonResponse({"status": "fail"}, status=400)
+
+
 @login_required
 def game_info(request, id):
     game = get_object_or_404(Game, pk=id)
@@ -748,3 +767,22 @@ def delete(request, id):
         return redirect("games")
     else:
         return render(request, "games/delete.html", {"game": game})
+
+
+def formatTime(white, black):
+    white_min, white_sec, black_min, black_sec = white // 60, white % 60, black // 60, black % 60
+
+    l = [white_min, white_sec, black_min, black_sec]
+
+    for i in range(0, len(l)):
+        if l[i] < 10:
+            l[i] = "0" + str(l[i])
+        else:
+            l[i] = str(l[i])
+
+    return {
+        "white_min": l[0],
+        "white_sec": l[1],
+        "black_min": l[2],
+        "black_sec": l[3]
+    }
