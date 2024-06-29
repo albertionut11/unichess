@@ -37,14 +37,14 @@ document.addEventListener("DOMContentLoaded", function() {
             if (whiteTime <= 0) {
                 endGame('black', 'Black wins! White ran out of time.');
             } else {
-                whiteTime-=10;
+                whiteTime-=1;
                 whiteTimerElement.textContent = formatTime(whiteTime);
             }
         } else {
             if (blackTime <= 0) {
                 endGame('white', 'White wins! Black ran out of time.');
             } else {
-                blackTime-=10;
+                blackTime-=1;
                 blackTimerElement.textContent = formatTime(blackTime);
             }
         }

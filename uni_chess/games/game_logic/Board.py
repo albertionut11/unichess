@@ -78,7 +78,7 @@ class Board:
             '1': {'a': Rook('white'), 'b': Knight('white'), 'c': Bishop('white'), 'd': Queen('white'), 'e': King('white'), 'f': Bishop('white'), 'g': Knight('white'), 'h': Rook('white')},
         }
 
-        # self.stalemate_table()
+        self.pp_table()
 
     def pp_table(self):
         self.table = {

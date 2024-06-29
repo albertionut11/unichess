@@ -331,20 +331,37 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function showPromotionOptions(fromPosition, toPosition, targetSquare) {
-        const promotionChoices = ["Q", "R", "B", "N"];
-        const promotionContainer = document.getElementById("promotion-container");
-        promotionContainer.innerHTML = "";
-        promotionChoices.forEach(choice => {
-            const btn = document.createElement("button");
-            btn.innerText = choice;
-            btn.addEventListener("click", () => {
-                promotionPiece = choice;
-                promotionContainer.innerHTML = "";
-                makeMove(fromPosition, toPosition, targetSquare, choice);
-            });
-            promotionContainer.appendChild(btn);
+    const promotionChoices = ["Q", "R", "B", "N"];
+    const promotionContainer = document.getElementById("promotion-container");
+    promotionContainer.innerHTML = "";
+
+    // Create a backdrop for the popup
+    const backdrop = document.createElement("div");
+    backdrop.id = "promotion-backdrop";
+
+    // Create a container for the buttons
+    const popupContainer = document.createElement("div");
+    popupContainer.id = "promotion-popup";
+
+    promotionChoices.forEach(choice => {
+        const btn = document.createElement("button");
+        btn.innerText = choice;
+        btn.className = "promotion-button";
+
+        btn.addEventListener("click", () => {
+            promotionPiece = choice;
+            promotionContainer.innerHTML = "";
+            document.body.removeChild(backdrop);
+            makeMove(fromPosition, toPosition, targetSquare, choice);
         });
-    }
+
+        popupContainer.appendChild(btn);
+    });
+
+    backdrop.appendChild(popupContainer);
+    document.body.appendChild(backdrop);
+}
+
 
     function performCastlingMove(castling, from) {
         let rookFrom = from[0] + "h";
