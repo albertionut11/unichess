@@ -28,7 +28,7 @@
             <div class="time-format-box">Time Format: {{context.duration}}+{{context.increment}}</div>
             <div class="username-box">White: {{ context.white_username }}</div>
             {% if context.is_active %}
-            <div id="white-timer" class="timer white-timer">{{context.duration}}</div>
+            <div id="white-timer" class="timer white-timer">{{context.white_time}}</div>
             {% else %}
             <div id="white-timer" class="timer white-timer">{{context.time.white_min}}:{{context.time.white_sec}}</div>
             {% endif %}
@@ -39,7 +39,7 @@
             <button id="offer-draw-button" class="action-button">Offer Draw</button>
             {% endif %}
             {% if context.is_active %}
-            <div id="black-timer" class="timer black-timer">{{context.duration}}</div>
+            <div id="black-timer" class="timer black-timer">{{context.black_time}}</div>
             {% else %}
             <div id="black-timer" class="timer black-timer">{{context.time.black_min}}:{{context.time.black_sec}}</div>
             {% endif %}
@@ -51,8 +51,8 @@
 <input type="hidden" id="game_id" value="{{ context.game_id }}">
 <input type="hidden" id="user_role" value="{{ context.user_role }}">
 <input type="hidden" id="turn" value="{{ context.turn }}">
-<input type="hidden" id="initial_white_time" value="{{ context.duration }}">
-<input type="hidden" id="initial_black_time" value="{{ context.duration }}">
+<input type="hidden" id="white_time" value="{{ context.white_time }}">
+<input type="hidden" id="black_time" value="{{ context.black_time }}">
 <input type="hidden" id="time_increment" value="{{ context.increment }}">
 <input type="hidden" id="is_active" value="{{ context.is_active }}">
 <input type="hidden" id="started" value="{{ context.started }}">

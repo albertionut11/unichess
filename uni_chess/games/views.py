@@ -59,7 +59,7 @@ class PlayView(LoginRequiredMixin, TemplateView):
         context['is_active'] = game.isActive
         context['started'] = game.started
 
-        context['time'] = formatTime(game.white_time_remaining, game.black_time_remaining)
+        context['time'], context['white_time'], context['black_time'] = formatTime(game.white_time_remaining, game.black_time_remaining)
 
         if play.checkmate:
             context['checkmate'] = play.checkmate
@@ -186,7 +186,7 @@ def move_piece(request, game_id):
             update_stats(game)
             return JsonResponse({"status": "ok", "winner": turn})
 
-        return JsonResponse({"status": "ok", "new_turn": new_turn, "enPassant": EP, "castling": C})
+        return JsonResponse({"status": "ok", "new_turn": new_turn, "enPassant": EP, "castling": C, 'white_time_remaining': game.white_time_remaining, 'black_time_remaining': game.black_time_remaining})
     return JsonResponse({"status": "fail"})
 
 
@@ -780,9 +780,11 @@ def formatTime(white, black):
         else:
             l[i] = str(l[i])
 
-    return {
+    return ({
         "white_min": l[0],
         "white_sec": l[1],
         "black_min": l[2],
         "black_sec": l[3]
-    }
+    },
+        white_min * 60 + white_sec,
+        black_min * 60 + black_sec)

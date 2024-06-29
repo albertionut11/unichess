@@ -94,8 +94,8 @@ document.addEventListener("DOMContentLoaded", function() {
     function initializeTimers() {
         let isActive = document.getElementById("is_active").value;
         if (isActive !== "False") {
-            whiteTime = parseInt(window.sessionStorage.getItem(COUNTER_KEY_WHITE)) || parseInt(document.getElementById("initial_white_time").value) * 60;
-            blackTime = parseInt(window.sessionStorage.getItem(COUNTER_KEY_BLACK)) || parseInt(document.getElementById("initial_black_time").value) * 60;
+            whiteTime = parseInt(window.sessionStorage.getItem(COUNTER_KEY_WHITE)) || parseInt(document.getElementById("white_time").value);
+            blackTime = parseInt(window.sessionStorage.getItem(COUNTER_KEY_BLACK)) || parseInt(document.getElementById("black_time").value);
 
             whiteTimerElement.textContent = formatTime(whiteTime);
             blackTimerElement.textContent = formatTime(blackTime);

@@ -293,6 +293,10 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(data => {
             if (data.status === "ok") {
+
+                document.getElementById("white_time").value = data.white_time_remaining;
+                document.getElementById("black_time").value = data.black_time_remaining;
+
                 if (data.enPassant) {
                     const fromRow = fromPosition[0];
                     const capturedPosition = fromRow + toPosition[1];
@@ -411,8 +415,12 @@ document.addEventListener("DOMContentLoaded", function() {
             piece.removeEventListener("click", handleClick);
             piece.setAttribute("draggable", false);
         });
-        document.getElementById("resign-button").disabled = true;
-        document.getElementById("offer-draw-button").disabled = true;
+        if (document.getElementById("resign-button")){
+            document.getElementById("resign-button").disabled = true;
+        }
+        if (document.getElementById("offer-draw-button")){
+            document.getElementById("offer-draw-button").disabled = true;
+        }
 
         showAnalyseButton();
 
