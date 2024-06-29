@@ -1,10 +1,8 @@
 let whiteTime;
 let blackTime;
 let whiteInterval, blackInterval;
-let gameOver = false;
 
 document.addEventListener("DOMContentLoaded", function() {
-    const isActive = document.getElementById("is_active").value === "True";
     const gameId = document.getElementById("game_id").value;
     const increment = parseInt(document.getElementById("time_increment").value);
     const whiteTimerElement = document.getElementById("white-timer");
@@ -18,6 +16,11 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function startTimer(turn) {
+        let started = document.getElementById("started").value;
+        let isActive = document.getElementById("is_active").value;
+
+        if (isActive === "False" || started === "False") return;
+
         clearInterval(whiteInterval);
         clearInterval(blackInterval);
 
@@ -29,20 +32,19 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function updateTimer(player) {
-        if (gameOver) return;
 
         if (player === 'white') {
-            whiteTime--;
-            if (whiteTime < 0) {
-                endGame('black', 'White ran out of time');
+            if (whiteTime <= 0) {
+                endGame('black', 'Black wins! White ran out of time.');
             } else {
+                whiteTime-=10;
                 whiteTimerElement.textContent = formatTime(whiteTime);
             }
         } else {
-            blackTime--;
-            if (blackTime < 0) {
-                endGame('white', 'Black ran out of time');
+            if (blackTime <= 0) {
+                endGame('white', 'White wins! Black ran out of time.');
             } else {
+                blackTime-=10;
                 blackTimerElement.textContent = formatTime(blackTime);
             }
         }
@@ -56,25 +58,52 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function endGame(winner, message) {
-        gameOver = true;
         clearInterval(whiteInterval);
         clearInterval(blackInterval);
         const messageDiv = document.getElementById("endgame-message");
         messageDiv.innerText = message;
         messageDiv.classList.add("checkmate-message");
+        saveToSessionStorage();
+
+        if (typeof window.displayEndgameMessage === 'function') {
+            window.displayEndgameMessage(message);
+        }
+
+        const gameId = document.getElementById("game_id").value;
+        console.log("here 2 times?");
+        fetch(`/expire_game/${gameId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': window.getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                white_time_remaining: whiteTime,
+                black_time_remaining: blackTime
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status !== "ok") {
+                console.error("Failed to expire the game");
+            }
+        })
+        .catch(error => console.error("Error:", error));
     }
 
     function initializeTimers() {
-        whiteTime = parseInt(window.sessionStorage.getItem(COUNTER_KEY_WHITE)) || parseInt(document.getElementById("initial_white_time").value) * 60;
-        blackTime = parseInt(window.sessionStorage.getItem(COUNTER_KEY_BLACK)) || parseInt(document.getElementById("initial_black_time").value) * 60;
+        let isActive = document.getElementById("is_active").value;
+        if (isActive !== "False") {
+            whiteTime = parseInt(window.sessionStorage.getItem(COUNTER_KEY_WHITE)) || parseInt(document.getElementById("initial_white_time").value) * 60;
+            blackTime = parseInt(window.sessionStorage.getItem(COUNTER_KEY_BLACK)) || parseInt(document.getElementById("initial_black_time").value) * 60;
 
-        whiteTimerElement.textContent = formatTime(whiteTime);
-        blackTimerElement.textContent = formatTime(blackTime);
+            whiteTimerElement.textContent = formatTime(whiteTime);
+            blackTimerElement.textContent = formatTime(blackTime);
+        }
 
         let turn = document.getElementById("turn").value;
-        if (isActive) {
-            startTimer(turn);
-        }
+
+        startTimer(turn);
     }
 
     initializeTimers();
@@ -82,26 +111,26 @@ document.addEventListener("DOMContentLoaded", function() {
     const socket = new WebSocket(`ws://${window.location.host}/ws/game/${gameId}/`);
 
     socket.onmessage = function(e) {
-            const data = JSON.parse(e.data);
-            if (data.type === "game_move"){
-                        let turn = data.turn;
-            console.log(data);
+        const data = JSON.parse(e.data);
+        if (data.type === "game_move"){
+        let turn = data.turn;
+        console.log(data);
 
-            whiteTime = data.white_time_remaining;
-            blackTime = data.black_time_remaining;
+        whiteTime = data.white_time_remaining;
+        blackTime = data.black_time_remaining;
 
-            if (turn === 'white') {
-                blackTime += increment;
-            }
-            else {
-                whiteTime += increment;
-            }
+        if (turn === 'white') {
+            blackTime += increment;
+        }
+        else {
+            whiteTime += increment;
+        }
 
-            whiteTimerElement.textContent = formatTime(whiteTime);
-            blackTimerElement.textContent = formatTime(blackTime);
-            if (isActive) {
-                startTimer(data.turn);
-            }
+        whiteTimerElement.textContent = formatTime(whiteTime);
+        blackTimerElement.textContent = formatTime(blackTime);
+
+        startTimer(data.turn);
+
         }
     };
 

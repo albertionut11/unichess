@@ -54,18 +54,21 @@ class PlayView(LoginRequiredMixin, TemplateView):
         context['turn'] = game.turn
         context['duration'] = game.duration
         context['increment'] = game.increment
-        context['white_time_remaining'] = game.white_time_remaining
-        context['black_time_remaining'] = game.black_time_remaining
         context['white_username'] = game.white
         context['black_username'] = game.black
         context['is_active'] = game.isActive
+        context['started'] = game.started
+
+        context['time'] = formatTime(game.white_time_remaining, game.black_time_remaining)
 
         if play.checkmate:
             context['checkmate'] = play.checkmate
-
+            game.isActive = False
+        # breakpoint()
         if not game.isActive:
-            winner = "Black" if game.turn == "white" else "Black"
-            loser = "White" if game.turn == "white" else "White"
+            # breakpoint()
+            winner = "White" if game.result == 1 else "Black"
+            loser = "Black" if game.result == 1 else "White"
             if game.endgame == 'draw':
                 context['endgame_message'] = "Game drawn!"
             elif game.endgame == 'checkmate':
@@ -74,6 +77,8 @@ class PlayView(LoginRequiredMixin, TemplateView):
                 context['endgame_message'] = f"{loser} resigns! {winner} wins!"
             elif game.endgame == 'stalemate':
                 context['endgame_message'] = "Stalemate!"
+            elif game.endgame == 'time_expired':
+                context['endgame_message'] = f"{winner} wins! {loser} ran out of time."
 
         return {'context': context}
 
@@ -90,7 +95,7 @@ class PlayView(LoginRequiredMixin, TemplateView):
 @login_required
 def move_piece(request, game_id):
     game = get_object_or_404(Game, pk=game_id)
-
+    # breakpoint()
     if request.user.username != game.white.username and request.user.username != game.black.username:
         return JsonResponse({"status": "fail"})
 
@@ -169,9 +174,12 @@ def move_piece(request, game_id):
             }
         )
 
-        if checkmate != 'false':
+        if checkmate != 'false' and checkmate != '':
+
+            game.isActive = False
             if checkmate == 'true':
                 game.endgame = 'checkmate'
+                game.result = 1 if turn == 'white' else 2
             else:
                 game.endgame = checkmate
             game.save()
@@ -583,16 +591,17 @@ def analyse_game_move(request, game_id):
         data = json.loads(request.body)
         indice = data.get("indice")
         play = Play(game.data, ind=indice)
+        turn = 'white' if indice % 2 == 0 else 'black'
         json_table = json.dumps(play.board.get_json_table())
         # breakpoint()
         moves = game.data.split(' ')[:indice]
-        evaluation, suggestions = get_evaluation(moves)
+        evaluation, suggestions = get_evaluation(moves, turn)
 
         return JsonResponse({"status": "ok", "json_table": json_table, "evaluation": evaluation, "suggestions": suggestions})
     return JsonResponse({"status": "fail"})
 
 
-def get_evaluation(moves):
+def get_evaluation(moves, turn):
     STOCKFISH_PATH = 'C:/Users/alber/Desktop/UniChessRepo/unichess/uni_chess/stockfish/stockfish-windows-x86-64-avx2.exe'
     board = chess.Board()
     for move in moves:
@@ -600,20 +609,28 @@ def get_evaluation(moves):
         board.push_uci(uci_move)
 
     with chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH) as engine:
-        info = engine.analyse(board, chess.engine.Limit(time=0.5), multipv=7)
+        # breakpoint()
+        info = engine.analyse(board, chess.engine.Limit(time=1), multipv=7)
         scores = []
         for i in range(min(7, len(info))):
             if info[i]['score'].is_mate():
                 if info[i].get('pv'):
-                    score = 'Mate in ' + str(info[i]['score'].relative.mate())
+                    score = 'Mate in ' + str(abs(info[i]['score'].relative.mate()))
                 else:
                     score = 'Checkmate'
             else:
-                score = str(info[i]['score'].relative.score() / 100)
-            scores.append(score)
+                relative_score = info[i]['score'].relative.score() / 100
 
-        suggestions = [(info[i]['pv'][0].uci(), scores[i]) for i in range(min(7, len(info)))]
+                if turn == 'black':
+                    relative_score = -relative_score
+                score = str(relative_score)
+            scores.append(score)
         # breakpoint()
+        if scores[0] == 'Checkmate':
+            suggestions = []
+        else:
+            suggestions = [(info[i]['pv'][0].uci(), scores[i]) for i in range(min(7, len(info)))]
+
         engine.quit()
     return scores[0], suggestions
 
@@ -645,6 +662,9 @@ def convert_to_uci(move):
 
 
 def parse_moves(moves):
+    if moves[-1] == '':
+        moves = moves[:-1]
+
     n = len(moves)
     parsed_moves = []
 
@@ -675,6 +695,43 @@ def show_move(move):
 def get_games(request):
     games = Game.objects.all()
     return render(request, 'games/games_list.html', {'games': games})
+
+
+@csrf_exempt
+@login_required
+def start_game(request, game_id):
+    game = get_object_or_404(Game, pk=game_id)
+    if request.user != game.white:
+        return JsonResponse({"status": "fail", "message": "Only the white player can start the game."})
+
+    game.started = True
+    game.save()
+
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f'game_{game_id}',
+        {
+            'type': 'start_game'
+        }
+    )
+
+    return JsonResponse({"status": "ok"})
+
+
+@csrf_exempt
+def expire_game(request, game_id):
+    # breakpoint()
+    if request.method == "POST":
+        game = get_object_or_404(Game, pk=game_id)
+        data = json.loads(request.body)
+        game.isActive = False
+        game.endgame = "time_expired"
+        game.result = 2 if data.get('white_time_remaining') == 0 else 1
+        game.white_time_remaining = data.get('white_time_remaining')
+        game.black_time_remaining = data.get('black_time_remaining')
+        game.save()
+        return JsonResponse({"status": "ok"})
+    return JsonResponse({"status": "fail"}, status=400)
 
 
 @login_required
@@ -710,3 +767,22 @@ def delete(request, id):
         return redirect("games")
     else:
         return render(request, "games/delete.html", {"game": game})
+
+
+def formatTime(white, black):
+    white_min, white_sec, black_min, black_sec = white // 60, white % 60, black // 60, black % 60
+
+    l = [white_min, white_sec, black_min, black_sec]
+
+    for i in range(0, len(l)):
+        if l[i] < 10:
+            l[i] = "0" + str(l[i])
+        else:
+            l[i] = str(l[i])
+
+    return {
+        "white_min": l[0],
+        "white_sec": l[1],
+        "black_min": l[2],
+        "black_sec": l[3]
+    }

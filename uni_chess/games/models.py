@@ -48,6 +48,7 @@ class Game(models.Model):
     endgame = models.CharField(max_length=100, default='')
     round = models.ForeignKey(Round, on_delete=models.CASCADE, related_name='games', null=True)
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, null=True)
+    started = models.BooleanField(default=False)
 
     def __str__(self):
         if self.isActive:

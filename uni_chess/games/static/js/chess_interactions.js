@@ -5,6 +5,7 @@ let blackTimerElement;
 document.addEventListener("DOMContentLoaded", function() {
 
     const isActive = document.getElementById("is_active").value === "True";
+    let started = document.getElementById("started").value === "True";
     if (!isActive) {
         document.getElementById("endgame-message").style.display = "block";
         return;
@@ -20,6 +21,11 @@ document.addEventListener("DOMContentLoaded", function() {
     let promotionPiece = null;
     let highlightedMoves = [];
 
+     if (!started && userRole === "white") {
+        const startGameButton = document.getElementById("start-game-button");
+        startGameButton.addEventListener("click", startGame);
+    }
+
     const socket = new WebSocket(`ws://${window.location.host}/ws/game/${gameId}/`);
 
     whiteTimerElement = document.getElementById("white-timer");
@@ -30,7 +36,13 @@ document.addEventListener("DOMContentLoaded", function() {
         console.log("DATA SENT:", data);
         const messageType = data.type;
 
-        if (messageType === 'end_game') {
+        if(messageType === 'start_game'){
+            document.getElementById("started").value = "True";
+            started = true;
+            startTimer(turn);
+            updateDraggable();
+        }
+        else if (messageType === 'end_game') {
             displayEndgameMessage(data.message);
         }
         else if (messageType === 'offer_draw') {
@@ -103,6 +115,8 @@ document.addEventListener("DOMContentLoaded", function() {
     };
 
     function updateDraggable() {
+        if (!started) return;
+
         pieces.forEach(piece => {
             piece.removeEventListener("dragstart", dragStart);
             piece.removeEventListener("click", handleClick);
@@ -300,9 +314,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 document.getElementById("turn").value = turn;
                 clearHighlights();
                 updateDraggable();
-                // Check if promotion occurred and handle it
+
                 if (promotion) {
-                    promotePawn(toPosition, userRole[0] + promotion); // e.g., "wQ" for white Queen
+                    promotePawn(toPosition, userRole[0] + promotion);
                 }
             } else {
                 console.error("Invalid move");
@@ -368,7 +382,13 @@ document.addEventListener("DOMContentLoaded", function() {
         const messageDiv = document.getElementById("endgame-message");
         messageDiv.innerText = message;
         messageDiv.classList.add("endgame-message");
-        messageDiv.style.display = "block"; // Ensure the message is displayed
+        messageDiv.style.display = "block";
+
+        const turnDisplay = document.querySelector(".info-box");
+        if (turnDisplay) {
+            turnDisplay.remove();
+        }
+
         pieces.forEach(piece => {
             piece.removeEventListener("dragstart", dragStart);
             piece.removeEventListener("click", handleClick);
@@ -376,9 +396,18 @@ document.addEventListener("DOMContentLoaded", function() {
         });
         document.getElementById("resign-button").disabled = true;
         document.getElementById("offer-draw-button").disabled = true;
+
+        showAnalyseButton();
+
         clearInterval(whiteInterval);
         clearInterval(blackInterval);
+
+        const isActiveElement = document.getElementById("is_active");
+        if (isActiveElement) {
+            isActiveElement.value = "False";
+        }
     }
+    window.displayEndgameMessage = displayEndgameMessage;
 
     function getCookie(name) {
         let cookieValue = null;
@@ -395,6 +424,8 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         return cookieValue;
     }
+
+    window.getCookie = getCookie;
 
     function promotePawn(position, promotion) {
         const targetSquare = document.querySelector(`td[data-position="${position}"]`);
@@ -523,5 +554,58 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("offer-draw-button").disabled = true;
         clearInterval(whiteInterval);
         clearInterval(blackInterval);
+    }
+
+        function showAnalyseButton() {
+        const timersElement = document.getElementById("timers");
+
+        const resignButton = document.getElementById("resign-button");
+        const offerDrawButton = document.getElementById("offer-draw-button");
+        if (resignButton) {
+            timersElement.removeChild(resignButton);
+        }
+        if (offerDrawButton) {
+            timersElement.removeChild(offerDrawButton);
+        }
+
+        const analyseButton = document.createElement("a");
+        analyseButton.href = `/analyse/${gameId}`;
+        analyseButton.className = "game-button";
+        analyseButton.textContent = "Analyse Game";
+
+        const blackTimerElement = document.getElementById("black-timer");
+        timersElement.insertBefore(analyseButton, blackTimerElement);
+    }
+
+     function startGame() {
+        const gameId = document.getElementById("game_id").value;
+        fetch(`/start_game/${gameId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken")
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "ok") {
+                document.getElementById("started").value = "True";
+
+                const turnDisplayElement = document.createElement("p");
+                turnDisplayElement.className = "info-box";
+                turnDisplayElement.innerHTML = 'Turn: <span id="turn-display">white</span>';
+
+                const startGameButton = document.getElementById("start-game-button");
+                startGameButton.parentNode.insertBefore(turnDisplayElement, startGameButton);
+
+                startGameButton.remove();
+
+                started = true;
+                startTimer(turn);
+                updateDraggable();
+            } else {
+                console.error("Failed to start the game");
+            }
+        });
     }
 });
