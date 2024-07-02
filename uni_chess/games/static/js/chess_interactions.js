@@ -214,7 +214,12 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(data => {
             if (data.status === "ok") {
-                highlightMoves(data.moves, fromPosition);
+                if (data.stalemate === "true"){
+                    displayEndgameMessage("Stalemate!");
+                }
+                else{
+                    highlightMoves(data.moves, fromPosition);
+                }
             } else {
                 console.error("Failed to get moves");
             }
@@ -454,23 +459,25 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function promotePawn(position, promotion, draggable) {
         const targetSquare = document.querySelector(`td[data-position="${position}"]`);
-        const promotionPiece = document.createElement("img");
-        promotionPiece.src = `/static/chess/pieces/${promotion}.svg`;
-        promotionPiece.setAttribute("data-piece", promotion.slice(1));
+        const currentPiece = targetSquare.querySelector("img");
 
-        if (promotion[0] === "w"){
-            promotionPiece.setAttribute("data-color", "white");
+        if (currentPiece) {
+            // Update the image source to the promoted piece
+            currentPiece.src = `/static/chess/pieces/${promotion}.svg`;
+            currentPiece.setAttribute("data-piece", promotion.slice(1));
+
+            // Update the color attribute based on the promotion
+            if (promotion[0] === "w") {
+                currentPiece.setAttribute("data-color", "white");
+            } else {
+                currentPiece.setAttribute("data-color", "black");
+            }
+
+            // Update the draggable attribute
+            currentPiece.setAttribute("draggable", draggable);
         }
-        else{
-            promotionPiece.setAttribute("data-color", "black");
-        }
-
-        promotionPiece.setAttribute("id", position);
-        promotionPiece.setAttribute("draggable", draggable);
-        resetSquare(position);
-        targetSquare.appendChild(promotionPiece);
-
     }
+
 
     // Ensure the formatTime and startTimer functions are accessible here
     window.formatTime = function(time) {

@@ -209,6 +209,12 @@ def get_moves(request, game_id):
         play = Play(game.data)
         # breakpoint()
         moves, EP, castling = play.getMoves(from_row, from_col)
+        if len(moves) == 0:
+            game.isActive = False
+            game.result = 0
+            game.endgame = "stalemate"
+            game.save()
+            return JsonResponse({"status": "ok", "stalemate": "true"})
         # moves, EP, castling = play.getAllMoves(from_row, from_col)
 
         if castling:
@@ -750,6 +756,19 @@ def expire_game(request, game_id):
         game.save()
         return JsonResponse({"status": "ok"})
     return JsonResponse({"status": "fail"}, status=400)
+
+@csrf_exempt
+@login_required
+def my_games(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    if request.user.is_authenticated:
+        context = {}
+        games = list(Game.objects.filter(white=user, started=True, isActive=True) | Game.objects.filter(
+            black=user, started=True, isActive=True))
+        context['games'] = games
+    else:
+        context = {}
+    return render(request, "games/my_games.html", context)
 
 
 @login_required

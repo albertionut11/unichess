@@ -6,7 +6,11 @@
 <div class="welcome-content">
     <h1>UNICHESS</h1>
     <p>
-       <a href="{% url 'game_create' %}" class="button-common"> NEW GAME </a>
+        {% if not active_game %}
+            <a href="{% url 'game_create' %}" class="button-common"> NEW GAME </a>
+        {% else %}
+            <a href="{% url 'my_games' user_id=user.id %}" class="button-common"> MY GAMES </a>
+        {% endif %}
     </p>
     <p>
        <a href="{% url 'games' %}" class="button-common"> GAMES </a>

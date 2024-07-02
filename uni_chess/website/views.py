@@ -8,9 +8,12 @@ from games.models import Game
 
 def welcome(request):
     if request.user.is_authenticated:
-        context = {"games": Game.objects.all()}
+        context = {}
+        games = list(Game.objects.filter(white=request.user, started=True, isActive=True) | Game.objects.filter(black=request.user, started=True, isActive=True))
+        context['active_game'] = len(games) > 0
     else:
         context = {}
+    print(context)
     return render(request, "website/welcome.html", context)
 
 
