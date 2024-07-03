@@ -31,7 +31,7 @@ html, body {
 .highlight-red {
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 0, 0, 0.3); /* Transparent red */
+    background-color: rgba(255, 0, 0, 0.3);
     position: absolute;
     top: 0;
     left: 0;
@@ -82,7 +82,7 @@ html, body {
 }
 
 .box {
-    background-color: rgba(255, 255, 255, 0.7); /* Light transparent background */
+    background-color: rgba(255, 255, 255, 0.7);
     padding: 10px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -158,26 +158,26 @@ html, body {
 
 .auth-page {
     text-align: center;
-    padding-top: 50px;  /* Adjusted padding to ensure it centers well */
+    padding-top: 50px;
 }
 
 .main-title {
     font-size: 3em;
     color: #333;
-    margin-bottom: 10px;  /* Space between titles */
+    margin-bottom: 10px;
 }
 
 .subtitle {
     font-size: 1.5em;
     color: #666;
-    margin-bottom: 30px;  /* Space between subtitle and form */
+    margin-bottom: 30px;
 }
 
 .auth-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 70vh;  /* Ensures it takes enough height to be centered */
+    min-height: 70vh;
 }
 
 .auth-box {
@@ -319,8 +319,8 @@ input[type="email"] {
 }
 
 .welcome-content ul li a:hover {
-    background-color: #bc7a77; /* Add background change for hover */
-    color: white; /* Change text color to white on hover */
+    background-color: #bc7a77;
+    color: white;
 }
 
 .welcome-content a {
@@ -431,7 +431,6 @@ input[type="email"] {
     color: white;
 }
 
-/* Specific button styles for the forms */
 .welcome-content .game-form button,
 .welcome-content .tournament-form button {
     width: 200px;
@@ -448,10 +447,10 @@ input[type="email"] {
     display: flex;
     justify-content: space-around;
     margin: 20px 0;
-    background-color: rgba(255, 255, 255, 0.7); /* Light transparent background */
-    border-radius: 10px; /* Rounded corners */
-    padding: 20px; /* Inner padding */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .stats-section {
@@ -471,21 +470,21 @@ input[type="email"] {
 }
 
 .tournament-info {
-    background-color: rgba(255, 255, 255, 0.7); /* Light transparent background */
-    border-radius: 10px; /* Rounded corners */
-    padding: 20px; /* Inner padding */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-    color: #222; /* Adjusted text color for better visibility */
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #222;
 }
 
 .rankings,
 .rounds {
     margin: 20px 0;
-    background-color: rgba(255, 255, 255, 0.9); /* Light transparent background */
-    border-radius: 10px; /* Rounded corners */
-    padding: 20px; /* Inner padding */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-    color: #222; /* Adjusted text color for better visibility */
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #222;
 }
 
 .ranking-table,
@@ -532,7 +531,7 @@ input[type="email"] {
 #moves-box {
     overflow-y: auto;
     padding: 10px;
-    background-color: rgba(255, 255, 255, 0.8); /* Restored transparent background */
+    background-color: rgba(255, 255, 255, 0.8);
     border-radius: 5px;
 }
 

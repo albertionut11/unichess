@@ -473,13 +473,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 currentPiece.setAttribute("data-color", "black");
             }
 
-            // Update the draggable attribute
             currentPiece.setAttribute("draggable", draggable);
         }
     }
 
-
-    // Ensure the formatTime and startTimer functions are accessible here
     window.formatTime = function(time) {
         const minutes = Math.floor(time / 60);
         const seconds = time % 60;

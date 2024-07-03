@@ -144,14 +144,12 @@ def move_piece(request, game_id):
         new_turn = 'black' if turn == 'white' else 'white'
         game.turn = new_turn
 
-        # Update the time for the player who just made the move
         if turn == 'white':
             game.white_time_remaining = data.get("white_time_remaining")
         else:
             game.black_time_remaining = data.get("black_time_remaining")
 
         game.save()
-        # perform move on the table to be able to correctly check for checkmate
         play.board.make_move(from_pos[0], from_pos[1], to_pos[0], to_pos[1], promotion, C)
         checkmate = ''
         if play.board.is_king_in_check(new_turn):
@@ -209,11 +207,21 @@ def get_moves(request, game_id):
         play = Play(game.data)
         # breakpoint()
         moves, EP, castling = play.getMoves(from_row, from_col)
-        if len(moves) == 0:
+        if len(moves) == 0 and play.is_checkmate(turn) == "stalemate":
             game.isActive = False
             game.result = 0
             game.endgame = "stalemate"
             game.save()
+
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f'game_{game_id}',
+                {
+                    'type': 'game_move',
+                    'checkmate': "stalemate"
+                }
+            )
+
             return JsonResponse({"status": "ok", "stalemate": "true"})
         # moves, EP, castling = play.getAllMoves(from_row, from_col)
 
@@ -337,7 +345,8 @@ def register(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()
+            Profile.objects.create(user=user)
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
@@ -395,6 +404,12 @@ def add_players(request, tournament_id):
         return redirect('tournaments')
 
     if request.method == 'POST':
+
+        players = [User.objects.get(username=player) for player in tournament.players]
+
+        if len(players) + 1 > tournament.maximum_players:
+            return redirect('tournament_info', tournament.id)
+
         form = AddPlayerForm(request.POST, tournament=tournament)
         if form.is_valid():
             user = form.cleaned_data['user']
@@ -432,6 +447,10 @@ def start_tournament(request, tournament_id):
     tournament = get_object_or_404(Tournament, id=tournament_id)
     if request.user == tournament.owner and not tournament.is_active:
         players = [User.objects.get(username=player) for player in tournament.players]
+
+        if len(players) > tournament.maximum_players or len(players) < tournament.minimum_players:
+            return redirect('tournament_info', tournament.id)
+
         generated_rounds = RoundRobinGeneration(players)
         round_counter = 1
         for matches in generated_rounds:
@@ -556,12 +575,10 @@ def update_stats(game):
         white_profile.draws_white += 1
         black_profile.draws_black += 1
 
-    # Update ELO
     white_elo = white_profile.elo
     black_elo = black_profile.elo
 
-    # Simple ELO adjustment calculation
-    k = 30  # K-factor
+    k = 30
     expected_white = 1 / (1 + 10 ** ((black_elo - white_elo) / 400))
     expected_black = 1 / (1 + 10 ** ((white_elo - black_elo) / 400))
 
@@ -662,19 +679,15 @@ def convert_to_uci(move):
 
     move = show_move(move)
 
-    # Parse simple moves
     if len(move) == 4:
         return move
 
-    # Parse EnPassant
     if move[0] == 'E':
         return move[1:]
 
-    # Parse Promotion
     if move[0] == 'P':
         return move[1:5] + move[5].lower()
 
-    # Parse Castling
     if move[0] == 'C':
         if move[-1] == 'K':
             return 'e1g1' if move[1:3] == 'e1' else 'e8g8'

@@ -55,7 +55,6 @@ class King(Piece):
                 if (not piece or piece.get_color() != self.color) and not self.king_nearby(board, to_row, to_col):
                     moves.append(to_row + to_col)
 
-        # Check for castling
         if not board.kings_moved[self.get_color()]:
             castling += self.check_castling(board, from_row, from_col)
 

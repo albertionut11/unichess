@@ -160,11 +160,10 @@ class Board:
         opponent_color = 'white' if king_color == 'black' else 'black'
 
         directions = [
-            (1, 0), (-1, 0), (0, 1), (0, -1),  # rook-like moves
-            (1, 1), (1, -1), (-1, 1), (-1, -1)  # bishop-like moves
+            (1, 0), (-1, 0), (0, 1), (0, -1),
+            (1, 1), (1, -1), (-1, 1), (-1, -1)
         ]
 
-        # check for attacks from Rook, Bishop, and Queen
         for direction in directions:
             row_offset, col_offset = direction
             row, col = int(king_row), king_col
@@ -186,7 +185,6 @@ class Board:
                         return True
                     break
 
-        # check for attacks from Knight
         knight_moves = [
             (2, 1), (2, -1), (-2, 1), (-2, -1),
             (1, 2), (1, -2), (-1, 2), (-1, -2)
@@ -201,7 +199,6 @@ class Board:
                 if piece and piece.get_color() == opponent_color and isinstance(piece, Knight):
                     return True
 
-        # check for attacks from Pawn
         pawn_direction = -1 if king_color == 'black' else 1
         for col_offset in [-1, 1]:
             row = str(int(king_row) + pawn_direction)
@@ -298,7 +295,6 @@ class Board:
         if self.kings_moved[color] or self.rooks_moved[rook_pos] or self.table[row]['f'] or self.table[row]['g']:
             return False
 
-        # Check if squares are under attack
         if self.is_under_attack(row, 'e', color) or self.is_under_attack(row, 'f', color) or self.is_under_attack(row, 'g', color):
             return False
         return True
@@ -310,7 +306,6 @@ class Board:
         if self.kings_moved[color] or self.rooks_moved[rook_pos] or self.table[row]['b'] or self.table[row]['c'] or self.table[row]['d']:
             return False
 
-        # Check if squares are under attack
         if self.is_under_attack(row, 'e', color) or self.is_under_attack(row, 'd', color) or self.is_under_attack(row, 'c', color):
             return False
         return True
