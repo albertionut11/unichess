@@ -6,7 +6,7 @@ UniChess is a web-based chess application built using Django and Python. It allo
 
 ### Chess Gameplay
 
-- Play chess against the Stockfish engine in real-time.
+- Play chess against other players in real-time.
 - Move validation and board updates using asynchronous communication.
 - Automatic response from Stockfish with best move computation.
 - Game state persistence using Django models and SQLite.
